@@ -26,6 +26,10 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] Schema, recipe, wire and backup migrations pass interruption and compatibility tests.
 - [ ] Compose Multiplatform benchmark is completed or a native UI path is approved.
 - [ ] OCR engine dependency, privacy and performance analysis is approved.
+- [ ] Every direct/build/CI dependency is approved in the register; resolved transitives match lock and verification evidence.
+- [ ] GitHub Actions and container references are immutable and dependency-policy CI passes.
+- [ ] Release SBOM covers resolved mobile/native/build graphs and is bound to the release artifact digest.
+- [ ] Build provenance is generated and independently verified; no SLSA level is claimed without evidence.
 
 ## Security and recovery gate
 
