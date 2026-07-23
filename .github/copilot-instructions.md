@@ -15,7 +15,8 @@ These instructions apply to every Copilot suggestion and agent session in this r
 7. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
 8. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
 9. For identity, cryptography, storage, telemetry, Firebase, recovery, deletion or export work, read `docs/security/SECURITY_BASELINE.md` and every linked applicable specification.
-10. Confirm the change is within the scope of the assigned issue before writing any code.
+10. For any dependency, plugin, Action, container or repository change, read ADR-0008 and `docs/architecture/DEPENDENCY_POLICY.md`.
+11. Confirm the change is within the scope of the assigned issue before writing any code.
 
 ---
 
@@ -67,14 +68,15 @@ Additional rules:
 
 ## Dependency policy
 
-Before introducing any new dependency:
-
-1. Record the licence and confirm compatibility.
-2. Check the security record for known CVEs.
-3. Estimate the binary-size impact.
-4. Document the removal plan if the dependency becomes abandoned.
-
-Never add a dependency without completing all four steps. Never add a commercial SDK without an approved ADR.
+- Never add or update a library, plugin, native package, Action or container unless it is approved in `config/dependencies/registry.json`.
+- Gradle aliases and versions belong in `gradle/libs.versions.toml`; direct/dynamic/SNAPSHOT versions are prohibited.
+- GitHub Actions require a full commit SHA and containers require a SHA-256 digest.
+- Do not add JCenter, `mavenLocal()`, `flatDir` or an unapproved repository.
+- Gradle dependency changes update strict lock state, reviewed verification metadata and the resolved SBOM.
+- Record licence evidence, vulnerability review, transitive graph, size, privacy/network behavior, owner, alternatives and removal plan.
+- Unknown, custom, source-available or reciprocal licence terms require the configured legal/product gate.
+- Never add a commercial scanner/OCR/PDF/image SDK without a dedicated approved ADR.
+- AWS dependencies are prohibited in the current Firebase-first phase.
 
 ---
 

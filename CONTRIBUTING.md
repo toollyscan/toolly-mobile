@@ -13,7 +13,7 @@ Be respectful and constructive. Harassment of any kind is not tolerated.
 ## Before you start
 
 1. Read the complete [architecture overview](docs/architecture/README.md).
-2. Read all four [Architecture Decision Records](docs/adr/).
+2. Read all [Architecture Decision Records](docs/adr/), including ADR-0008 before dependency changes.
 3. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
 4. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
 5. Confirm your change is within the scope of the assigned issue.
@@ -39,6 +39,10 @@ Be respectful and constructive. Harassment of any kind is not tolerated.
    ```bash
    # Markdown linting
    npx markdownlint-cli2 "**/*.md"
+
+   # Benchmark and dependency governance
+   python3 scripts/validate_benchmark_evidence.py --self-test
+   python3 scripts/validate_dependency_policy.py --self-test
    ```
 
 4. Self-review every item in the PR template before requesting review.
@@ -65,14 +69,15 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
 ## Dependency policy
 
-Before adding any dependency, document:
+Before adding or updating any library, plugin, native package, GitHub Action or container:
 
-1. The licence and compatibility with this project's licence.
-2. The security record (known CVEs).
-3. The impact on binary size.
-4. The removal plan if the dependency is abandoned.
+1. Complete [DEPENDENCY_REVIEW_TEMPLATE.md](docs/architecture/DEPENDENCY_REVIEW_TEMPLATE.md).
+2. Add/update the machine-readable dependency register and version catalog.
+3. Update resolved lock and verification metadata when a build exists.
+4. Run the dependency-policy validator and applicable resolved-graph/security checks.
+5. Regenerate the SBOM and measure runtime dependency size when applicable.
 
-Commercial scanning, OCR, PDF and image-processing SDKs require an approved Architecture Decision Record before inclusion.
+Commercial scanning, OCR, PDF and image SDKs require a dedicated approved ADR. Unknown/custom licence terms require legal review. Mutable Actions, container tags, dynamic versions and unregistered coordinates are prohibited.
 
 ---
 
