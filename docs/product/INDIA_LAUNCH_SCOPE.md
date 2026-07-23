@@ -55,6 +55,7 @@ India is Toolly's selected first market. Market size, willingness to pay and wor
   See COST_CONTROLS.md.
 - Firebase Authentication is the OTP provider; it must remain behind a
   provider-neutral interface.
+- Before phone authentication, the notice and consent flow must explain that the phone number is sent to and stored by Google for spam and abuse prevention, subject to the approved Firebase configuration and privacy notice.
 
 ---
 
@@ -120,20 +121,20 @@ India is Toolly's selected first market. Market size, willingness to pay and wor
 - The privacy notice must describe:
   - What data is collected.
   - How data is used.
-  - Where data is stored (India data-residency for Indian users where applicable).
+  - Which providers process each data category, the applicable processing locations and any reviewed cross-border transfer.
   - How users can access, correct and delete their data.
   - Grievance officer contact details.
 - Privacy notice must be accessible from the app and from the store listing.
 - Privacy notice must be reviewed by qualified legal counsel. **[Legal gate]**
-- Privacy notice must comply with DPDP Act 2023. **[Legal gate]**
+- Privacy notice and consent flows must be reviewed against the DPDP Act 2023, DPDP Rules 2025 and provisions effective on the launch date. **[Legal gate]**
 
 ---
 
 ## Grievance contact requirement
 
-Indian data-protection law (DPDP Act 2023) requires designation of a Grievance Officer.
+The exact grievance contact, role, response process and statutory terminology must be confirmed against provisions effective at launch.
 
-- Grievance officer must be designated before launch. **[Legal gate]**
+- An accountable grievance contact and process must be operational before launch. **[Legal gate]**
 - Grievance officer contact details (name and contact address) must appear in:
   - The in-app privacy notice or settings.
   - The store listing privacy policy link.
@@ -145,7 +146,7 @@ Indian data-protection law (DPDP Act 2023) requires designation of a Grievance O
 ## Data deletion and export workflows
 
 - Users must be able to request deletion of their account and all associated data.
-- Data deletion must be completed within the period required by DPDP Act 2023. **[Legal gate]**
+- Deletion timing must follow the approved purpose/retention schedule and legal obligations effective at launch. **[Legal gate]**
 - Users must be able to export their data in a portable format.
 - Local vault data: user deletes via app; Toolly does not remote-wipe local data.
 - Cloud backup data: deleted from cloud on account deletion after the retention period.
@@ -218,7 +219,7 @@ The India launch must be implemented in a way that does not block future interna
 | India pricing validated per MONETIZATION.md framework | Pending |
 | Domain clearance (toollyscan.com / toollyscan.in) | Pending — D-007 |
 | Trademark clearance ("Toolly" in India) | Pending — D-007 |
-| Firebase data-residency for Indian user data confirmed | Pending |
+| Firebase service-by-service processing locations, transfers and retention reviewed; Authentication is not represented as India-resident | Pending — **[Legal gate]** |
 | Low-cost Android device benchmark complete | Pending |
 | Accessibility audit (TalkBack, VoiceOver, WCAG 2.1 AA) | Pending |
 | Performance benchmarks on representative devices meet targets | Pending |
