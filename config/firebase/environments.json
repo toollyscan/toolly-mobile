@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "status": "design-approved-when-merged",
+  "cloudProvider": "firebase",
+  "awsImplementationAllowed": false,
+  "projectIdBindingStatus": "unprovisioned",
+  "environments": [
+    {
+      "name": "development",
+      "projectAlias": "toolly-development",
+      "projectId": null,
+      "dataPolicy": "synthetic-only",
+      "distribution": "developer-only",
+      "billing": "disabled-unless-required-by-approved-spike",
+      "emulatorFirst": true,
+      "productionIdentityAllowed": false,
+      "debugAppCheckTokensAllowed": true
+    },
+    {
+      "name": "test",
+      "projectAlias": "toolly-test",
+      "projectId": null,
+      "dataPolicy": "synthetic-only",
+      "distribution": "ci-and-automated-tests",
+      "billing": "disabled-unless-required-by-approved-integration-test",
+      "emulatorFirst": true,
+      "productionIdentityAllowed": false,
+      "debugAppCheckTokensAllowed": true
+    },
+    {
+      "name": "staging",
+      "projectAlias": "toolly-staging",
+      "projectId": null,
+      "dataPolicy": "consent-safe-non-production-only",
+      "distribution": "approved-internal-testers",
+      "billing": "isolated-budget-required-before-enable",
+      "emulatorFirst": false,
+      "productionIdentityAllowed": false,
+      "debugAppCheckTokensAllowed": false
+    },
+    {
+      "name": "production",
+      "projectAlias": "toolly-production",
+      "projectId": null,
+      "dataPolicy": "approved-user-data-only",
+      "distribution": "public-store-release",
+      "billing": "isolated-budget-and-anomaly-alerts-required",
+      "emulatorFirst": false,
+      "productionIdentityAllowed": true,
+      "debugAppCheckTokensAllowed": false
+    }
+  ],
+  "isolationInvariants": {
+    "separateFirebaseProjectPerEnvironment": true,
+    "androidAndIosShareOnlySameEnvironmentBackend": true,
+    "crossEnvironmentDataAccess": false,
+    "productionDataInNonProduction": false,
+    "productionCredentialsInNonProduction": false,
+    "testPhoneNumbersInProduction": false,
+    "unknownEnvironmentBehavior": "fail-closed",
+    "productionDeploymentRequiresNamedApproval": true
+  },
+  "bindingEvidenceRequired": [
+    "project-number-and-id",
+    "immutable-resource-locations",
+    "registered-app-identifiers-and-signing-fingerprints",
+    "enabled-api-inventory",
+    "billing-account-and-budget-policy",
+    "iam-policy-export",
+    "app-check-provider-and-enforcement-state",
+    "security-rules-and-index-release",
+    "data-processing-inventory-review"
+  ]
+}
