@@ -10,9 +10,11 @@ These instructions apply to every Copilot suggestion and agent session in this r
 2. Read the relevant product documents in `docs/product/`.
 3. Read `docs/architecture/README.md`.
 4. Read all ADRs in `docs/adr/`.
-5. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
-6. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
-7. Confirm the change is within the scope of the assigned issue before writing any code.
+5. Read the applicable contracts in `docs/architecture/`.
+6. For model, persistence, processing, sync, Firebase or schema work, read all TLY-004 architecture contracts.
+7. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
+8. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
+9. Confirm the change is within the scope of the assigned issue before writing any code.
 
 ---
 
@@ -31,7 +33,12 @@ These instructions apply to every Copilot suggestion and agent session in this r
 - **Provider-neutral.** Firebase UID must not become the canonical document-owner ID. Canonical IDs belong to Toolly.
 - **No SDK leakage.** Provider SDK types must not appear in shared domain models, DTOs, contracts or schemas.
 - **Offline-first.** All capture, processing, organisation and local export must work without a network connection.
-- **Clean Architecture.** Dependencies flow inward: `presentation → domain ← data`. Never reverse this direction.
+- **Clean Architecture.** Dependencies flow inward through Toolly-owned ports. Follow `docs/architecture/MODULE_BOUNDARIES.md`.
+- **Immutable history.** Source assets, revisions and operations are immutable.
+- **Atomic outbox.** A mutation, revision and outbox entry commit atomically.
+- **Conflict safety.** Never use timestamp-only last-write-wins or silently overwrite divergent revisions.
+- **Versioned contracts.** Persisted models, operations, recipes, wire envelopes and migrations carry explicit versions.
+- **Fitness functions.** New scaffolding must implement the applicable checks in `ARCHITECTURE_FITNESS_FUNCTIONS.md`.
 
 ---
 
