@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "run_id": "20260725-camera-boundary-a-low-01",
+  "benchmark_id": "camera-boundary",
+  "implementation_id": "candidate-name-and-version",
+  "git_commit": "0123456789abcdef0123456789abcdef01234567",
+  "build_variant": "release-benchmark",
+  "started_at": "2026-07-25T08:00:00Z",
+  "finished_at": "2026-07-25T08:15:00Z",
+  "status": "complete",
+  "evidence_maturity": "supplemental",
+  "operator_role": "benchmark-operator",
+  "environment": {
+    "kind": "emulator",
+    "platform": "android",
+    "os_version": "example-only",
+    "device_tier": "A-low",
+    "manufacturer": "example",
+    "model_alias": "example-device",
+    "architecture": "arm64",
+    "ram_mib": 4096,
+    "free_storage_mib": 8192,
+    "power_source": "battery",
+    "battery_percent_start": 80,
+    "battery_percent_end": 75,
+    "thermal_state_start": "nominal",
+    "thermal_state_end": "nominal"
+  },
+  "protocol": {
+    "id": "camera-boundary",
+    "version": "1.0.0",
+    "warmup_iterations": 5,
+    "measured_iterations": 30,
+    "timeout_ms": 10000,
+    "cooldown_seconds": 60
+  },
+  "corpus": {
+    "manifest_version": "1.0.0-definition",
+    "cohort_ids": [
+      "printed-a4-clean"
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "measurements.jsonl",
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "media_type": "application/x-ndjson",
+      "contains_personal_data": false
+    }
+  ],
+  "deviations": [],
+  "notes": "Template only. This file is not benchmark evidence."
+}
