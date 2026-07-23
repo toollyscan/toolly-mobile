@@ -58,8 +58,10 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 ## Quality gate
 
 - [ ] Definition of Done is adopted by the team.
-- [ ] Benchmark corpus and representative device matrix are defined.
-- [ ] Performance targets are documented and baseline measurements meet them.
+- [ ] Benchmark contracts and checked-in evidence pass `validate_benchmark_evidence.py`.
+- [ ] Consent-safe corpus items and the exact representative physical-device matrix are approved.
+- [ ] Raw measurements cover required tiers/cohorts and are reproducible from the identified commit.
+- [ ] Performance targets are approved from evidence and baseline measurements meet them; planning hypotheses are not treated as gates.
 - [ ] Accessibility audit is completed for the supported platforms and languages.
 - [ ] Offline, retry, interruption, migration and recovery tests pass.
 
