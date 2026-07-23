@@ -1,0 +1,87 @@
+name: Architecture Decision Record
+description: Propose or revise an Architecture Decision Record (ADR)
+title: "[ADR-XXXX] "
+labels: ["architecture", "adr"]
+assignees:
+  - shivayogih
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to propose, revise or supersede an Architecture Decision Record.
+        Before submitting, read the existing ADRs in `docs/adr/`.
+
+  - type: input
+    id: adr_number
+    attributes:
+      label: ADR number
+      description: The next sequential ADR number (e.g. 0005).
+      placeholder: "0005"
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: Decision title
+      placeholder: "Short present-tense title"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - Proposed
+        - Accepted
+        - Deprecated
+        - Superseded
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What is the problem or situation that requires a decision?
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: The chosen solution, stated as a present-tense fact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences
+      description: What are the positive and negative outcomes of this decision?
+    validations:
+      required: true
+
+  - type: textarea
+    id: rejected_alternatives
+    attributes:
+      label: Rejected alternatives
+      description: What other options were considered and why were they rejected?
+
+  - type: checkboxes
+    id: architecture_constraints
+    attributes:
+      label: Architecture constraints
+      description: Confirm the decision is consistent with the architecture principles.
+      options:
+        - label: Domain code remains provider-independent.
+          required: true
+        - label: Offline-first paths are preserved.
+          required: true
+        - label: No provider SDK type enters shared domain models.
+          required: true
+        - label: Canonical IDs belong to Toolly, not to a provider.
+          required: true

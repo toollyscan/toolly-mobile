@@ -1,0 +1,71 @@
+# Android
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+*.dex
+
+# Android signing
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+release-keystore.properties
+
+# Google / Firebase
+google-services.json
+firebase-debug.log
+firebase-debug.*.log
+
+# iOS / Xcode
+*.xcworkspace/
+*.xcuserdata/
+*.xcbkptlist
+Pods/
+Podfile.lock
+DerivedData/
+build/
+*.ipa
+
+# Apple provisioning and signing
+*.mobileprovision
+*.certSigningRequest
+*.cer
+*.p8
+*.p12
+ExportOptions.plist
+
+# GoogleService-Info
+GoogleService-Info.plist
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+.env.*
+*.secret
+secrets/
+credentials/
+
+# Node (for tooling)
+node_modules/
+npm-debug.log*
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# Coverage
+.coverage/
+htmlcov/
