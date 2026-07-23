@@ -22,8 +22,10 @@ ROOT = Path(__file__).resolve().parents[1]
 # ── Patterns ──────────────────────────────────────────────────────────────────
 
 # A heading attempt is any line that starts with 1-6 # characters.
-# Valid ATX headings have the form "#{1,6} text" or "#{1,6}" (empty).
-# Invalid form "#{1,6}text" is still detected as a heading for rule purposes.
+# Each alternation covers one valid/invalid heading form:
+#   [ \t].+    valid heading with text ("# Heading text")
+#   [ \t]?$    empty heading or heading with only whitespace ("##")
+#   [^ \t#\n]. invalid no-space heading detected for MD018 ("##Heading")
 ATX_HEADING = re.compile(r"^(#{1,6})([ \t].+|[ \t]?$|[^ \t#\n].*)")
 ATX_NO_SPACE = re.compile(r"^#{1,6}[^ \t#\n]")  # MD018: no space after hash
 ATX_MULTI_SPACE = re.compile(r"^#{1,6} {2,}")    # MD019: multiple spaces after hash
@@ -63,7 +65,7 @@ def _check_file(path: Path, root: Path) -> list[Violation]:
 
     for i, raw_line in enumerate(lines, start=1):
         # Detect fenced code block boundaries (skip content inside)
-        stripped = raw_line.rstrip("\n").rstrip("\r")
+        stripped = raw_line.rstrip("\r\n")
 
         fence_match = FENCE_START.match(stripped)
         if fence_match:

@@ -22,7 +22,7 @@ A pull request may not be merged unless every applicable item in this checklist 
 
 - [ ] Document content, OCR text, filenames, PII, OTPs, tokens and key material do not appear in logs or analytics.
 - [ ] No secrets, credentials or personal data are committed.
-- [ ] Gitleaks secret scan passes.
+- [ ] `scan_secrets.py` secret scan passes (no unexcepted findings in tracked files or history).
 
 ## Dependency policy
 

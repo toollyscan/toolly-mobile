@@ -35,7 +35,8 @@ ROOT = Path(__file__).resolve().parents[1]
 TRUST_POLICY_PATH = ROOT / "config/ci/trust-policy.json"
 REGISTRY_PATH = ROOT / "config/dependencies/registry.json"
 
-SHA40 = re.compile(r"^[0-9a-f]{40}$")
+# Full 40-character git commit SHA (hex string), used to validate immutable action refs.
+COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 USES_LINE = re.compile(r"^\s+(?:-\s+)?uses:\s+(.+)$")
 RUN_BLOCK_START = re.compile(r"^\s+(?:-\s+)?run:\s+[|>]?\s*(.*)$")
 
@@ -94,7 +95,7 @@ def _check_uses(
         )
 
     # Ref must be a full 40-char SHA (not a tag or branch)
-    if not SHA40.fullmatch(immutable_ref):
+    if not COMMIT_SHA.fullmatch(immutable_ref):
         errors.append(
             f"{location}: action '{coordinate}' uses mutable ref '{immutable_ref}' "
             f"instead of a full commit SHA"

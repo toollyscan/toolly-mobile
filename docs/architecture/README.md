@@ -94,3 +94,4 @@ Native UI remains the default until Compose Multiplatform evidence changes ADR-0
 - [ADR-0007 — Encryption envelope/key hierarchy](../adr/0007-encryption-envelope-and-key-hierarchy.md)
 - [ADR-0008 — Dependency/supply-chain governance](../adr/0008-dependency-and-supply-chain-governance.md)
 - [ADR-0009 — Firebase control plane/environment isolation](../adr/0009-firebase-control-plane-and-environment-isolation.md)
+- [ADR-0010 — First-party CI trust boundary](../adr/0010-first-party-ci-trust-boundary.md)

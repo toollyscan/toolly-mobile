@@ -87,9 +87,16 @@ _PATTERNS: list[tuple[str, str, re.Pattern[str], int]] = [
         "GENERIC_SECRET_ASSIGNMENT",
         "Generic secret/key/token literal assignment",
         re.compile(
-            r"""(?i)(?:secret|api[_-]?key|private[_-]?key|access[_-]?token"""
-            r"""|auth[_-]?token|bearer[_-]?token|client[_-]?secret|password"""
-            r"""|passwd)\s*[:=]\s*['"]([^'"]{12,})['"]"""
+            r"""(?ix)
+            (?:
+                secret | api[_-]?key | private[_-]?key
+                | access[_-]?token | auth[_-]?token
+                | bearer[_-]?token | client[_-]?secret
+                | password | passwd
+            )
+            \s* [:=] \s*
+            ['"] ([^'"]{12,}) ['"]
+            """
         ),
         1,
     ),
@@ -154,6 +161,11 @@ class Finding(NamedTuple):
 # Core helpers
 # ---------------------------------------------------------------------------
 
+# Maximum number of asterisks used to represent the redacted portion.
+# Enough to obscure length while keeping the output concise.
+_REDACT_MAX_ASTERISKS = 8
+
+
 def _redact(value: str) -> str:
     """Return a representation that hints at type without revealing the value.
 
@@ -162,7 +174,7 @@ def _redact(value: str) -> str:
     """
     if len(value) <= 4:
         return "****"
-    return value[:4] + "*" * min(len(value) - 4, 8)
+    return value[:4] + "*" * min(len(value) - 4, _REDACT_MAX_ASTERISKS)
 
 
 def _is_allowed(line: str) -> bool:
