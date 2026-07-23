@@ -13,6 +13,7 @@ This index defines Toolly's minimum security posture and links the detailed cont
 | Retention, deletion and export | Contract defined | End-to-end evidence pending | Privacy owner and legal counsel |
 | Telemetry allowlist | Policy defined | Generated-schema tests pending | Security and privacy owners |
 | Firebase processing | Initial inventory defined | Console and contract evidence pending | Privacy owner and legal counsel |
+| Firebase environment, cost and operational policy | Defined in ADR-0009 | Project, load and configuration evidence pending | Product, security and operations owners |
 | Incident and vulnerability operations | Runbooks defined | Contacts and exercise pending | Incident commander |
 
 ## Non-negotiable objectives
@@ -37,6 +38,7 @@ This index defines Toolly's minimum security posture and links the detailed cont
 | Retention, deletion and export | [DATA_LIFECYCLE.md](DATA_LIFECYCLE.md) |
 | Telemetry allowlist and tests | [TELEMETRY_POLICY.md](TELEMETRY_POLICY.md) |
 | Firebase services and processing | [FIREBASE_PROCESSING_INVENTORY.md](FIREBASE_PROCESSING_INVENTORY.md) |
+| Firebase abuse and signed policy | [FIREBASE_ABUSE_AND_POLICY_CONTROLS.md](FIREBASE_ABUSE_AND_POLICY_CONTROLS.md) |
 | India privacy readiness | [PRIVACY_READINESS.md](PRIVACY_READINESS.md) |
 | Software supply-chain security | [SUPPLY_CHAIN_SECURITY.md](SUPPLY_CHAIN_SECURITY.md) |
 | Security incident response | [SECURITY_INCIDENT_RESPONSE.md](../operations/SECURITY_INCIDENT_RESPONSE.md) |
@@ -52,6 +54,7 @@ Implementations must provide:
 - Staging abuse tests for every authentication provider and account-linking path.
 - Generated telemetry-schema tests that reject unknown events and prohibited properties.
 - Firebase console exports or screenshots recording enabled services, regions, retention, access and deletion settings.
+- `validate_firebase_governance.py --self-test` plus environment, App Check, signed-policy, budget, anomaly and workload evidence.
 - Dependency, secret, static-analysis and mobile security checks appropriate to the implemented platform.
 - A qualified cryptography review before ADR-0007 can become accepted.
 - Qualified legal review before launch claims, notices, retention periods or regulatory conclusions become approved.
@@ -72,6 +75,7 @@ The Digital Personal Data Protection Act, 2023 and the Digital Personal Data Pro
 - [ ] Authentication abuse and account-linking controls pass staging tests for every provider.
 - [ ] Telemetry generated allowlist and prohibited-data tests pass.
 - [ ] Firebase service inventory matches production console configuration.
+- [ ] Four isolated environment bindings, signed operational policy and cost/load evidence satisfy ADR-0009.
 - [ ] Service-specific processing locations, transfers and retention are legally reviewed.
 - [ ] Deletion, consent withdrawal and export pass end-to-end tests.
 - [ ] Security incident contacts, access and evidence storage are verified in an exercise.
