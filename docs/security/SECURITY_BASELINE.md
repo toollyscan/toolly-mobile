@@ -14,20 +14,20 @@ This document defines Toolly's security objectives and proposed baseline. Crypto
 | OCR text | High | Local vault (encrypted) |
 | Phone identity | High | Firebase Authentication provider record; Toolly-owned duplication requires approved purpose |
 | ToollyAccountId | Medium | Local vault, cloud record |
-| Encryption keys | Critical | Platform hardware keystore |
-| Recovery codes | Critical | Local vault (encrypted), user-held |
-| OTP values | Critical | In-memory only; never persisted |
+| Encryption keys | Critical | Platform-protected storage design; evidence pending |
+| Recovery material | Critical | Proposed user-held and/or trusted-device design; evidence pending |
+| OTP values | Critical | Provider/app processing only; never persisted by Toolly application code or logged |
 | Firebase credentials | High | Outside source control; environment-managed |
 
 ### Threats and controls
 
 | Threat | Control |
 |--------|---------|
-| Device theft or loss | AES-256-GCM vault encryption; hardware-backed keys |
+| Device theft or loss | Authenticated local-vault encryption and platform-protected keys; exact mechanism pending review |
 | Cloud storage breach | End-to-end encryption; provider cannot decrypt |
 | OTP interception | OTP never logged; rate-limited; lockout enforced |
-| SIM-swap attack | Trusted-device approval required for new devices |
-| Credential stuffing | OTP-based auth; no password; rate limiting |
+| SIM-swap attack | Proposed trusted-device and recovery controls; protocol pending threat review |
+| Credential stuffing | Provider protections, password controls, OTP abuse controls and progressive backoff; thresholds pending testing |
 | Malicious dependency | Dependency policy: licence, CVE, size and removal analysis required |
 | Secret in source control | Gitleaks in CI; no credentials committed |
 | Log exfiltration | Document content, PII and key material never logged |
