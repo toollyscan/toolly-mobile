@@ -22,6 +22,16 @@ Additionally, mobile-number authentication via OTP is the expected primary authe
 
 ---
 
+## V1 authentication decision
+
+Authentication is required before the first scan. V1 supports phone OTP, email/password, Google, and Apple Sign In on iOS. Guest scanning is excluded unless a later approved decision explicitly supersedes this ADR.
+
+Firebase Authentication is the current identity provider behind Toolly-owned contracts. Firebase identities map to canonical `ToollyAccountId` values and never become document-owner IDs.
+
+Toolly-owned databases must not duplicate plaintext phone numbers without an approved purpose, retention period and security review. Firebase Authentication processes provider identity data according to its configured service contract and privacy terms. Phone numbers, OTPs, passwords, tokens and provider credentials never enter application logs or analytics.
+
+Trusted-device approval, recovery material and abuse thresholds remain evidence pending.
+
 ## Decision
 
 1. Toolly assigns every account a **`ToollyAccountId`** (UUID v4) at registration. This is the canonical document-owner ID.
