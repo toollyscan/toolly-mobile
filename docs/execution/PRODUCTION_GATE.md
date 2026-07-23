@@ -25,11 +25,15 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 
 ## Architecture gate
 
-- [ ] ADR-0001 (KMP boundary) accepted and prototype evidence attached.
-- [ ] ADR-0002 (local vault) accepted and vault encryption implementation reviewed.
-- [ ] ADR-0003 (cloud provider portability) accepted and provider-neutral interface implemented.
-- [ ] ADR-0004 (authentication and account boundary) accepted and `ToollyAccountId` generation implemented.
-- [ ] No Firebase, AWS or other provider SDK type appears in domain models, use cases or repository interfaces.
+- [ ] ADR-0001 KMP boundary prototype evidence attached.
+- [ ] ADR-0002 vault transaction/recovery and security evidence attached.
+- [ ] ADR-0003 provider-neutral Firebase ports implemented and contract-tested.
+- [ ] ADR-0004 canonical account mapping and provider-linking tests pass.
+- [ ] ADR-0005 canonical IDs/models and explicit mapper tests pass.
+- [ ] ADR-0006 atomic outbox, replay and conflict tests pass.
+- [ ] Module dependency, forbidden-import and public-API fitness functions pass.
+- [ ] No platform/provider/billing/database SDK type leaks into shared domain contracts.
+- [ ] Schema, recipe, wire and backup migration fixtures pass interruption and compatibility tests.
 - [ ] Compose Multiplatform benchmark completed (DA-001) or native UI path confirmed.
 - [ ] OCR engine selected with completed dependency analysis (DA-004).
 
