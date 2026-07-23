@@ -36,6 +36,12 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | ADR — Cloud provider portability | [docs/adr/0003-cloud-provider-portability.md](docs/adr/0003-cloud-provider-portability.md) |
 | ADR — Authentication and account boundary | [docs/adr/0004-authentication-and-account-boundary.md](docs/adr/0004-authentication-and-account-boundary.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
+| Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
+| Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
+| Monetization | [docs/product/MONETIZATION.md](docs/product/MONETIZATION.md) |
+| Subscription lifecycle | [docs/product/SUBSCRIPTION_LIFECYCLE.md](docs/product/SUBSCRIPTION_LIFECYCLE.md) |
+| Product metrics | [docs/product/PRODUCT_METRICS.md](docs/product/PRODUCT_METRICS.md) |
+| India launch scope | [docs/product/INDIA_LAUNCH_SCOPE.md](docs/product/INDIA_LAUNCH_SCOPE.md) |
 | Design audit | [docs/product/DESIGN_AUDIT.md](docs/product/DESIGN_AUDIT.md) |
 | Security baseline | [docs/security/SECURITY_BASELINE.md](docs/security/SECURITY_BASELINE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
