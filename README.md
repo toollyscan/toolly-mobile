@@ -78,6 +78,8 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | GitHub setup | [docs/execution/GITHUB_SETUP.md](docs/execution/GITHUB_SETUP.md) |
 | Definition of done | [docs/quality/DEFINITION_OF_DONE.md](docs/quality/DEFINITION_OF_DONE.md) |
 | Benchmark plan | [docs/quality/BENCHMARK_PLAN.md](docs/quality/BENCHMARK_PLAN.md) |
+| Benchmark governance and metrics | [docs/quality/BENCHMARK_GOVERNANCE.md](docs/quality/BENCHMARK_GOVERNANCE.md) · [docs/quality/BENCHMARK_METRICS.md](docs/quality/BENCHMARK_METRICS.md) |
+| Benchmark corpus, devices and evidence | [docs/quality/CORPUS_POLICY.md](docs/quality/CORPUS_POLICY.md) · [docs/quality/DEVICE_MATRIX.md](docs/quality/DEVICE_MATRIX.md) · [docs/quality/BENCHMARK_EVIDENCE.md](docs/quality/BENCHMARK_EVIDENCE.md) |
 | Cloud provider migration feasibility guide | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
 | Cost controls | [docs/operations/COST_CONTROLS.md](docs/operations/COST_CONTROLS.md) |
 
