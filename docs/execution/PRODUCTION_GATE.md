@@ -6,6 +6,17 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 
 ---
 
+## Design gate
+
+- [ ] Figma file created and organised per [docs/design/FIGMA_INFORMATION_ARCHITECTURE.md](../design/FIGMA_INFORMATION_ARCHITECTURE.md).
+- [ ] All 52 screens in [docs/design/SCREEN_INVENTORY.md](../design/SCREEN_INVENTORY.md) designed and approved.
+- [ ] All 50 components in [docs/design/COMPONENT_INVENTORY.md](../design/COMPONENT_INVENTORY.md) designed with all required states.
+- [ ] Design tokens implemented in Figma per [docs/design/DESIGN_TOKENS.md](../design/DESIGN_TOKENS.md).
+- [ ] [Figma Completion Gate](../design/FIGMA_COMPLETION_GATE.md) global gate items signed off by `@shivayogih`.
+- [ ] [Figma Audit Report](../design/FIGMA_AUDIT_REPORT.md) updated to confirm all screens at gate-passed status.
+
+---
+
 ## Architecture gate
 
 - [ ] ADR-0001 (KMP boundary) accepted and prototype evidence attached.

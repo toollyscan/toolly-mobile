@@ -50,6 +50,17 @@ A pull request may not be merged unless every applicable item in this checklist 
 - [ ] README links are valid.
 - [ ] Markdown linting passes.
 
+## Design
+
+For PRs that implement a UI screen or component:
+
+- [ ] The screen or component has a corresponding entry in [SCREEN_INVENTORY.md](../design/SCREEN_INVENTORY.md) or [COMPONENT_INVENTORY.md](../design/COMPONENT_INVENTORY.md).
+- [ ] The Figma Completion Gate has been passed for this screen or component (see [FIGMA_COMPLETION_GATE.md](../design/FIGMA_COMPLETION_GATE.md)).
+- [ ] Design tokens are used; no hardcoded colour, spacing or typography values.
+- [ ] All required component states from [COMPONENT_STATE_MATRIX.md](../design/COMPONENT_STATE_MATRIX.md) are implemented.
+- [ ] Accessibility labels and focus order match the annotations in the Figma frame (see [ACCESSIBILITY_REQUIREMENTS.md](../design/ACCESSIBILITY_REQUIREMENTS.md)).
+- [ ] All strings use externalised string resources; no hardcoded UI strings in code (see [LOCALIZATION_REQUIREMENTS.md](../design/LOCALIZATION_REQUIREMENTS.md)).
+
 ## Review
 
 - [ ] All items in the pull-request template are completed.

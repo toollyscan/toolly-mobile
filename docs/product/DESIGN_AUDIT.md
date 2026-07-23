@@ -82,6 +82,28 @@ Each item below represents an area where a design assumption has been made but e
 
 ---
 
+### DA-010 — Figma design specifications complete
+
+**Status:** Open — design specifications written; Figma implementation evidence pending.
+
+**Questions:**
+
+- Is the Toolly Figma file created and organised per
+  [FIGMA_INFORMATION_ARCHITECTURE.md](../design/FIGMA_INFORMATION_ARCHITECTURE.md)?
+- Are all 52 screens in [SCREEN_INVENTORY.md](../design/SCREEN_INVENTORY.md) designed and
+  approved?
+- Are all 50 components in [COMPONENT_INVENTORY.md](../design/COMPONENT_INVENTORY.md)
+  designed with all required states?
+- Are design tokens implemented in Figma per [DESIGN_TOKENS.md](../design/DESIGN_TOKENS.md)?
+- Have the [FIGMA_COMPLETION_GATE.md](../design/FIGMA_COMPLETION_GATE.md) global gate items
+  been passed?
+
+**Evidence required:** Figma file URL, screen-count verification and Figma Completion Gate
+sign-off by `@shivayogih` before engineering implementation of any screen begins. See
+[FIGMA_AUDIT_REPORT.md](../design/FIGMA_AUDIT_REPORT.md).
+
+---
+
 ## Non-blocking audit items
 
 | ID | Title | Notes |
