@@ -1,6 +1,6 @@
 # Production Gate
 
-Production feature implementation is blocked until every item in this gate is approved.
+Production work proceeds through evidence-based, proportional gates. No code may process real user documents or connect to production cloud infrastructure until the applicable architecture, security, design and operational controls are approved.
 
 The gate must be reviewed by `@shivayogih` before any code that processes real user documents, captures images, writes to the encrypted vault or connects to cloud infrastructure is merged to `main`.
 
@@ -15,10 +15,11 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 - [ ] Accessibility requirements defined (ACCESSIBILITY_REQUIREMENTS.md). Complete.
 - [ ] Localization requirements defined (LOCALIZATION_REQUIREMENTS.md). Complete.
 - [ ] Figma completion gates G1–G10 defined (FIGMA_COMPLETION_GATE.md). Complete.
-- [ ] Figma G3 (Components) approved before any screen implementation begins.
-- [ ] Figma G4 (Screen coverage) approved for the relevant screen before implementation.
-- [ ] Figma G9 (Developer handoff) approved before implementation of any production screen.
-- [ ] Figma G10 (Product and design sign-off) approved before Phase 2 begins.
+- [ ] Figma G2 foundations and relevant G3 components approved before UI implementation.
+- [ ] Figma G4 screen coverage approved for each implemented vertical slice.
+- [ ] Figma G9 developer handoff approved for each implemented vertical slice.
+- [ ] Accessibility and localization acceptance included in each implemented slice.
+- [ ] Figma G10 product and design sign-off approved before beta/GA.
 
 ---
 
@@ -39,7 +40,7 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 - [ ] Vault encryption reviewed by a qualified security practitioner.
 - [ ] OTP abuse controls (rate limiting, lockout) tested in staging.
 - [ ] Trusted-device approval and account recovery tested end to end.
-- [ ] Phone numbers confirmed to be stored as HMAC only; no plaintext in logs or database.
+- [ ] Toolly-owned phone-number persistence, Firebase Authentication processing, retention and deletion are documented and approved; phone numbers are absent from application logs and analytics.
 - [ ] Document content, OCR text and PII confirmed absent from all logs and analytics.
 - [ ] Firebase credentials confirmed absent from source control (Gitleaks passes).
 - [ ] Firebase data-residency configuration confirmed for Indian user data.
