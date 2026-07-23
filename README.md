@@ -16,8 +16,8 @@ Privacy-first, offline-first document scanning for Android and iOS.
 1. The encrypted local vault is the source of truth.
 2. Capture, processing, organisation and local export must work offline.
 3. Cloud backup is optional, explicit, encrypted and resumable.
-4. Firebase is the cloud infrastructure provider. Firebase SDK code is confined to the data layer only, never to the domain.
-5. All provider SDK implementations must remain behind Toolly-owned contracts and adapters, preserving migration feasibility.
+4. Firebase is the approved cloud platform for initial development and production releases. Firebase SDK code is confined to infrastructure adapters and never enters the domain.
+5. AWS is not implemented in the current phase. Migration may be evaluated after approximately two years based on cost, scale, reliability and business needs; this is a planning assumption, not a deadline.
 6. Canonical IDs, schemas, encryption envelopes, sync contracts and object keys belong to Toolly.
 7. Firebase UID must not become the canonical document-owner ID.
 8. Provider SDK types must not enter shared domain models.
@@ -73,4 +73,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
 
 ## Licence
 
-Copyright © 2025 Toolly. All rights reserved.
+Copyright © 2026 Toolly. All rights reserved.
