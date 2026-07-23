@@ -1,0 +1,10 @@
+# Canonical Gradle dependency and plugin catalog.
+# Intentionally empty until a dependency is approved in config/dependencies/registry.json.
+
+[versions]
+
+[libraries]
+
+[bundles]
+
+[plugins]
