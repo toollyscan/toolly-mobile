@@ -2,63 +2,53 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Accepted |
-| Date | 2025-07-01 |
+| Status | Accepted; prototype evidence pending |
+| Date | 2026-07-23 |
 | Author | shivayogih |
-
----
 
 ## Context
 
-Toolly targets Android and iOS. Sharing business logic reduces maintenance cost and reduces the risk of behavioural divergence between platforms.
-
-Kotlin Multiplatform (KMP) allows Kotlin code to compile to Android (JVM/Android) and iOS (Kotlin/Native). Compose Multiplatform (CMP) extends this to shared UI.
-
-However, KMP/CMP maturity varies by API surface:
-
-- Domain models, use cases and repository interfaces are well-supported.
-- Platform APIs (camera, file system, cryptography, biometrics) require platform-specific implementations via `expect`/`actual`.
-- CMP rendering on iOS has not yet been validated at production quality for document-scan preview.
-
----
+Toolly targets Android and iOS. Sharing stable product policy reduces divergence, while camera,
+image, cryptography, storage and UI surfaces need platform evidence and native integration.
 
 ## Decision
 
-1. **Share via KMP:** domain models, use cases, repository interfaces, validation logic, canonical ID generation and sync contracts.
-2. **Platform-specific via `expect`/`actual`:** camera capture, local storage, cryptographic key management, biometric authentication, share/export and push notification handling.
-3. **Do not share UI via CMP until evidence is gathered** (see DA-001 in DESIGN_AUDIT.md). Each platform uses its native UI toolkit by default: Jetpack Compose on Android, SwiftUI on iOS.
-4. ViewModels may be evaluated for KMP sharing after CMP evidence is gathered.
+1. Share canonical models, validation, use cases, ports, processing recipes, sync/conflict policy
+   and entitlement evaluation through KMP.
+2. Keep camera sessions, image buffers/GPU resources, key protection, filesystem implementation,
+   biometrics, PDF/share, push handling and billing SDKs platform-specific behind Toolly ports.
+3. Use `expect`/`actual` only for small stable APIs; wrap large SDK surfaces through interfaces.
+4. Use Jetpack Compose on Android and SwiftUI on iOS by default.
+5. Do not share production UI/ViewModels until DA-001 and technical spikes provide evidence.
+6. Firebase is implemented through adapters and is not a KMP domain dependency.
 
----
+See [MODULE_BOUNDARIES.md](../architecture/MODULE_BOUNDARIES.md).
 
 ## Consequences
 
-**Positive:**
+Positive:
 
-- Business logic is tested once and behaves identically on both platforms.
-- Domain code is completely independent of Android and iOS frameworks.
-- Provider migrations (Firebase → AWS) affect only data-layer implementations.
+- stable product policy is tested once;
+- native camera, accessibility and performance paths remain available;
+- platform/provider replacement does not change domain contracts.
 
-**Negative:**
+Costs:
 
-- `expect`/`actual` boilerplate is required for every platform API.
-- Build complexity is higher than a single-platform project.
-- Kotlin/Native memory model and interop with Swift require care.
-
----
+- explicit ports, mappings and platform implementations are required;
+- Kotlin/Native/Swift interop and cancellation need contract tests;
+- UI behavior must be verified on both platforms.
 
 ## Rejected alternatives
 
-| Alternative | Reason rejected |
-|-------------|----------------|
-| Flutter | Dart ecosystem is not the team's primary competency; platform channel overhead for document processing. |
-| React Native | JavaScript bridge latency is unsuitable for real-time camera preview and GPU image processing. |
-| Native-only Android first | Creates divergent codebases and delays iOS launch. |
-| Full CMP UI sharing | Insufficient production evidence for document-scan preview quality on iOS at this time. |
+| Alternative | Reason |
+|-------------|--------|
+| Full shared UI immediately | Insufficient document-capture, accessibility and device evidence |
+| Native-only Android first | Conflicts with approved dual-platform direction |
+| Expose native SDK types to common code | Breaks replacement and test boundaries |
 
----
+## Evidence required
 
-## Evidence required before changing status
-
-- Benchmark of CMP rendering vs. native on document-scan preview on representative Android and iOS devices (see DA-001).
-- Prototype of the `expect`/`actual` camera capture boundary.
+- KMP build and Swift interop prototype;
+- camera request/result boundary prototype;
+- cancellation and memory behavior tests;
+- Compose Multiplatform versus native benchmark before any UI decision changes.
