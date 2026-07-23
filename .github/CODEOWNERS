@@ -4,9 +4,14 @@
 # Default — every file in the repository
 * @shivayogih
 
-# Architecture documents
+# Architecture and dependency governance
 /docs/architecture/ @shivayogih
 /docs/adr/ @shivayogih
+/config/dependencies/ @shivayogih
+/gradle/libs.versions.toml @shivayogih
+/gradle/verification-metadata.xml @shivayogih
+**/*lockfile @shivayogih
+/scripts/validate_dependency_policy.py @shivayogih
 
 # Security documents
 /docs/security/ @shivayogih
