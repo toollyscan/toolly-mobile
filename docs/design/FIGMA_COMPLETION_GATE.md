@@ -271,11 +271,13 @@ Defines the ten completion gates (G1–G10) that must be passed before Toolly pr
 
 ## Gate dependency
 
-Implementation of production features on design-dependent screens is blocked until:
+Design approval is proportional to the implementation slice:
 
-- The relevant screen's Figma frame is covered under G4 (screen coverage — Approved).
-- The component library (G3) is Approved.
-- The developer handoff (G9) for that screen is Approved.
-- Overall product sign-off (G10) is Approved.
+- G2 foundations and the relevant G3 component foundations are required before UI implementation.
+- The implemented screen and its required states must be approved under G4.
+- Developer handoff for that screen must be approved under G9.
+- Accessibility and localization acceptance are mandatory for every implemented slice.
+- Unrelated unimplemented screens do not block an independently approved walking slice.
+- Overall G10 product and design sign-off is required before beta/GA, not before repository scaffolding, technical spikes or an approved walking skeleton.
 
-See PRODUCTION_GATE.md for the full production readiness gate.
+See PRODUCTION_GATE.md for the full production-readiness gate.
