@@ -73,6 +73,12 @@ Controls return Allow, StepUp, Delay, Deny, LockedPendingReview or Unknown. Risk
 shown to attackers. Unknown fails closed for remote/key-sensitive actions while preserving access
 to already-owned local documents.
 
+## Firebase OTP enforcement boundary
+
+Client resend timers are bypassable usability controls. Firebase Security Rules do not govern Authentication SMS sends, and App Check is defense-in-depth rather than per-user authorization. Provider quota/region policy, App Check enforcement metrics and every Toolly server-side risk control must be tested against the actual mobile SDK flow before claiming an enforced numeric limit.
+
+Operational thresholds and the signed cloud-degradation policy are defined by [FIREBASE_ABUSE_AND_POLICY_CONTROLS.md](FIREBASE_ABUSE_AND_POLICY_CONTROLS.md). They are versioned configuration, not permanent application constants.
+
 ## Required test matrix
 
 - enumeration across every auth/recovery response;
