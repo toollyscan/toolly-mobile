@@ -33,6 +33,15 @@ A pull request may not be merged unless every applicable item in this checklist 
 - [ ] Applicable SBOM is regenerated; release artifacts include resolved transitive SBOM/provenance evidence.
 - [ ] No commercial scanner/OCR/PDF/image SDK is introduced without a dedicated approved ADR.
 
+## Firebase governance
+
+- [ ] `validate_firebase_governance.py --self-test` passes for Firebase/environment/policy changes.
+- [ ] Environment, project, service, data and App Check bindings match the machine-readable contracts.
+- [ ] Remote Config contains no secret or authorization grant; cloud control uses the signed Toolly policy envelope.
+- [ ] Budget alerts are not represented as hard caps and automatic billing disable is not introduced.
+- [ ] Cost/load assumptions remain hypotheses until current SKU and staging evidence is linked.
+- [ ] AWS code, infrastructure, credentials and dependencies remain excluded.
+
 ## Code quality
 
 - [ ] The code compiles without warnings in the CI environment.
