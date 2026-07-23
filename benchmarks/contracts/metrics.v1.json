@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "registry_id": "toolly-benchmark-metrics",
+  "registry_version": "1.0.0",
+  "metrics": [
+    {
+      "id": "camera.first_frame",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "camera.capture_to_buffer",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "camera.buffer_transfer",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "camera.capture_success",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "camera.peak_memory",
+      "unit": "MiB",
+      "better": "lower"
+    },
+    {
+      "id": "geometry.pipeline_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "geometry.quad_iou",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "geometry.corner_error",
+      "unit": "ratio",
+      "better": "lower"
+    },
+    {
+      "id": "geometry.detection_success",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "enhancement.pipeline_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "enhancement.peak_memory",
+      "unit": "MiB",
+      "better": "lower"
+    },
+    {
+      "id": "pdf.generate_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "pdf.output_size",
+      "unit": "bytes",
+      "better": "contextual"
+    },
+    {
+      "id": "pdf.peak_memory",
+      "unit": "MiB",
+      "better": "lower"
+    },
+    {
+      "id": "pdf.validation_success",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "export.temporary_plaintext_lifetime",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.character_error_rate",
+      "unit": "ratio",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.word_error_rate",
+      "unit": "ratio",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.peak_memory",
+      "unit": "MiB",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.artifact_size",
+      "unit": "bytes",
+      "better": "lower"
+    },
+    {
+      "id": "ocr.offline_success",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "vault.open_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "vault.write_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "vault.read_latency",
+      "unit": "ms",
+      "better": "lower"
+    },
+    {
+      "id": "vault.peak_memory",
+      "unit": "MiB",
+      "better": "lower"
+    },
+    {
+      "id": "vault.storage_overhead",
+      "unit": "ratio",
+      "better": "lower"
+    },
+    {
+      "id": "vault.tamper_detection",
+      "unit": "ratio",
+      "better": "higher"
+    },
+    {
+      "id": "vault.recovery_success",
+      "unit": "ratio",
+      "better": "higher"
+    }
+  ]
+}
