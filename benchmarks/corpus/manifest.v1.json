@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "corpus_id": "toolly-consent-safe-corpus",
+  "corpus_version": "1.0.0-definition",
+  "status": "definition_only",
+  "data_policy": "synthetic_by_default",
+  "languages": [
+    "en",
+    "hi",
+    "kn"
+  ],
+  "required_cohorts": [
+    {
+      "id": "printed-a4-clean",
+      "minimum_items_per_language": 10
+    },
+    {
+      "id": "printed-card-synthetic",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "multi-page",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "low-light",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "blur-motion",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "glare-shadow",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "skew-perspective",
+      "minimum_items_per_language": 10
+    },
+    {
+      "id": "low-contrast",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "dense-table",
+      "minimum_items_per_language": 5
+    },
+    {
+      "id": "handwriting",
+      "minimum_items_per_language": 10
+    }
+  ],
+  "items": [],
+  "notes": [
+    "No corpus binary is approved or present in this definition-only version.",
+    "Each item requires a digest, provenance, licence and privacy status before activation."
+  ]
+}

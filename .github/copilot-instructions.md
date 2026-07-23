@@ -83,6 +83,10 @@ Never add a dependency without completing all four steps. Never add a commercial
 - Include tests for failure, interruption, retry, offline and recovery paths — not only the happy path.
 - Never claim a build or test passed unless it was executed in CI or documented locally with the exact command and output.
 - Do not disable or remove unrelated tests.
+- Never invent benchmark measurements, copy summary values into raw evidence or represent host/emulator/simulator results as physical-device results.
+- Benchmark changes must follow `docs/quality/BENCHMARK_GOVERNANCE.md`; raw runs use the registered metric units and exact commit/corpus/environment provenance.
+- Do not commit personal documents, OCR output, device serials, user filenames, credentials or key material as fixtures or benchmark evidence.
+- A benchmark target remains a hypothesis until raw representative-device evidence is reviewed and linked from the applicable ADR.
 
 ---
 

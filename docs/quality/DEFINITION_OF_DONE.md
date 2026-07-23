@@ -41,6 +41,8 @@ A pull request may not be merged unless every applicable item in this checklist 
 - [ ] Tests cover failure, interruption, retry, offline and recovery paths where executable behavior changes.
 - [ ] All applicable existing tests continue to pass.
 - [ ] Test results are linked or attached; unexecuted checks are never marked passed.
+- [ ] Benchmark-related changes pass `python3 scripts/validate_benchmark_evidence.py --self-test`.
+- [ ] Any benchmark claim links raw measurements, run manifest, exact commit, corpus version and environment; summary-only evidence is rejected.
 
 ## Documentation
 
@@ -63,7 +65,7 @@ A pull request may not be merged unless every applicable item in this checklist 
 
 For PRs that implement production features (after the Production Gate is approved):
 
-- [ ] Performance benchmarks on representative devices meet targets in `BENCHMARK_PLAN.md`.
+- [ ] Accepted raw benchmarks on the approved representative physical-device matrix meet evidence-backed thresholds in `BENCHMARK_PLAN.md`.
 - [ ] Accessibility requirements are met (minimum WCAG 2.1 AA; TalkBack / VoiceOver).
 - [ ] English, Hindi and Kannada strings are complete.
 - [ ] The `staging` environment deployment is verified before merging to `main`.
