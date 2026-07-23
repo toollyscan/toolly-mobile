@@ -26,8 +26,12 @@ A pull request may not be merged unless every applicable item in this checklist 
 
 ## Dependency policy
 
-- [ ] Any new dependency has a documented licence, security check, binary-size estimate and removal plan.
-- [ ] No commercial scanning/OCR/PDF SDK is introduced without an approved ADR.
+- [ ] `validate_dependency_policy.py --self-test` passes.
+- [ ] Every changed dependency, plugin, Action or container has an approved register entry and completed review.
+- [ ] Versions are immutable; Gradle catalog, lock and reviewed verification metadata agree where applicable.
+- [ ] Transitive graph, vulnerability/licence posture, size, privacy/network behavior and removal plan are documented.
+- [ ] Applicable SBOM is regenerated; release artifacts include resolved transitive SBOM/provenance evidence.
+- [ ] No commercial scanner/OCR/PDF/image SDK is introduced without a dedicated approved ADR.
 
 ## Code quality
 
