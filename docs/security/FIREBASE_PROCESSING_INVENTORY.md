@@ -22,12 +22,12 @@ These are provider statements, not Toolly legal conclusions or guarantees.
 | Service | Planned purpose | Data | Location/configuration status | Approval |
 |---------|-----------------|------|-------------------------------|----------|
 | Authentication | Phone, email/password, Google, Apple identity | Provider identity, IP, user agent, tokens | Auth documented as US-only | Legal/privacy and notice pending |
-| Cloud Firestore or approved metadata service | Account mapping, encrypted manifests, sync/entitlement metadata | Canonical IDs and ciphertext metadata; no document plaintext | Region not selected | TLY-008 plus legal review |
-| Cloud Storage for Firebase | Optional encrypted backup objects | Ciphertext, lengths/digests/object keys | Region not selected | Backup crypto and TLY-008 pending |
-| Cloud Functions | Identity/entitlement/deletion orchestration | Minimum event metadata; IP for HTTP invocation | Region/runtime pending | TLY-008/TLY-009 |
-| App Check | App/device integrity and abuse control | Attestation material/tokens | Provider-dependent/global behavior | Privacy inventory and rollout pending |
+| Cloud Firestore or approved metadata service | Account mapping, encrypted manifests, sync/entitlement metadata | Canonical IDs and ciphertext metadata; no document plaintext | Region not selected | TLY-008 design defined; location binding and legal review pending |
+| Cloud Storage for Firebase | Optional encrypted backup objects | Ciphertext, lengths/digests/object keys | Region not selected | TLY-008 boundary defined; backup crypto and environment evidence pending |
+| Cloud Functions | Identity/entitlement/deletion orchestration | Minimum event metadata; IP for HTTP invocation | Region/runtime pending | TLY-008 design defined; TLY-009 deployment evidence pending |
+| App Check | App/device integrity and abuse control | Attestation material/tokens | Provider-dependent/global behavior | TLY-008 rollout defined; implementation evidence pending |
 | FCM | Security/backup notifications | Installation ID and non-sensitive payload | Global service behavior | Opt-in/config review pending |
-| Remote Config | Signed/validated operational policy input | Installation ID; no document identity | Global behavior | Kill-switch design pending |
+| Remote Config | Signed/validated operational policy input | Installation ID; no document identity | Global behavior | Signed TLY-008 policy design defined; implementation evidence pending |
 | Crashlytics | Reliability diagnostics | Installation IDs and crash data | Collection disabled until allowlist tests | Privacy approval pending |
 | Performance Monitoring | Coarse performance | Installation ID/IP and traces | Collection disabled until allowlist tests | Privacy approval pending |
 | Analytics | Product metrics | Only approved events if enabled | Not approved by inclusion | Separate privacy decision |
@@ -84,6 +84,10 @@ For SDKs that support automatic initialization/collection:
 - [ ] Logs/exports/backups contain no prohibited data.
 - [ ] Data principal access/deletion workflow tested.
 - [ ] Privacy/store disclosures match observed collection.
+
+## TLY-008 control-plane design
+
+Environment isolation, service boundaries, cost/abuse controls, signed operational policy and required deployment evidence are defined in ADR-0009, `config/firebase/` and the linked architecture/security/operations documents. Project IDs, locations, billing, IAM, Rules and App Check remain unprovisioned evidence; this inventory must be reconciled to observed configuration before staging and production.
 
 ## Official references
 

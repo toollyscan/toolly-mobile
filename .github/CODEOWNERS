@@ -4,9 +4,11 @@
 # Default — every file in the repository
 * @shivayogih
 
-# Architecture and dependency governance
+# Architecture, cloud and dependency governance
 /docs/architecture/ @shivayogih
 /docs/adr/ @shivayogih
+/config/firebase/ @shivayogih
+/scripts/validate_firebase_governance.py @shivayogih
 /config/dependencies/ @shivayogih
 /gradle/libs.versions.toml @shivayogih
 /gradle/verification-metadata.xml @shivayogih

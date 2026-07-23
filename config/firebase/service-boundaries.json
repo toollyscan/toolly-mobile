@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "cloudProvider": "firebase",
+  "awsImplementationAllowed": false,
+  "defaultPolicy": "disabled-and-deny",
+  "services": [
+    {
+      "id": "authentication",
+      "purpose": "phone, email-password, Google and Apple credential verification",
+      "domainContract": "AuthSessionPort",
+      "allowedData": [
+        "provider-credential-reference",
+        "minimum-provider-identity-data",
+        "canonical-account-mapping-reference"
+      ],
+      "prohibitedData": [
+        "document-content",
+        "ocr-text",
+        "vault-key",
+        "otp-value",
+        "password",
+        "provider-token-in-domain"
+      ],
+      "automaticCollection": "not-applicable",
+      "appCheckRollout": "metrics-then-enforce-before-production",
+      "authorizationSource": "firebase-authentication-plus-toolly-account-mapping",
+      "enabled": {
+        "development": "approved-test-identities-only",
+        "test": "emulator-or-approved-test-identities-only",
+        "staging": "internal-test-identities-only",
+        "production": "blocked-until-privacy-and-abuse-gates"
+      }
+    },
+    {
+      "id": "firestore",
+      "purpose": "canonical account mapping, encrypted manifests, operation envelopes and entitlement metadata",
+      "domainContract": "RemoteMetadataPort",
+      "allowedData": [
+        "toolly-canonical-identifiers",
+        "ciphertext-metadata",
+        "versioned-envelopes",
+        "idempotency-and-revision-state"
+      ],
+      "prohibitedData": [
+        "document-plaintext",
+        "ocr-text",
+        "filename",
+        "provider-object-in-domain",
+        "raw-token"
+      ],
+      "automaticCollection": "not-applicable",
+      "appCheckRollout": "metrics-then-enforce-before-production",
+      "authorizationSource": "deny-by-default-rules-plus-canonical-account-scope",
+      "enabled": {
+        "development": "emulator-first",
+        "test": "emulator-only-by-default",
+        "staging": "blocked-until-location-rules-indexes-and-budget-evidence",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "storage",
+      "purpose": "optional client-encrypted backup objects",
+      "domainContract": "BackupObjectPort",
+      "allowedData": [
+        "ciphertext",
+        "ciphertext-digest",
+        "ciphertext-length",
+        "versioned-adapter-private-object-key"
+      ],
+      "prohibitedData": [
+        "document-plaintext",
+        "ocr-text",
+        "user-filename",
+        "vault-key",
+        "identity-in-object-path"
+      ],
+      "automaticCollection": "not-applicable",
+      "appCheckRollout": "metrics-then-enforce-before-production",
+      "authorizationSource": "deny-by-default-rules-plus-canonical-account-scope",
+      "enabled": {
+        "development": "emulator-first",
+        "test": "emulator-only-by-default",
+        "staging": "blocked-until-resumable-integrity-deletion-and-cost-evidence",
+        "production": "blocked-until-backup-crypto-and-production-gates"
+      }
+    },
+    {
+      "id": "functions",
+      "purpose": "identity, entitlement, deletion, policy and idempotent orchestration",
+      "domainContract": "Toolly-owned-request-and-result-contracts",
+      "allowedData": [
+        "minimum-operation-envelope",
+        "idempotency-key",
+        "privacy-safe-error-code",
+        "bounded-risk-signal"
+      ],
+      "prohibitedData": [
+        "document-plaintext",
+        "ocr-text",
+        "vault-key",
+        "raw-credential",
+        "request-body-in-log"
+      ],
+      "automaticCollection": "not-applicable",
+      "appCheckRollout": "metrics-then-enforce-before-production",
+      "authorizationSource": "iam-or-authentication-plus-app-check-plus-operation-authorization",
+      "enabled": {
+        "development": "emulator-first",
+        "test": "emulator-only-by-default",
+        "staging": "blocked-until-function-level-scaling-iam-and-retry-policy",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "fcm",
+      "purpose": "generic security and backup-status wake-up notifications",
+      "domainContract": "NotificationPort",
+      "allowedData": [
+        "bounded-event-type",
+        "non-sensitive-display-copy",
+        "short-lived-opaque-fetch-reference"
+      ],
+      "prohibitedData": [
+        "document-content",
+        "ocr-text",
+        "filename",
+        "account-id",
+        "document-id",
+        "storage-path",
+        "secret"
+      ],
+      "automaticCollection": "disabled-until-approved",
+      "appCheckRollout": "not-a-client-authorization-control",
+      "authorizationSource": "trusted-server-send-only",
+      "enabled": {
+        "development": "disabled-by-default",
+        "test": "disabled-by-default",
+        "staging": "blocked-until-payload-and-consent-review",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "remote-config",
+      "purpose": "transport of public, versioned and independently verified operational policy",
+      "domainContract": "OperationalPolicyPort",
+      "allowedData": [
+        "signed-policy-envelope",
+        "public-policy-key-id",
+        "non-confidential-feature-default"
+      ],
+      "prohibitedData": [
+        "secret",
+        "authorization-grant",
+        "user-identity",
+        "document-identity",
+        "unsigned-cloud-write-enable"
+      ],
+      "automaticCollection": "minimal-fetch-only-after-approved-initialization",
+      "appCheckRollout": "defense-in-depth-where-supported",
+      "authorizationSource": "never-remote-config",
+      "enabled": {
+        "development": "local-defaults-first",
+        "test": "fixture-only",
+        "staging": "blocked-until-signature-replay-and-expiry-tests",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "app-check",
+      "purpose": "application and device integrity signal for abuse reduction",
+      "domainContract": "IntegritySignalPort",
+      "allowedData": [
+        "attestation-token",
+        "bounded-verification-outcome"
+      ],
+      "prohibitedData": [
+        "authorization-decision-as-sole-input",
+        "document-content",
+        "stable-device-id-in-domain"
+      ],
+      "automaticCollection": "explicit-provider-initialization",
+      "appCheckRollout": "monitor-then-enforce-with-rollback",
+      "authorizationSource": "never-app-check-alone",
+      "enabled": {
+        "development": "debug-provider-registered-and-restricted",
+        "test": "debug-provider-or-emulator",
+        "staging": "real-provider-monitor-then-enforce",
+        "production": "real-provider-enforced-before-public-traffic"
+      }
+    },
+    {
+      "id": "crashlytics",
+      "purpose": "privacy-safe crash diagnostics",
+      "domainContract": "TelemetryPort",
+      "allowedData": [
+        "registered-crash-classification",
+        "coarse-app-and-device-bucket"
+      ],
+      "prohibitedData": [
+        "document-content",
+        "ocr-text",
+        "filename",
+        "identity",
+        "path",
+        "raw-exception-message"
+      ],
+      "automaticCollection": "disabled-until-telemetry-gate",
+      "appCheckRollout": "not-applicable",
+      "authorizationSource": "not-applicable",
+      "enabled": {
+        "development": "disabled",
+        "test": "disabled",
+        "staging": "blocked-until-allowlist-capture-test",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "performance",
+      "purpose": "coarse performance diagnostics",
+      "domainContract": "TelemetryPort",
+      "allowedData": [
+        "registered-trace-name",
+        "coarse-duration-and-size-bucket"
+      ],
+      "prohibitedData": [
+        "document-content",
+        "document-identity",
+        "user-identity",
+        "dynamic-url",
+        "filename"
+      ],
+      "automaticCollection": "disabled-until-telemetry-gate",
+      "appCheckRollout": "not-applicable",
+      "authorizationSource": "not-applicable",
+      "enabled": {
+        "development": "disabled",
+        "test": "disabled",
+        "staging": "blocked-until-allowlist-capture-test",
+        "production": "blocked-until-production-gate"
+      }
+    },
+    {
+      "id": "analytics",
+      "purpose": "not-approved",
+      "domainContract": "TelemetryPort",
+      "allowedData": [],
+      "prohibitedData": [
+        "all-events-until-separate-product-and-privacy-approval"
+      ],
+      "automaticCollection": "disabled",
+      "appCheckRollout": "not-applicable",
+      "authorizationSource": "not-applicable",
+      "enabled": {
+        "development": "disabled",
+        "test": "disabled",
+        "staging": "disabled",
+        "production": "disabled"
+      }
+    }
+  ]
+}

@@ -78,6 +78,8 @@ Native UI remains the default until Compose Multiplatform evidence changes ADR-0
 | [Module boundaries](MODULE_BOUNDARIES.md) | KMP/platform responsibilities and forbidden dependencies |
 | [Vault and processing](VAULT_AND_PROCESSING_CONTRACTS.md) | Transactions, recovery and recipe versioning |
 | [Sync and Firebase](SYNC_AND_FIREBASE_CONTRACTS.md) | Outbox, conflict, idempotency and adapter tests |
+| [Firebase environments](FIREBASE_ENVIRONMENTS.md) | Project isolation, build binding and environment gates |
+| [Firebase service boundaries](FIREBASE_SERVICE_BOUNDARIES.md) | Auth, data, storage, functions, messaging, policy and observability boundaries |
 | [Schema evolution](SCHEMA_EVOLUTION.md) | Compatibility, migration and rollout |
 | [Fitness functions](ARCHITECTURE_FITNESS_FUNCTIONS.md) | CI enforcement contracts |
 
@@ -89,3 +91,6 @@ Native UI remains the default until Compose Multiplatform evidence changes ADR-0
 - [ADR-0004 — Authentication/account](../adr/0004-authentication-and-account-boundary.md)
 - [ADR-0005 — Canonical data/operations](../adr/0005-canonical-data-and-operation-model.md)
 - [ADR-0006 — Outbox/conflicts](../adr/0006-local-outbox-and-conflict-policy.md)
+- [ADR-0007 — Encryption envelope/key hierarchy](../adr/0007-encryption-envelope-and-key-hierarchy.md)
+- [ADR-0008 — Dependency/supply-chain governance](../adr/0008-dependency-and-supply-chain-governance.md)
+- [ADR-0009 — Firebase control plane/environment isolation](../adr/0009-firebase-control-plane-and-environment-isolation.md)

@@ -42,7 +42,8 @@ application is effectively once through stable operation IDs and idempotency key
 - One poisoned aggregate does not block unrelated aggregates.
 - Per-aggregate ordering is preserved.
 - A signed backup kill switch can stop cloud work without disabling local scanning.
-- Numeric thresholds belong to TLY-008 and require evidence.
+- Numeric thresholds follow the TLY-008 cost/abuse model and remain hypotheses until staging evidence approves them.
+- Remote cloud modes use the signed TLY-008 operational-policy envelope; an invalid policy pauses new cloud writes without disabling local scan, vault or export.
 
 ## Conflict
 

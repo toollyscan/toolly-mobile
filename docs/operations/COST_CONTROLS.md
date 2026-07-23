@@ -1,116 +1,174 @@
-# Cost Controls
+# Firebase cost and capacity controls
 
-This document describes the Firebase budget, quota and kill-switch controls for Toolly.
+This document replaces fixed, unverified quotas with a measured FinOps control loop. It defines the
+design; no budget, quota, Firebase project or paid service is claimed to be configured.
 
----
+The machine-readable workload and alert contract is
+`config/firebase/cost-model.json`.
 
-## Firebase budget alerts
+## Principles
 
-Configure budget alerts in the Google Cloud Console under **Billing → Budgets & alerts**.
+1. Local scanning, the local vault and local export do not depend on cloud availability or spend.
+2. Google Cloud budgets generate alerts; they do not cap spend.
+3. Billing is never automatically disabled because abrupt service loss can corrupt workflows,
+   block deletion/recovery and still arrive after reporting delay.
+4. Cost protection is layered across product entitlement, authorization, request limits, App
+   Check, Security Rules, provider quotas, function scaling, bounded retries, anomaly detection and
+   a signed degradation policy.
+5. Values are hypotheses until linked staging/load evidence approves them.
+6. Every cost decision records region, edition, SKU snapshot, currency, tax/credit treatment and
+   evidence date.
 
-| Alert threshold | Action |
-|----------------|--------|
-| 50 % of monthly budget | Notify `shivayogih` by email. |
-| 80 % of monthly budget | Notify `shivayogih` by email; review usage report. |
-| 100 % of monthly budget | Notify `shivayogih` by email; consider kill-switch activation. |
+## Control loop
 
-The monthly budget must be set before any production traffic is enabled.
-
----
-
-## Firebase quota limits
-
-Apply the following quota limits in the Firebase Console and Google Cloud Console to prevent runaway spend.
-
-### Firebase Authentication
-
-| Quota | Limit | Rationale |
-|-------|-------|-----------|
-| SMS OTP requests per day | 1 000 (staging) / 10 000 (production) | Prevents OTP abuse and unexpected cost. |
-| Anonymous sign-in per day | Disabled | Toolly requires phone authentication. |
-
-### Firebase Storage
-
-| Quota | Limit | Rationale |
-|-------|-------|-----------|
-| Daily download bandwidth | 50 GB (initial) | Prevents accidental egress cost. |
-| Daily upload bandwidth | 10 GB (initial) | Review and increase as user base grows. |
-| Maximum object size | 50 MB | Limit individual document upload size. |
-
-### Firestore (if used)
-
-| Quota | Limit | Rationale |
-|-------|-------|-----------|
-| Daily reads | 100 000 (initial) | Prevents accidental read amplification. |
-| Daily writes | 20 000 (initial) | Review and increase as user base grows. |
-
----
-
-## Kill-switch controls
-
-A kill switch disables cloud sync for all users without a new application release.
-
-### Firebase Remote Config kill switch
-
-Configure a Remote Config parameter `cloud_sync_enabled` with a default value of `true`.
-
-The sync engine must check this parameter before every sync operation:
-
-```kotlin
-if (remoteConfig.getBoolean("cloud_sync_enabled") == false) {
-    // Skip sync; queue for retry when kill switch is lifted
-    return
-}
+```mermaid
+flowchart LR
+    Model["Versioned workload model"] --> Load["Staging load and abuse tests"]
+    Load --> Estimate["Regional SKU estimate"]
+    Estimate --> Budget["Budget and anomaly policies"]
+    Budget --> Observe["Billing, service and product metrics"]
+    Observe --> Decide{"Threshold or anomaly?"}
+    Decide -->|"No"| Model
+    Decide -->|"Yes"| Respond["Investigate and choose bounded response"]
+    Respond --> Policy["Publish signed cloud-degradation policy"]
+    Policy --> Model
 ```
 
-To activate the kill switch:
+## Budget alerts
 
-1. Set `cloud_sync_enabled = false` in the Firebase Remote Config console.
-2. Publish the change.
-3. Within 15 minutes, all active clients will stop syncing.
-4. Document the activation in the operations log below.
+Each billable environment has a project-scoped budget and named recipients. Staging and production
+must not share one project budget.
 
-To deactivate the kill switch:
+| Signal | Provisional threshold | Response |
+|---|---:|---|
+| Actual spend | 50% | Verify forecast, user growth and top SKUs |
+| Actual spend | 75% | Engineering/FinOps review; validate abuse and retry rates |
+| Actual spend | 90% | Incident owner evaluates bounded cloud degradation |
+| Actual spend | 100% | Cost incident; containment requires accountable approval |
+| Forecast spend | 80% | Review before the expected breach |
+| Forecast spend | 100% | Incident owner and product owner notified |
 
-1. Set `cloud_sync_enabled = true` in the Firebase Remote Config console.
-2. Publish the change.
-3. Clients will resume sync automatically.
+Budget notifications use email plus programmatic Pub/Sub delivery before staging billing is
+enabled. The consumer is idempotent because billing notifications may be duplicated or reordered.
+Alert delay and cost-reporting delay are accounted for; no workflow assumes instant notification.
 
----
+## Cost anomaly detection
 
-## OTP cost controls
+Initial two-dimensional filters are provisional:
 
-| Control | Value |
-|---------|-------|
-| Maximum OTP requests per phone number per 10 minutes | 3 |
-| Maximum failed OTP attempts before lockout | 5 |
-| Lockout duration | 30 minutes |
+| Scope | Minimum cost impact | Minimum deviation |
+|---|---:|---:|
+| Development/test | ₹250 | 50% |
+| Staging | ₹500 | 35% |
+| Production | ₹1,000 | 25% |
 
-These controls are enforced in the application and must also be enforced server-side via Firebase App Check and Firebase Authentication rules.
+They are recalibrated after each pricing change, load test, launch cohort, entitlement change or
+material architecture change. A low absolute-spend environment needs a low impact threshold;
+production also needs service-level operational alerts because billing anomaly detection learns
+from historical spend and is not an abuse firewall.
 
----
+## Service safeguards
 
-## Cost review cadence
+### Authentication
 
-| Frequency | Action |
-|-----------|--------|
-| Weekly | Review Firebase billing dashboard for anomalies. |
-| Monthly | Compare actual spend to budget; adjust quotas if necessary. |
-| Quarterly | Review quota limits against user growth; plan budget for the next quarter. |
+- India SMS region policy for initial scope;
+- provider quota/throttle monitoring;
+- App Check rollout and production enforcement evidence;
+- generic results, persisted client backoff and approved server-side risk controls;
+- alerts on SMS count, success/failure ratio, new-user ratio and cost per successful sign-in;
+- an emergency response may pause new OTP acquisition but cannot revoke an existing user's local
+  vault.
 
----
+### Firestore
 
-## Operations log
+- bounded, indexed queries and page limits;
+- no unbounded listeners or collection scans;
+- read/write/delete metrics per canonical operation type;
+- App Check plus deny-by-default Rules;
+- cost tests for reconnect, retry, conflict and deletion flows;
+- Query Explain or equivalent evidence for high-volume queries before production.
 
-Record any kill-switch activations and significant budget events here.
+### Storage
 
-| Date | Event | Activated by | Notes |
-|------|-------|-------------|-------|
-| — | — | — | No events recorded. |
+- premium backup entitlement checked through Toolly policy;
+- per-user allowance is a product hypothesis, not only a client check;
+- ciphertext size, upload frequency and restore egress limits;
+- resumable upload with stable identity and integrity verification;
+- lifecycle cleanup only for approved temporary/noncurrent objects;
+- no silent deletion of live user backups as a cost response.
 
----
+### Functions
 
-## Related documents
+- one purpose and runtime identity per function;
+- minimum instances default to zero unless latency evidence approves otherwise;
+- explicit maximum instances, timeout, memory/CPU and concurrency per function;
+- bounded event age/attempts, idempotency and dead-letter handling;
+- request/body size limits and no open proxy behavior;
+- alerts on invocation, active instances, errors, retries, duration and downstream operations.
 
-- [FIREBASE_TO_AWS_RUNBOOK.md](FIREBASE_TO_AWS_RUNBOOK.md)
-- [ADR-0003 — Cloud provider portability](../adr/0003-cloud-provider-portability.md)
+Maximum instances can briefly exceed a configured value and is therefore a safeguard, not a bill
+guarantee. Production values require load and downstream-capacity evidence.
+
+### FCM, Remote Config and observability
+
+- FCM payloads are allowlisted and generic;
+- Remote Config fetch intervals and real-time connections are measured;
+- Remote Config cannot authorize spend or transport a secret;
+- Crashlytics/Performance remain off until telemetry approval;
+- logging, metrics and traces use sampling, retention and cardinality limits.
+
+## Cost-per-user model
+
+Three monthly active-user scenarios are defined:
+
+- `free-base`: minimum identity/entitlement/security operations; no document backup;
+- `premium-base`: average encrypted-backup hypothesis;
+- `premium-allowance-edge`: stress case for the proposed 5 GiB allowance.
+
+For each billable SKU:
+
+```text
+scenario variable cost =
+    max(0, usage - allocated free-tier share)
+    × effective regional SKU price
+
+cohort monthly cloud cost =
+    active users × per-user variable cost + allocated fixed cost
+```
+
+Gross-margin review additionally includes store fees, tax, support, refunds and currency effects.
+Free-tier allocation is modelled conservatively and never double-counted across projects.
+
+Required cohorts are 100, 1k, 10k, 100k and 1m active users. Profiles include normal traffic,
+launch burst, OTP abuse, backup resume storm, function retry storm and deletion backlog. The output
+records service operations, regional cost, latency, retries, quota rejection, errors, storage
+growth, egress and kill-switch time-to-effect.
+
+No final premium allowance, price or gross-margin claim is approved until current regional SKUs and
+staging evidence populate the model.
+
+## Response ladder
+
+1. verify alert authenticity and reporting period;
+2. identify project, service, SKU, operation and release cohort;
+3. distinguish expected growth, regression, retry amplification and abuse;
+4. stop a bad deployment or isolate an abusive route;
+5. tighten safe server-side rate/scaling controls within approved availability limits;
+6. publish the signed `contain-cost` policy to pause new backup uploads/background sync;
+7. preserve restore, deletion and security operations when safe;
+8. communicate user-visible degradation if material;
+9. record decision, duration, rollback and post-incident model update.
+
+Direct console edits require a linked incident/change record and later reconciliation to source
+control.
+
+## References
+
+- [Cloud Billing budgets and alerts](https://cloud.google.com/billing/docs/how-to/budgets)
+- [Programmatic budget notifications](https://cloud.google.com/billing/docs/how-to/budgets-programmatic-notifications)
+- [Cloud Billing cost anomalies](https://cloud.google.com/billing/docs/how-to/manage-anomalies)
+- [Firestore usage, limits and spending note](https://firebase.google.com/docs/firestore/quotas)
+- [Cloud Run maximum-instance safeguards](https://cloud.google.com/run/docs/configuring/max-instances)
+- [Cloud Monitoring alerting](https://cloud.google.com/monitoring/alerts)
+
+References were revalidated on 2026-07-23.

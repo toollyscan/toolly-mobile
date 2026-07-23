@@ -40,9 +40,10 @@ Be respectful and constructive. Harassment of any kind is not tolerated.
    # Markdown linting
    npx markdownlint-cli2 "**/*.md"
 
-   # Benchmark and dependency governance
+   # Benchmark, dependency and Firebase governance
    python3 scripts/validate_benchmark_evidence.py --self-test
    python3 scripts/validate_dependency_policy.py --self-test
+   python3 scripts/validate_firebase_governance.py --self-test
    ```
 
 4. Self-review every item in the PR template before requesting review.
@@ -78,6 +79,19 @@ Before adding or updating any library, plugin, native package, GitHub Action or 
 5. Regenerate the SBOM and measure runtime dependency size when applicable.
 
 Commercial scanning, OCR, PDF and image SDKs require a dedicated approved ADR. Unknown/custom licence terms require legal review. Mutable Actions, container tags, dynamic versions and unregistered coordinates are prohibited.
+
+---
+
+## Firebase governance
+
+Before changing Firebase, Remote Config, App Check, environment binding, cloud cost, IAM or infrastructure:
+
+1. Read ADR-0009 and every contract in `config/firebase/`.
+2. Keep development, test, staging and production projects isolated.
+3. Keep project IDs unbound until provisioned evidence is approved.
+4. Preserve local scan, vault and export in every cloud-degradation mode.
+5. Treat budgets as alerts, keep Analytics/automatic telemetry disabled and do not add AWS.
+6. Update the service inventory, cost/load model, evidence checklist and validator together.
 
 ---
 

@@ -12,11 +12,12 @@ These instructions apply to every Copilot suggestion and agent session in this r
 4. Read all ADRs in `docs/adr/`.
 5. Read the applicable contracts in `docs/architecture/`.
 6. For model, persistence, processing, sync, Firebase or schema work, read all TLY-004 architecture contracts.
-7. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
-8. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
-9. For identity, cryptography, storage, telemetry, Firebase, recovery, deletion or export work, read `docs/security/SECURITY_BASELINE.md` and every linked applicable specification.
-10. For any dependency, plugin, Action, container or repository change, read ADR-0008 and `docs/architecture/DEPENDENCY_POLICY.md`.
-11. Confirm the change is within the scope of the assigned issue before writing any code.
+7. For Firebase, environment, Remote Config, App Check, cost, IAM or cloud-operations work, read ADR-0009, `config/firebase/` and the linked TLY-008 specifications.
+8. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
+9. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
+10. For identity, cryptography, storage, telemetry, Firebase, recovery, deletion or export work, read `docs/security/SECURITY_BASELINE.md` and every linked applicable specification.
+11. For any dependency, plugin, Action, container or repository change, read ADR-0008 and `docs/architecture/DEPENDENCY_POLICY.md`.
+12. Confirm the change is within the scope of the assigned issue before writing any code.
 
 ---
 

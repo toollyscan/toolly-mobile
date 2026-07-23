@@ -21,6 +21,7 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] Security, privacy, Firebase processing, telemetry, recovery and incident-response design baseline (TLY-005)
 - [x] Benchmark governance, corpus, device, metric and evidence contracts (TLY-006A)
 - [x] Dependency, licence, SBOM, provenance and supply-chain governance (TLY-007)
+- [x] Firebase environment, service-boundary, cost, abuse, signed-policy and IaC design (TLY-008)
 - [ ] TLY-005 implementation, legal, cryptographic and operational evidence
 - [ ] Figma completion gates G1–G10 approved (TLY-003B — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance

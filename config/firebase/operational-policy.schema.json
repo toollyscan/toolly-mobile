@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toollyscan.com/schemas/firebase/operational-policy.v1.schema.json",
+  "title": "Toolly signed operational policy envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "environment",
+    "generation",
+    "issuedAt",
+    "expiresAt",
+    "keyId",
+    "signatureAlgorithm",
+    "payload",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "environment": {
+      "enum": [
+        "development",
+        "test",
+        "staging",
+        "production"
+      ]
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "keyId": {
+      "type": "string",
+      "pattern": "^toolly-policy-[a-z0-9-]{1,48}$"
+    },
+    "signatureAlgorithm": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cloudMode",
+        "localCapabilities",
+        "remoteCapabilities",
+        "reasonCode",
+        "minimumClientPolicyVersion"
+      ],
+      "properties": {
+        "cloudMode": {
+          "enum": [
+            "normal",
+            "contain-cost",
+            "contain-incident"
+          ]
+        },
+        "localCapabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scan",
+            "vaultRead",
+            "vaultWrite",
+            "localExport"
+          ],
+          "properties": {
+            "scan": {
+              "const": true
+            },
+            "vaultRead": {
+              "const": true
+            },
+            "vaultWrite": {
+              "const": true
+            },
+            "localExport": {
+              "const": true
+            }
+          }
+        },
+        "remoteCapabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "backgroundSync",
+            "backupUpload",
+            "backupRestore",
+            "accountDeletionRequest",
+            "securityNotification"
+          ],
+          "properties": {
+            "backgroundSync": {
+              "type": "boolean"
+            },
+            "backupUpload": {
+              "type": "boolean"
+            },
+            "backupRestore": {
+              "type": "boolean"
+            },
+            "accountDeletionRequest": {
+              "type": "boolean"
+            },
+            "securityNotification": {
+              "type": "boolean"
+            }
+          }
+        },
+        "reasonCode": {
+          "enum": [
+            "normal",
+            "budget-threshold",
+            "cost-anomaly",
+            "abuse",
+            "provider-incident",
+            "security-incident",
+            "maintenance"
+          ]
+        },
+        "minimumClientPolicyVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 32
+    }
+  },
+  "x-toolly-verification": {
+    "transport": "Firebase Remote Config may transport the envelope but is not trusted to authorize cloud writes.",
+    "canonicalization": "A versioned canonical byte representation is required before signature verification.",
+    "keyManagement": "Signing keys remain in an approved managed signing service; clients contain only reviewed public verification keys.",
+    "replayControls": [
+      "environment binding",
+      "strictly increasing generation",
+      "issued-at and expiry validation using bounded clock policy",
+      "minimum policy version",
+      "key-id rotation and revocation"
+    ],
+    "invalidOrExpiredBehavior": "Disable new background sync and backup uploads; preserve local scan, vault and export; keep deletion requests queued until an approved route is available."
+  }
+}
