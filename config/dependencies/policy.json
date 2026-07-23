@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "policy_id": "toolly-dependency-policy",
+  "policy_version": "1.0.0",
+  "current_phase": {
+    "cloud_provider": "firebase",
+    "aws_dependencies_allowed": false
+  },
+  "versions": {
+    "prohibited_patterns": [
+      "+",
+      "latest",
+      "SNAPSHOT",
+      "RELEASE",
+      "[",
+      "]",
+      "(",
+      ")"
+    ]
+  },
+  "repositories": {
+    "approved": [
+      "google",
+      "mavenCentral",
+      "gradlePluginPortal"
+    ],
+    "prohibited_tokens": [
+      "jcenter(",
+      "mavenLocal(",
+      "flatDir"
+    ],
+    "custom_repository_requires_exception": true
+  },
+  "licences": {
+    "engineering_allowed": [
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC",
+      "MIT",
+      "Unicode-3.0",
+      "Zlib"
+    ],
+    "legal_review_required": [
+      "CDDL-1.0",
+      "EPL-2.0",
+      "LGPL-2.1-only",
+      "LGPL-2.1-or-later",
+      "LGPL-3.0-only",
+      "LGPL-3.0-or-later",
+      "MPL-2.0",
+      "NOASSERTION",
+      "LicenseRef-Proprietary"
+    ],
+    "prohibited_without_explicit_legal_and_product_exception": [
+      "AGPL-3.0-only",
+      "AGPL-3.0-or-later",
+      "BUSL-1.1",
+      "GPL-2.0-only",
+      "GPL-2.0-or-later",
+      "GPL-3.0-only",
+      "GPL-3.0-or-later",
+      "SSPL-1.0"
+    ]
+  },
+  "vulnerabilities": {
+    "release_block_severities": [
+      "critical",
+      "high"
+    ],
+    "known_exploited_always_blocks": true,
+    "maximum_review_age_days": 90
+  },
+  "ci": {
+    "github_actions_require_full_sha": true,
+    "container_actions_require_digest": true
+  },
+  "coordinates": {
+    "prohibited_fragments_current_phase": [
+      "software.amazon",
+      "com.amazonaws",
+      "aws.sdk.kotlin"
+    ]
+  },
+  "source_boundaries": [
+    {
+      "id": "aws-current-phase",
+      "tokens": [
+        "software.amazon.awssdk",
+        "com.amazonaws",
+        "aws.sdk.kotlin",
+        "import AWS",
+        "import AWSSDK"
+      ],
+      "allowed_path_fragments": []
+    },
+    {
+      "id": "firebase-adapter-only",
+      "tokens": [
+        "com.google.firebase",
+        "import Firebase"
+      ],
+      "allowed_path_fragments": [
+        "firebase-adapter",
+        "firebase_adapter",
+        "/firebase/",
+        "/composition/"
+      ]
+    },
+    {
+      "id": "billing-adapter-only",
+      "tokens": [
+        "com.android.billingclient",
+        "import StoreKit"
+      ],
+      "allowed_path_fragments": [
+        "billing-adapter",
+        "billing_adapter",
+        "/billing/",
+        "/composition/"
+      ]
+    }
+  ],
+  "domain_forbidden_tokens": [
+    "import android.",
+    "import androidx.",
+    "import platform.",
+    "import UIKit",
+    "import AppKit",
+    "com.google.firebase",
+    "com.android.billingclient",
+    "software.amazon.awssdk",
+    "com.amazonaws",
+    "android.database",
+    "org.sqlite"
+  ],
+  "domain_path_fragments": [
+    "/commonMain/",
+    "/domain-model/",
+    "/domain-contracts/",
+    "/domain-usecases/",
+    "/domain/"
+  ]
+}
