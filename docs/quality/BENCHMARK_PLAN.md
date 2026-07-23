@@ -1,120 +1,116 @@
 # Benchmark Plan
 
-This document defines the benchmark corpus, representative device matrix and performance targets for Toolly.
+This document coordinates Toolly's TLY-006 benchmark program. It defines planned evidence; it does not claim any implementation meets a target.
 
----
+## Program sequence
 
-## Purpose
+| Slice | Scope | Completion evidence |
+|-------|-------|---------------------|
+| TLY-006A | Governance, corpus, devices, metrics and evidence contracts | Validators and reviewed contracts |
+| TLY-006B | KMP camera boundary and buffer transfer | Physical-device raw runs and ADR-0001 update |
+| TLY-006C | Geometry and image enhancement | Accuracy/performance evidence and engine decision |
+| TLY-006D | PDF generation and export | Reliability, fidelity, privacy and performance evidence |
+| TLY-006E | OCR comparison | Per-language/cohort accuracy, latency, memory and size |
+| TLY-006F | Encrypted local vault | Performance, tamper, interruption, corruption and recovery evidence |
+| TLY-006G | Representative matrix and decision review | Accepted/blocked decisions linked to raw runs |
 
-Benchmarks must be run on representative devices before any production feature is merged. Results must be attached to the relevant pull request or linked from the Production Gate.
+TLY-007 approval is required before a new third-party implementation dependency is introduced in a spike.
 
----
+## Binding contracts
 
-## Representative device matrix
+- [Benchmark Governance](BENCHMARK_GOVERNANCE.md)
+- [Corpus Policy](CORPUS_POLICY.md)
+- [Device Matrix](DEVICE_MATRIX.md)
+- [Metric Contracts](BENCHMARK_METRICS.md)
+- [Evidence Format](BENCHMARK_EVIDENCE.md)
+- `benchmarks/contracts/metrics.v1.json`
+- `benchmarks/corpus/manifest.v1.json`
 
-### Android
+## Corpus readiness
 
-| Device | Category | Android version | RAM | Notes |
-|--------|----------|----------------|-----|-------|
-| Samsung Galaxy A14 | Entry-level phone | Android 13 | 4 GB | India volume leader |
-| Redmi 12 | Entry-level phone | Android 13 | 4 GB | India volume leader |
-| Samsung Galaxy S23 | Flagship phone | Android 14 | 8 GB | Upper bound |
-| Xiaomi Pad 6 | Tablet | Android 13 | 6 GB | Tablet baseline |
-| Samsung Galaxy Tab S8 | Flagship tablet | Android 14 | 8 GB | Tablet upper bound |
+The corpus is currently `definition_only`. Required cohorts and minimum counts are in the machine-readable manifest. No benchmark depending on document images or ground truth becomes a decision candidate until:
 
-### iOS
+- synthetic/licensed items are registered with SHA-256 digests;
+- English, Hindi and Kannada minimums are met for the applicable cohort;
+- OCR or geometry ground truth is independently sampled and reviewed;
+- privacy and licence statuses are approved;
+- the exact corpus version is frozen for the comparison.
 
-| Device | Category | iOS version | Notes |
-|--------|----------|------------|-------|
-| iPhone SE (3rd gen) | Entry-level phone | iOS 17 | Smallest supported screen |
-| iPhone 14 | Mid-range phone | iOS 17 | Volume baseline |
-| iPhone 15 Pro | Flagship phone | iOS 17 | Upper bound |
-| iPad (10th gen) | Entry-level tablet | iOS 17 | iPad baseline |
-| iPad Pro 12.9 (6th gen) | Flagship tablet | iOS 17 | Tablet upper bound |
+No real personal or production document may be committed or uploaded as benchmark evidence.
 
----
+## Device readiness
 
-## Benchmark corpus
+The active matrix is selected by capability tier close to execution. Required applicable tiers are:
 
-The benchmark corpus is a set of representative documents used to measure accuracy and performance.
+- Android low, mid, high and tablet;
+- iPhone low, mid and high;
+- iPad/tablet.
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| Aadhaar card | 5 | Front and back; standard and worn |
-| PAN card | 5 | Standard and worn |
-| Indian passport | 5 | Data page |
-| Utility bill | 10 | English and Hindi |
-| Handwritten text | 10 | English, Hindi and Kannada |
-| Multi-page A4 document | 5 | English, 5–10 pages |
-| Low-light capture | 5 | Mixed document types |
-| Skewed capture (>15°) | 5 | Deskewing required |
+Exact model, OS, memory, architecture, power and thermal conditions are recorded per run. Emulator, simulator and host data remain supplemental.
 
-All benchmark documents must be synthetic or redacted before inclusion in the repository. No real personal documents may be committed.
+## Planning hypotheses
 
----
+The following values are initial product hypotheses inherited from the baseline. They are not approved release thresholds.
 
-## Performance targets
+| ID | Metric | Initial hypothesis | Validation scope |
+|----|--------|--------------------|------------------|
+| H-BENCH-001 | `camera.first_frame` | p95 below 200 ms | Supported physical phone tiers |
+| H-BENCH-002 | `geometry.pipeline_latency` plus enhancement | p95 below 2 s per page | Applicable low/mid phone tiers |
+| H-BENCH-003 | `vault.write_latency` | p95 below 500 ms for one reference page | Low-tier physical devices |
+| H-BENCH-004 | `vault.read_latency` | p95 below 300 ms for one reference page | Low-tier physical devices |
+| H-BENCH-005 | `vault.open_latency` | p95 below 1 s | Cold process, supported tiers |
+| H-BENCH-006 | Capture pipeline peak memory | Below 200 MiB | Constrained supported tier |
+| H-BENCH-007 | Steady-state application memory | Below 80 MiB after protocol workload | Constrained supported tier |
 
-### Camera and capture
+Startup targets are deferred until application scaffolding defines stable startup boundaries.
 
-| Metric | Target | Measurement method |
-|--------|--------|-------------------|
-| Camera preview latency | < 200 ms to first frame | Measured from screen tap to preview visible |
-| Auto-capture trigger time | < 500 ms after document detected | Measured from detection to shutter |
-| Page processing time | < 2 s per page | From capture to enhanced preview |
+OCR hypotheses are evaluated as ranges rather than launch promises:
 
-### Vault operations
+| Language/cohort | Initial character-accuracy hypothesis |
+|-----------------|---------------------------------------|
+| English printed A4 | At least 0.97 |
+| English printed compact/card-like | At least 0.95 |
+| Hindi printed A4 | At least 0.90 |
+| Kannada printed A4 | At least 0.85 |
+| Handwriting | Report separately; no release threshold approved |
 
-| Metric | Target | Measurement method |
-|--------|--------|-------------------|
-| Document write (1 page, encrypted) | < 500 ms | Measured on entry-level devices |
-| Document read (1 page, decrypted) | < 300 ms | Measured on entry-level devices |
-| Vault open (cold start) | < 1 s | Measured on entry-level devices |
+Accuracy equals `1 - character_error_rate` under the approved normalization contract. Aggregate accuracy cannot hide language, cohort or device regressions.
 
-### Application startup
+## Run requirements
 
-| Metric | Target | Measurement method |
-|--------|--------|-------------------|
-| Cold start to interactive | < 3 s | Measured on entry-level devices |
-| Warm start to interactive | < 1 s | Measured on entry-level devices |
+Each candidate implementation follows a versioned protocol that specifies:
 
-### Memory
+- hypothesis and decision to inform;
+- implementation ID and exact commit;
+- corpus cohorts and exclusions;
+- device tiers and build variant;
+- warm-up, measured iteration, timeout and cooldown;
+- failure injection and stopping rules;
+- metrics and grouping dimensions;
+- artifact collection and privacy checks;
+- comparison and acceptance authority.
 
-| Metric | Target | Measurement method |
-|--------|--------|-------------------|
-| Peak heap during capture | < 200 MB | Measured on 4 GB RAM devices |
-| Steady-state heap | < 80 MB | Measured on 4 GB RAM devices after 10 captures |
+At least three independent physical-device sessions per required tier are expected unless the reviewed protocol justifies another sample design.
 
----
+## Analysis
 
-## OCR accuracy targets
+- Retain individual samples.
+- Report sample counts and failed/timed-out/excluded counts.
+- Use median, p90 and p95 for latency; include min/max and distribution plot when useful.
+- Report confidence intervals or repeated-run variance when selecting close candidates.
+- Separate cold/warm, language, cohort, device tier and thermal state.
+- Do not drop an outlier without a recorded rule and reason.
+- Do not compare incompatible protocol, corpus or metric versions in one aggregate.
 
-| Language | Document type | Target accuracy |
-|----------|--------------|----------------|
-| English | Printed (A4) | ≥ 97 % |
-| English | Printed (ID card) | ≥ 95 % |
-| Hindi | Printed (A4) | ≥ 90 % |
-| Kannada | Printed (A4) | ≥ 85 % |
-| Any | Handwritten | ≥ 70 % |
+## Completion
 
-Accuracy is measured as character-level accuracy on the benchmark corpus.
+TLY-006 is complete only when:
 
----
+- required child slices have candidate evidence;
+- raw artifacts validate and remain accessible;
+- representative device tiers are executed or explicitly blocked;
+- ADRs record accepted claim and non-claims;
+- security, privacy and dependency reviews are complete;
+- the product owner records accepted, blocked or follow-up status.
 
-## Accessibility targets
-
-| Requirement | Target |
-|-------------|--------|
-| WCAG level | 2.1 AA |
-| TalkBack (Android) | All interactive elements labelled; no unlabelled images |
-| VoiceOver (iOS) | All interactive elements labelled; no unlabelled images |
-| Minimum touch target | 48 × 48 dp (Android) / 44 × 44 pt (iOS) |
-| Minimum contrast ratio | 4.5:1 (normal text) |
-
----
-
-## How to run benchmarks
-
-Benchmark procedures will be documented in the relevant feature pull requests. Results must be attached as artefacts or linked from the PR before the Definition of Done is signed off.
-
-No benchmark result may be self-certified. Raw measurement output must be attached.
+Copied tables, screenshots or self-certified summaries do not satisfy this gate.
