@@ -17,6 +17,17 @@ Closes #
 
 ---
 
+## Applicability
+
+<!-- Mark non-applicable sections N/A with a reason. Never mark an unexecuted check as passed. -->
+
+- [ ] Executable code changed
+- [ ] Documentation-only change
+- [ ] Design/Figma change
+- [ ] Cloud/infrastructure change
+
+---
+
 ## Pre-merge checklist
 
 ### Scope
@@ -44,9 +55,10 @@ Closes #
 
 ### Tests
 
-- [ ] Failure, interruption, retry, offline and recovery paths are tested.
-- [ ] All existing tests continue to pass.
-- [ ] Test results are attached or linked (not self-certified without evidence).
+- [ ] Applicable failure, interruption, retry, offline and recovery paths are tested.
+- [ ] Applicable existing tests continue to pass.
+- [ ] Test results are attached or linked, or this section is marked N/A with a reason.
+- [ ] No unexecuted check is represented as passed.
 
 ### Documentation
 
