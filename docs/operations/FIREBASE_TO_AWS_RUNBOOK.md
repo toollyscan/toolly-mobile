@@ -156,5 +156,5 @@ If any phase fails or metrics degrade:
 
 | Role | Name |
 |------|------|
-| Migration owner (if approved) | shivayogih |
 | Firebase account holder | shivayogih |
+| Future migration owner (if ever approved) | shivayogih |
