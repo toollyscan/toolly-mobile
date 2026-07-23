@@ -28,6 +28,8 @@ Authentication, recovery and trusted-device controls must support phone OTP, ema
 8. Phone numbers, email addresses, OTPs, passwords, tokens and provider credentials never enter application logs or analytics.
 9. OTP resend floors, abuse thresholds, lockout values, account linking, trusted-device approval and recovery protocols require implementation spikes, threat analysis and approval before finalization.
 10. Returning authenticated users retain offline access to their existing local library during transient network or provider outages.
+11. Identity recovery, device trust and encrypted-backup key recovery are separate domains. A recovered provider session does not by itself release backup keys.
+12. Support personnel and cloud administrators have no plaintext-document or recovery-key bypass.
 
 ---
 
@@ -69,3 +71,12 @@ Authentication, recovery and trusted-device controls must support phone OTP, ema
 | Guest scanning in V1 | Conflicts with the approved login-before-first-scan decision. |
 | OTP-only authentication | Conflicts with approved email/password, Google and Apple methods. |
 | Finalize recovery codes or lockout values without evidence | Creates security and usability risk before threat analysis and testing. |
+
+---
+
+## Related security specifications
+
+- [Authentication abuse controls](../security/AUTHENTICATION_ABUSE_CONTROLS.md)
+- [Trusted device and recovery](../security/TRUSTED_DEVICE_AND_RECOVERY.md)
+- [Firebase processing inventory](../security/FIREBASE_PROCESSING_INVENTORY.md)
+- [ADR-0007 — Encryption envelope and key hierarchy](0007-encryption-envelope-and-key-hierarchy.md)
