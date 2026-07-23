@@ -1,0 +1,16 @@
+# CODEOWNERS
+# All paths require review from @shivayogih.
+
+# Default — every file in the repository
+* @shivayogih
+
+# Architecture documents
+/docs/architecture/ @shivayogih
+/docs/adr/ @shivayogih
+
+# Security documents
+/docs/security/ @shivayogih
+/SECURITY.md @shivayogih
+
+# GitHub workflows and governance
+/.github/ @shivayogih

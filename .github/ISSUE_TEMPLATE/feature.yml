@@ -1,0 +1,83 @@
+name: Feature request
+description: Propose a new Toolly feature
+title: "[TLY-XXXX] "
+labels: ["feature"]
+assignees:
+  - shivayogih
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, read the [Product Roadmap](../../docs/execution/ROADMAP.md) and
+        [Definition of Done](../../docs/quality/DEFINITION_OF_DONE.md).
+
+  - type: input
+    id: title
+    attributes:
+      label: Feature title
+      placeholder: "Short imperative title"
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What user need or product goal does this feature address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User story
+      description: "As a [user], I want [capability] so that [benefit]."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Numbered list of testable conditions that define done.
+    validations:
+      required: true
+
+  - type: textarea
+    id: offline_behaviour
+    attributes:
+      label: Offline behaviour
+      description: How does this feature behave without a network connection?
+    validations:
+      required: true
+
+  - type: textarea
+    id: privacy_impact
+    attributes:
+      label: Privacy and security impact
+      description: Does this feature touch document content, PII, encryption or cloud sync?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: architecture_constraints
+    attributes:
+      label: Architecture constraints
+      options:
+        - label: Offline-first paths are preserved.
+          required: true
+        - label: Domain code remains provider-independent.
+          required: true
+        - label: No document content or PII will appear in logs or analytics.
+          required: true
+        - label: This feature does not require changes to the canonical document schema without a new ADR.
+          required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: What is explicitly excluded from this issue?
+    validations:
+      required: true
