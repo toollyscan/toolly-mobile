@@ -38,6 +38,7 @@ This index defines Toolly's minimum security posture and links the detailed cont
 | Telemetry allowlist and tests | [TELEMETRY_POLICY.md](TELEMETRY_POLICY.md) |
 | Firebase services and processing | [FIREBASE_PROCESSING_INVENTORY.md](FIREBASE_PROCESSING_INVENTORY.md) |
 | India privacy readiness | [PRIVACY_READINESS.md](PRIVACY_READINESS.md) |
+| Software supply-chain security | [SUPPLY_CHAIN_SECURITY.md](SUPPLY_CHAIN_SECURITY.md) |
 | Security incident response | [SECURITY_INCIDENT_RESPONSE.md](../operations/SECURITY_INCIDENT_RESPONSE.md) |
 | Vulnerability disclosure | [VULNERABILITY_DISCLOSURE.md](../operations/VULNERABILITY_DISCLOSURE.md) |
 
