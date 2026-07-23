@@ -37,6 +37,9 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Sync and Firebase contracts | [docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md](docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md) |
 | Schema evolution | [docs/architecture/SCHEMA_EVOLUTION.md](docs/architecture/SCHEMA_EVOLUTION.md) |
 | Architecture fitness functions | [docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md](docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md) |
+| Dependency policy and review | [docs/architecture/DEPENDENCY_POLICY.md](docs/architecture/DEPENDENCY_POLICY.md) · [docs/architecture/DEPENDENCY_REVIEW_TEMPLATE.md](docs/architecture/DEPENDENCY_REVIEW_TEMPLATE.md) |
+| Supply-chain security | [docs/security/SUPPLY_CHAIN_SECURITY.md](docs/security/SUPPLY_CHAIN_SECURITY.md) |
+| SBOM, provenance and vulnerability response | [docs/operations/SBOM_AND_PROVENANCE.md](docs/operations/SBOM_AND_PROVENANCE.md) · [docs/operations/DEPENDENCY_VULNERABILITY_RESPONSE.md](docs/operations/DEPENDENCY_VULNERABILITY_RESPONSE.md) |
 | ADR — KMP boundary | [docs/adr/0001-kotlin-multiplatform-boundary.md](docs/adr/0001-kotlin-multiplatform-boundary.md) |
 | ADR — Local vault source of truth | [docs/adr/0002-local-vault-source-of-truth.md](docs/adr/0002-local-vault-source-of-truth.md) |
 | ADR — Cloud provider portability | [docs/adr/0003-cloud-provider-portability.md](docs/adr/0003-cloud-provider-portability.md) |
@@ -44,6 +47,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | ADR — Canonical data and operation model | [docs/adr/0005-canonical-data-and-operation-model.md](docs/adr/0005-canonical-data-and-operation-model.md) |
 | ADR — Local outbox and conflict policy | [docs/adr/0006-local-outbox-and-conflict-policy.md](docs/adr/0006-local-outbox-and-conflict-policy.md) |
 | ADR — Encryption envelope and key hierarchy | [docs/adr/0007-encryption-envelope-and-key-hierarchy.md](docs/adr/0007-encryption-envelope-and-key-hierarchy.md) |
+| ADR — Dependency and supply-chain governance | [docs/adr/0008-dependency-and-supply-chain-governance.md](docs/adr/0008-dependency-and-supply-chain-governance.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
 | Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
 | Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
