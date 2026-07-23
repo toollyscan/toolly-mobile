@@ -161,20 +161,14 @@ class Finding(NamedTuple):
 # Core helpers
 # ---------------------------------------------------------------------------
 
-# Maximum number of asterisks used to represent the redacted portion.
-# Enough to obscure length while keeping the output concise.
-_REDACT_MAX_ASTERISKS = 8
-
-
 def _redact(value: str) -> str:
-    """Return a representation that hints at type without revealing the value.
+    """Return a fixed redaction marker.
 
-    First 4 characters preserved as a type hint; the rest replaced with
-    asterisks.  The original value is never stored or printed.
+    No part of the value (prefix, suffix, or length) is conveyed.
+    The original value is never stored or printed.
     """
-    if len(value) <= 4:
-        return "****"
-    return value[:4] + "*" * min(len(value) - 4, _REDACT_MAX_ASTERISKS)
+    del value  # intentionally unused — value is never stored or printed
+    return "[REDACTED]"
 
 
 def _is_allowed(line: str) -> bool:
@@ -409,10 +403,13 @@ def _self_test() -> list[str]:
     redacted = _redact(real_value)
     if real_value in redacted:
         failures.append("self-test: _redact() leaked the full secret value")
-    if not redacted.startswith("AKIA"):
-        failures.append("self-test: _redact() did not preserve the type-hint prefix")
-    if "*" not in redacted:
-        failures.append("self-test: _redact() produced no asterisks")
+    if redacted != "[REDACTED]":
+        failures.append("self-test: _redact() did not return the fixed marker")
+    for substr in ("AKIA", "BCDE", "MNOPQ"):
+        if substr in redacted:
+            failures.append(
+                f"self-test: _redact() revealed part of the secret value ({substr!r})"
+            )
 
     # ── Exception lifecycle ──────────────────────────────────────────────────
 
