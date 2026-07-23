@@ -9,7 +9,7 @@ production code merges.
 | Check name | Failure condition | Initial implementation |
 |------------|-------------------|------------------------|
 | `architecture:dependencyDirection` | A module depends contrary to `MODULE_BOUNDARIES.md` | Gradle/Xcode dependency graph assertion |
-| `architecture:forbiddenImports` | Shared/domain source references platform, provider, billing or DB namespaces | Static source/API scan |
+| `architecture:forbiddenImports` | Shared/domain source references platform, provider, billing or DB namespaces | TLY-007 static scan; Gradle/public-API expansion at scaffolding |
 | `architecture:publicApiLeakage` | Provider/platform types appear in public Toolly contracts | Kotlin/Swift API signature inspection |
 | `architecture:canonicalIds` | Provider UID/path is used as canonical owner/object identity | Architecture test plus mapping tests |
 | `architecture:providerIsolation` | Firebase code exists outside allowed adapters/composition roots | Path/import/dependency rule |
@@ -19,7 +19,7 @@ production code merges.
 | `architecture:recipeCompatibility` | Recipe history is rewritten or unsupported mandatory steps execute | Recipe contract tests |
 | `architecture:sensitiveTelemetry` | Prohibited fields/types reach logger/analytics APIs | Compile-time wrappers plus static/runtime tests |
 | `architecture:adapterContracts` | Fake and Firebase emulator differ semantically | Shared contract suite |
-| `architecture:dependencyGovernance` | Unapproved dependency/licence/version enters build | Version/dependency policy check |
+| `architecture:dependencyGovernance` | Unapproved dependency/licence/version or mutable CI reference enters the repository | TLY-007 registry/catalog/workflow/manifest validator |
 
 ## Namespace denylist categories
 
@@ -56,9 +56,10 @@ No production credentials or personal documents are used.
 ## CI rollout
 
 1. Documentation phase: Markdown and secret scanning validate this baseline.
-2. Scaffolding phase: dependency, forbidden-import and public-API checks become required.
-3. Adapter phase: shared fake/emulator contract suites become required.
-4. Production phase: schema fixtures, device benchmarks and privacy tests are required.
+2. Governance phase: dependency registry, immutable CI references and early forbidden-import scans are required (implemented by TLY-007).
+3. Scaffolding phase: resolved dependency, lock/verification, module graph and public-API checks become required.
+4. Adapter phase: shared fake/emulator contract suites become required.
+5. Production phase: schema fixtures, device benchmarks and privacy tests are required.
 
 A check cannot be marked passed before its executable implementation exists. Until then, it is
 `Not implemented` or `N/A` with a reason.
