@@ -28,6 +28,7 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] OCR engine dependency, privacy and performance analysis is approved.
 - [ ] Every direct/build/CI dependency is approved in the register; resolved transitives match lock and verification evidence.
 - [ ] GitHub Actions and container references are immutable and dependency-policy CI passes.
+- [ ] Firebase environment/service/cost contracts pass `validate_firebase_governance.py --self-test` and match provisioned evidence.
 - [ ] Release SBOM covers resolved mobile/native/build graphs and is bound to the release artifact digest.
 - [ ] Build provenance is generated and independently verified; no SLSA level is claimed without evidence.
 
@@ -42,6 +43,8 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] Support and cloud administrators cannot bypass encrypted-backup recovery.
 - [ ] Phone OTP, email/password, Google, Apple and account-linking abuse controls pass staging tests.
 - [ ] App Check configuration and limitations are recorded; it is not treated as authorization.
+- [ ] Signed operational-policy signature, generation, expiry, replay, environment and key-rotation tests pass.
+- [ ] Invalid/expired policy pauses new cloud writes but cannot disable local scan, vault read/write or export.
 - [ ] Secrets are absent from source control and release artifacts.
 - [ ] Dependency and mobile security checks pass for the release commit.
 - [ ] Qualified cryptography review approves ADR-0007 and implementation evidence.
@@ -78,11 +81,14 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] Subscription terms and store disclosures are reviewed.
 - [ ] Final prices and entitlement policies are approved in the decision register.
 - [ ] Cloud cost and gross-margin models are approved for projected usage.
+- [ ] Current regional SKU evidence and 100/1k/10k/100k/1m free/premium workload scenarios are approved.
 - [ ] Subscription expiry cannot remove or block local documents.
 
 ## Operational gate
 
-- [ ] Firebase budgets, quotas, alerts and approved kill switches are configured.
+- [ ] Separate staging/production budgets, forecast alerts, anomaly alerts and programmatic notification tests are configured.
+- [ ] Budgets are treated as alerts rather than hard caps; automatic billing disable is prohibited.
+- [ ] Per-function scaling/retry limits and signed cost/incident degradation policy are configured and tested.
 - [ ] Production access follows least privilege with named owners and periodic review.
 - [ ] Backup, restore, deletion and key-compromise exercises are completed.
 - [ ] Security incident contacts, decision authority and evidence storage are verified by tabletop.
