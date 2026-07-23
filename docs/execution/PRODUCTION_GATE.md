@@ -46,6 +46,28 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 - [ ] DPDP Act 2023 obligations mapped.
 - [ ] Privacy policy reviewed by qualified legal counsel.
 - [ ] Grievance officer designated.
+- [ ] GST display and invoicing requirements confirmed by qualified tax advisor.
+- [ ] Subscription terms reviewed by qualified legal counsel.
+
+---
+
+## Monetization and pricing gate
+
+- [ ] Competitor pricing benchmark completed for India market (top 5 apps).
+- [ ] Willingness-to-pay research completed with Indian user segments.
+- [ ] Cloud cost per active free user modelled at projected launch volume.
+- [ ] Cloud cost per active premium user modelled (including backup storage and egress).
+- [ ] Google Play and App Store commission rates confirmed.
+- [ ] Target gross margin approved.
+- [ ] Final India subscription prices set and recorded in DECISION_REGISTER.md.
+- [ ] Free-tier batch page limit hypothesis (H-001) validated or revised.
+- [ ] Premium cloud-storage allowance hypothesis (H-002) validated or revised.
+- [ ] Entitlement freshness policy hypothesis (H-007) validated or revised.
+- [ ] Backup data retention period hypothesis (H-009) validated or revised.
+- [ ] Store subscription products created in Google Play Console and App Store Connect.
+- [ ] Entitlement service architecture reviewed: billing types do not appear in domain models.
+- [ ] Offline entitlement cache and freshness policy implemented and tested.
+- [ ] Subscription expiry does not delete local documents — verified by test.
 
 ---
 

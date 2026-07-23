@@ -13,6 +13,8 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] Security baseline
 - [x] Definition of done and benchmark plan
 - [x] CI: Markdown lint and secret scan
+- [x] Product scope, entitlements, monetization and subscription lifecycle (TLY-002)
+- [x] India launch scope and product metrics (TLY-002)
 - [ ] Domain and trademark clearance
 - [ ] GitHub branch protection and environment configuration (see GITHUB_SETUP.md)
 
@@ -90,6 +92,26 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [ ] Conflict resolution (local-wins)
 - [ ] User-controlled backup toggle
 - [ ] DPDP Act 2023 consent flow
+
+---
+
+## Phase 5a — Subscription and entitlements
+
+**Goal:** Implement premium subscription, entitlement service and in-app purchase flow.
+
+*Blocked until Production Gate monetization gate is approved.*
+
+- [ ] Entitlement domain model (provider-neutral; no billing SDK types in domain)
+- [ ] Offline entitlement cache with freshness policy
+- [ ] Google Play Billing integration (behind Toolly-owned entitlement contract)
+- [ ] StoreKit integration (behind Toolly-owned entitlement contract)
+- [ ] Backend entitlement verification service (idempotent)
+- [ ] Subscription lifecycle state machine (all states in SUBSCRIPTION_LIFECYCLE.md)
+- [ ] Free and premium entitlement enforcement per ENTITLEMENTS.md
+- [ ] Subscription expiry behaviour: local documents unaffected — verified by test
+- [ ] Paywall and subscription management UI
+- [ ] Restore purchase flow
+- [ ] India pricing validated and store products created
 
 ---
 
