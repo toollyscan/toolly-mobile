@@ -18,6 +18,8 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] Design specification baseline: screen inventory, component inventory, tokens, accessibility, localization, Figma IA, user flow matrix, content guidelines, developer handoff, Figma completion gates (TLY-003)
 - [x] Canonical domain, module, vault, processing, sync, Firebase and schema contracts (TLY-004)
 - [x] Architecture fitness-function specification (TLY-004)
+- [x] Security, privacy, Firebase processing, telemetry, recovery and incident-response design baseline (TLY-005)
+- [ ] TLY-005 implementation, legal, cryptographic and operational evidence
 - [ ] Figma completion gates G1–G10 approved (TLY-003B — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance
 - [ ] GitHub branch protection and environment configuration (see GITHUB_SETUP.md)
@@ -29,7 +31,7 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 **Goal:** Validate the KMP boundary and encrypted vault before production implementation.
 
 - [ ] KMP module structure (domain, data interfaces)
-- [ ] Encrypted local vault prototype (SQLCipher or platform encryption evaluation)
+- [ ] Encrypted local vault prototype against ADR-0007 candidate choices, including nonce, rotation, key-invalidation and failure tests
 - [ ] `expect`/`actual` camera capture boundary prototype
 - [ ] Compose Multiplatform rendering benchmark on representative devices (DA-001)
 - [ ] OCR engine evaluation on Indian documents (DA-004)
@@ -80,7 +82,7 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [ ] Phone OTP, email/password, Google and Apple Sign In on iOS
 - [ ] Provider-account linking and canonical-ID contract tests
 - [ ] OTP abuse controls validated in staging
-- [ ] Trusted-device and account-recovery design approved under TLY-005
+- [ ] Trusted-device, identity recovery and encrypted-backup recovery implementation evidence approved under TLY-005
 - [ ] Provider identity processing, Toolly persistence, retention and deletion reviewed
 
 ---
@@ -89,14 +91,14 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 
 **Goal:** End-to-end encrypted cloud backup and sync.
 
-*Blocked until Phase 4 is complete and data-residency requirements are confirmed.*
+*Blocked until Phase 4 is complete and service-specific processing locations, transfers, retention and deletion are approved.*
 
 - [ ] Provider-neutral sync engine and atomic local outbox
 - [ ] Firebase metadata/object adapters
 - [ ] Resumable verified upload, download and restore
 - [ ] Revision-ancestry reconciliation and conflict preservation
 - [ ] User-controlled backup toggle
-- [ ] DPDP Act 2023 consent flow
+- [ ] Approved backup notice, consent, withdrawal, deletion and export flows
 
 ---
 

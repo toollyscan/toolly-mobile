@@ -43,6 +43,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | ADR — Authentication and account boundary | [docs/adr/0004-authentication-and-account-boundary.md](docs/adr/0004-authentication-and-account-boundary.md) |
 | ADR — Canonical data and operation model | [docs/adr/0005-canonical-data-and-operation-model.md](docs/adr/0005-canonical-data-and-operation-model.md) |
 | ADR — Local outbox and conflict policy | [docs/adr/0006-local-outbox-and-conflict-policy.md](docs/adr/0006-local-outbox-and-conflict-policy.md) |
+| ADR — Encryption envelope and key hierarchy | [docs/adr/0007-encryption-envelope-and-key-hierarchy.md](docs/adr/0007-encryption-envelope-and-key-hierarchy.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
 | Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
 | Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
@@ -65,6 +66,12 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Figma completion gate | [docs/design/FIGMA_COMPLETION_GATE.md](docs/design/FIGMA_COMPLETION_GATE.md) |
 | Figma audit report | [docs/design/FIGMA_AUDIT_REPORT.md](docs/design/FIGMA_AUDIT_REPORT.md) |
 | Security baseline | [docs/security/SECURITY_BASELINE.md](docs/security/SECURITY_BASELINE.md) |
+| Threat model | [docs/security/THREAT_MODEL.md](docs/security/THREAT_MODEL.md) |
+| Data inventory and lifecycle | [docs/security/DATA_INVENTORY.md](docs/security/DATA_INVENTORY.md) · [docs/security/DATA_LIFECYCLE.md](docs/security/DATA_LIFECYCLE.md) |
+| Authentication and recovery | [docs/security/AUTHENTICATION_ABUSE_CONTROLS.md](docs/security/AUTHENTICATION_ABUSE_CONTROLS.md) · [docs/security/TRUSTED_DEVICE_AND_RECOVERY.md](docs/security/TRUSTED_DEVICE_AND_RECOVERY.md) |
+| Telemetry and Firebase processing | [docs/security/TELEMETRY_POLICY.md](docs/security/TELEMETRY_POLICY.md) · [docs/security/FIREBASE_PROCESSING_INVENTORY.md](docs/security/FIREBASE_PROCESSING_INVENTORY.md) |
+| India privacy readiness | [docs/security/PRIVACY_READINESS.md](docs/security/PRIVACY_READINESS.md) |
+| Security operations | [docs/operations/SECURITY_INCIDENT_RESPONSE.md](docs/operations/SECURITY_INCIDENT_RESPONSE.md) · [docs/operations/VULNERABILITY_DISCLOSURE.md](docs/operations/VULNERABILITY_DISCLOSURE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
 | Production gate | [docs/execution/PRODUCTION_GATE.md](docs/execution/PRODUCTION_GATE.md) |
 | Foundation audit and pending work | [docs/execution/FOUNDATION_AUDIT_2026-07-23.md](docs/execution/FOUNDATION_AUDIT_2026-07-23.md) |
