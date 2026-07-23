@@ -129,9 +129,9 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 
 ---
 
-## Phase 7 — Firebase-to-AWS migration (planned)
+## Phase 7 — Cloud provider migration feasibility (planning assumption, not a committed deadline)
 
-See [FIREBASE_TO_AWS_RUNBOOK.md](../operations/FIREBASE_TO_AWS_RUNBOOK.md).
+If a provider migration is ever approved, see [FIREBASE_TO_AWS_RUNBOOK.md](../operations/FIREBASE_TO_AWS_RUNBOOK.md) for the feasibility procedures. AWS implementation is not part of the current product phase.
 
 ---
 

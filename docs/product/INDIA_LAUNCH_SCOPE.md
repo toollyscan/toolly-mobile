@@ -56,7 +56,7 @@ national language requirements. See DECISION_REGISTER D-001 and D-002.
 - Phone number is stored as HMAC only; no plaintext phone number in the database or logs.
 - OTP abuse controls (rate limiting, lockout) must be in place before launch.
   See COST_CONTROLS.md.
-- Firebase Authentication is the initial OTP provider; it must remain behind a
+- Firebase Authentication is the OTP provider; it must remain behind a
   provider-neutral interface.
 
 ---

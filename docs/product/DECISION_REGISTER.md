@@ -9,7 +9,7 @@ Add a row when a decision is made. Update the status column when a decision is r
 | D-002 | 2025-07-01 | Accepted | English, Hindi and Kannada as launch languages | Covers the primary developer market (Bengaluru) and national language requirements. | shivayogih |
 | D-003 | 2025-07-01 | Accepted | Android and iOS dual-platform from day one | Avoid market fragmentation; KMP boundary ADR manages shared code risk. | shivayogih |
 | D-004 | 2025-07-01 | Accepted | Encrypted local vault as source of truth | Privacy-first requirement; offline-first requirement; cloud is optional. See ADR-0002. | shivayogih |
-| D-005 | 2025-07-01 | Accepted | Firebase as initial cloud provider | Time-to-market; well-understood; migration plan documented. See ADR-0003. | shivayogih |
+| D-005 | 2025-07-01 | Accepted | Firebase as the approved cloud provider | Firebase is the cloud provider for Toolly's initial product and all production releases. Architecture preserves migration feasibility through provider-neutral contracts. See ADR-0003. | shivayogih |
 | D-006 | 2025-07-01 | Accepted | Toolly-owned canonical document and account IDs | Prevents provider lock-in and enables migration without data loss. See ADR-0004. | shivayogih |
 | D-007 | 2025-07-01 | Accepted | Domain and trademark clearance are release blockers | toollyscan.com / toollyscan.in must be owned; "Toolly" trademark must be cleared in India before public release. | shivayogih |
 | D-008 | 2025-07-01 | Accepted | No commercial scanning or OCR SDK without approved ADR | Licence, binary-size and removal risk must be evaluated before any commercial SDK is added. | shivayogih |

@@ -192,7 +192,7 @@ The following are explicitly excluded from V1 scope:
 7. **No automatic cloud upload when backup is disabled.** Backup is opt-in.
 8. **No guaranteed handwriting recognition.** Accuracy depends on OCR engine evaluation.
 9. **No production SDK offering during initial app launch.** SDK offering is a post-launch decision.
-10. **No provider-specific domain model.** Firebase and AWS types must not enter domain entities.
+10. **No provider-specific domain model.** Firebase, AWS or any provider SDK types must not enter domain entities.
 11. **No unlimited free cloud-storage promise.** Cloud storage quotas are a premium capability.
 12. **No intrusive advertising.** See product principle 3.
 13. **No watermark on normal free exports.** See product principle 2.

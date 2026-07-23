@@ -16,8 +16,8 @@ Privacy-first, offline-first document scanning for Android and iOS.
 1. The encrypted local vault is the source of truth.
 2. Capture, processing, organisation and local export must work offline.
 3. Cloud backup is optional, explicit, encrypted and resumable.
-4. Firebase is the initial infrastructure provider, not a domain dependency.
-5. Firebase and future AWS implementations must remain behind Toolly-owned contracts.
+4. Firebase is the cloud infrastructure provider. Firebase SDK code is confined to the data layer only, never to the domain.
+5. All provider SDK implementations must remain behind Toolly-owned contracts and adapters, preserving migration feasibility.
 6. Canonical IDs, schemas, encryption envelopes, sync contracts and object keys belong to Toolly.
 7. Firebase UID must not become the canonical document-owner ID.
 8. Provider SDK types must not enter shared domain models.
@@ -62,7 +62,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | GitHub setup | [docs/execution/GITHUB_SETUP.md](docs/execution/GITHUB_SETUP.md) |
 | Definition of done | [docs/quality/DEFINITION_OF_DONE.md](docs/quality/DEFINITION_OF_DONE.md) |
 | Benchmark plan | [docs/quality/BENCHMARK_PLAN.md](docs/quality/BENCHMARK_PLAN.md) |
-| Firebase-to-AWS runbook | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
+| Cloud provider migration feasibility guide | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
 | Cost controls | [docs/operations/COST_CONTROLS.md](docs/operations/COST_CONTROLS.md) |
 
 ---

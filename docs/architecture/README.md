@@ -21,8 +21,8 @@ Toolly is a privacy-first, offline-first document-scanning application for Andro
 1. The encrypted local vault is the source of truth.
 2. Capture, processing, organisation and local export must work offline.
 3. Cloud backup is optional, explicit, encrypted and resumable.
-4. Firebase is the initial infrastructure provider, not a domain dependency.
-5. Firebase and future AWS implementations must remain behind Toolly-owned contracts.
+4. Firebase is the cloud infrastructure provider. Firebase SDK code is confined to the data layer only, not a domain dependency.
+5. All provider SDK implementations must remain behind Toolly-owned contracts and adapters, preserving migration feasibility.
 6. Canonical IDs, schemas, encryption envelopes, sync contracts and object keys belong to Toolly.
 7. Firebase UID must not become the canonical document-owner ID.
 8. Provider SDK types must not enter shared domain models.
@@ -98,10 +98,10 @@ See [ADR-0004](../adr/0004-authentication-and-account-boundary.md).
 graph LR
     V[Local vault] -->|Encrypted chunks| S[Sync engine]
     S -->|Provider-neutral contract| F[Firebase Storage]
-    S -.->|Future migration| A[AWS S3]
+    S -.->|Feasibility: future migration| A[Alternative provider]
 ```
 
-The sync engine operates against a provider-neutral contract. The Firebase implementation and the future AWS implementation are interchangeable without changes to domain code.
+The sync engine operates against a provider-neutral contract. The Firebase implementation is the only provider being built now; the architecture preserves migration feasibility without requiring domain changes if a migration is ever approved.
 
 See [ADR-0003](../adr/0003-cloud-provider-portability.md).
 
