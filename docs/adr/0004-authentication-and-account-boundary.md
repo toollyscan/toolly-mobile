@@ -10,7 +10,7 @@
 
 ## Context
 
-Toolly uses Firebase Authentication as the initial authentication provider. Firebase assigns each user a Firebase UID (a provider-scoped identifier).
+Toolly uses Firebase Authentication as the authentication provider. Firebase assigns each user a Firebase UID (a provider-scoped identifier).
 
 If Firebase UID is used as the canonical document-owner ID throughout the application:
 

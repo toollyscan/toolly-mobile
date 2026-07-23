@@ -6,6 +6,22 @@ The gate must be reviewed by `@shivayogih` before any code that processes real u
 
 ---
 
+## Design gate
+
+- [ ] Figma information architecture documented (FIGMA_INFORMATION_ARCHITECTURE.md). Complete.
+- [ ] Screen inventory defined (SCREEN_INVENTORY.md). Complete.
+- [ ] Component inventory defined (COMPONENT_INVENTORY.md). Complete.
+- [ ] Design tokens defined (DESIGN_TOKENS.md). Complete.
+- [ ] Accessibility requirements defined (ACCESSIBILITY_REQUIREMENTS.md). Complete.
+- [ ] Localization requirements defined (LOCALIZATION_REQUIREMENTS.md). Complete.
+- [ ] Figma completion gates G1–G10 defined (FIGMA_COMPLETION_GATE.md). Complete.
+- [ ] Figma G3 (Components) approved before any screen implementation begins.
+- [ ] Figma G4 (Screen coverage) approved for the relevant screen before implementation.
+- [ ] Figma G9 (Developer handoff) approved before implementation of any production screen.
+- [ ] Figma G10 (Product and design sign-off) approved before Phase 2 begins.
+
+---
+
 ## Architecture gate
 
 - [ ] ADR-0001 (KMP boundary) accepted and prototype evidence attached.

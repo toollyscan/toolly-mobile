@@ -234,7 +234,7 @@ entitlement revocation.
 - Verification must be idempotent (re-submitting the same token must not create duplicate records).
 - Verification must not block local document access on failure.
 - Verification results must be stored by `ToollyAccountId`, not by Firebase UID.
-- Verification must support migration to AWS without loss of entitlement history.
+- Verification must support a future provider migration without loss of entitlement history.
 - Google Play and Apple App Store transaction types must not appear in domain entitlement models.
 
 ---

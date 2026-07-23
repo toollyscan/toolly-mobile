@@ -10,32 +10,33 @@
 
 ## Context
 
-Firebase is the planned initial cloud infrastructure provider for Toolly. It offers authentication, cloud storage and real-time database capabilities with a generous free tier suitable for the early-stage product.
+Firebase is the approved cloud infrastructure provider for Toolly's initial product and all production releases. It provides authentication, cloud storage and real-time database capabilities that are well-suited to Toolly's requirements.
 
-However, vendor lock-in to Firebase would create risk:
+Tight coupling between Firebase SDK types and domain code would create unnecessary risk:
 
-- Firebase pricing and quotas may become unacceptable at scale.
-- Firebase may not meet Indian data-residency requirements under the DPDP Act 2023.
-- AWS or a self-hosted solution may become strategically necessary.
+- Indian data-residency obligations under the DPDP Act 2023 may evolve and require review.
+- A provider migration may be evaluated in the future if strategic or operational factors require it; that timing is a planning assumption, not a committed deadline.
 
-The architecture must allow migration from Firebase to AWS (or another provider) without changing domain code or requiring users to re-authenticate or re-upload documents.
+The architecture must allow a future provider migration without changing domain code or requiring users to re-authenticate or re-upload documents.
 
 ---
 
 ## Decision
 
-1. Firebase is the **initial** cloud provider, not a permanent dependency.
+1. Firebase is the **approved cloud provider** for Toolly's initial product and all production releases. A provider migration may be evaluated in the future; that timing is a planning assumption, not a committed deadline.
 2. All Firebase SDK calls are confined to data-layer implementations. No Firebase type may appear in domain models, use cases or repository interfaces.
 3. All cloud operations use a **provider-neutral sync contract** owned by Toolly:
    - Object keys are Toolly canonical IDs, not Firebase paths.
    - Encryption envelopes are defined by Toolly, not by the Firebase SDK.
    - Metadata schemas are Toolly-owned.
-4. The migration path from Firebase to AWS is documented in [FIREBASE_TO_AWS_RUNBOOK.md](../operations/FIREBASE_TO_AWS_RUNBOOK.md).
+4. Migration feasibility procedures are documented in [FIREBASE_TO_AWS_RUNBOOK.md](../operations/FIREBASE_TO_AWS_RUNBOOK.md) for planning purposes only; no migration is being implemented now.
 5. Firebase budget alerts and kill-switch controls are documented in [COST_CONTROLS.md](../operations/COST_CONTROLS.md).
 
 ---
 
-## Migration strategy
+## Migration feasibility strategy
+
+The following phases describe how a future provider migration could be executed if one is ever required. These phases are documented for planning purposes only; no migration is being implemented in the current product phase.
 
 ```mermaid
 graph LR
@@ -46,7 +47,7 @@ graph LR
     E --> F[Phase 6\nFirebase decommission]
 ```
 
-See the runbook for detailed procedures for each phase.
+See the feasibility guide for detailed procedures for each phase.
 
 ---
 
@@ -54,16 +55,16 @@ See the runbook for detailed procedures for each phase.
 
 **Positive:**
 
-- Domain code is never rewritten during a provider migration.
+- Domain code is never rewritten if a provider migration is ever required.
 - Users are not required to re-upload documents or re-authenticate.
 - Canonical IDs are stable across providers.
-- Data-residency requirements can be met by switching to a region-specific AWS deployment.
+- Data-residency requirements can be addressed by switching to a region-specific deployment if migration is ever required.
 
 **Negative:**
 
 - Provider-neutral abstraction requires additional interface and mapping code.
-- Dual-write phase increases write latency and cloud cost temporarily.
-- The migration requires careful hash-reconciliation testing to detect data corruption.
+- If a dual-write phase were executed in future, it would temporarily increase write latency and cloud cost.
+- A future migration would require careful hash-reconciliation testing to detect data corruption.
 
 ---
 
@@ -71,6 +72,6 @@ See the runbook for detailed procedures for each phase.
 
 | Alternative | Reason rejected |
 |-------------|----------------|
-| Direct Firebase SDK calls in domain layer | Creates lock-in; impossible to migrate without rewriting domain code. |
-| Use Firebase as permanent provider | Unacceptable data-residency and cost risk at scale. |
+| Direct Firebase SDK calls in domain layer | Creates lock-in; impossible to migrate without rewriting domain code if migration is ever required. |
+| Implement an alternative provider alongside Firebase from day one | Premature; increases complexity and time-to-market without corresponding benefit at launch. |
 | Build self-hosted storage from day one | Premature; increases time-to-market without corresponding benefit at launch. |

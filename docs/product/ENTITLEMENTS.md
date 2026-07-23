@@ -40,7 +40,7 @@ are finalised. Do not treat them as commitments.
 | **PDF split** | Not included | Included | Yes | None | Device compute | Reverts to no split on expiry | None | Advanced PDF tool; premium candidate. |
 | **PDF compression** | Not included | Included | Yes | None | Device compute | Reverts to no compression on expiry | None | Advanced PDF tool; premium candidate. |
 | **Document organisation** | Unlimited folders, rename, move, delete | Same | Yes | None | Local storage | Unchanged | None | Core organisation is free. |
-| **Cloud backup** | Not included | Included — opt-in, end-to-end encrypted | No | Firebase Storage (initially) | Storage, egress, encryption | Backup paused on expiry; local documents unchanged; data retained per retention policy | Backup quota enforced | Cloud backup is a premium capability and a cost driver. |
+| **Cloud backup** | Not included | Included — opt-in, end-to-end encrypted | No | Firebase Storage | Storage, egress, encryption | Backup paused on expiry; local documents unchanged; data retained per retention policy | Backup quota enforced | Cloud backup is a premium capability and a cost driver. |
 | **Cloud-storage allowance** | None | **[H]** Up to 5 GB encrypted backup storage | No | Cloud | Storage cost per user | Quota enforced on expiry; uploads paused; existing backup retained per retention policy | Quota hard limit + alerts | Hypothesis H-002; requires cloud cost validation. |
 | **Multi-device synchronisation** | Not included | Included (requires backup) | Partial — local copy synced when online | Cloud | Sync compute, storage, egress | Sync paused on expiry; last synced state retained | Concurrent device limit **[H]** 5 devices | Hypothesis H-003; requires cost validation. |
 | **Trusted devices** | 1 trusted device **[H]** | Up to **[H]** 5 trusted devices | Yes (cached trust state) | None for offline check | Negligible | Reverts to free limit on expiry | Device revocation required | Security control; limit is a hypothesis. |
@@ -75,7 +75,7 @@ When a premium subscription expires:
 - Backend entitlement verification must be idempotent.
 - Google Play and Apple App Store transaction types must not appear in domain entitlement models.
 - Firebase must not become the permanent entitlement domain model.
-- Future AWS migration must preserve canonical entitlement history.
+- A future provider migration, if ever approved, must preserve canonical entitlement history.
 - Entitlement contracts belong to Toolly, not to the billing provider.
 
 ---

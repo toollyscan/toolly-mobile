@@ -16,8 +16,8 @@ Privacy-first, offline-first document scanning for Android and iOS.
 1. The encrypted local vault is the source of truth.
 2. Capture, processing, organisation and local export must work offline.
 3. Cloud backup is optional, explicit, encrypted and resumable.
-4. Firebase is the initial infrastructure provider, not a domain dependency.
-5. Firebase and future AWS implementations must remain behind Toolly-owned contracts.
+4. Firebase is the cloud infrastructure provider. Firebase SDK code is confined to the data layer only, never to the domain.
+5. All provider SDK implementations must remain behind Toolly-owned contracts and adapters, preserving migration feasibility.
 6. Canonical IDs, schemas, encryption envelopes, sync contracts and object keys belong to Toolly.
 7. Firebase UID must not become the canonical document-owner ID.
 8. Provider SDK types must not enter shared domain models.
@@ -43,13 +43,26 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Product metrics | [docs/product/PRODUCT_METRICS.md](docs/product/PRODUCT_METRICS.md) |
 | India launch scope | [docs/product/INDIA_LAUNCH_SCOPE.md](docs/product/INDIA_LAUNCH_SCOPE.md) |
 | Design audit | [docs/product/DESIGN_AUDIT.md](docs/product/DESIGN_AUDIT.md) |
+| Figma information architecture | [docs/design/FIGMA_INFORMATION_ARCHITECTURE.md](docs/design/FIGMA_INFORMATION_ARCHITECTURE.md) |
+| Screen inventory | [docs/design/SCREEN_INVENTORY.md](docs/design/SCREEN_INVENTORY.md) |
+| User flow matrix | [docs/design/USER_FLOW_MATRIX.md](docs/design/USER_FLOW_MATRIX.md) |
+| Component inventory | [docs/design/COMPONENT_INVENTORY.md](docs/design/COMPONENT_INVENTORY.md) |
+| Component state matrix | [docs/design/COMPONENT_STATE_MATRIX.md](docs/design/COMPONENT_STATE_MATRIX.md) |
+| Responsive layouts | [docs/design/RESPONSIVE_LAYOUTS.md](docs/design/RESPONSIVE_LAYOUTS.md) |
+| Accessibility requirements | [docs/design/ACCESSIBILITY_REQUIREMENTS.md](docs/design/ACCESSIBILITY_REQUIREMENTS.md) |
+| Localization requirements | [docs/design/LOCALIZATION_REQUIREMENTS.md](docs/design/LOCALIZATION_REQUIREMENTS.md) |
+| Content guidelines | [docs/design/CONTENT_GUIDELINES.md](docs/design/CONTENT_GUIDELINES.md) |
+| Design tokens | [docs/design/DESIGN_TOKENS.md](docs/design/DESIGN_TOKENS.md) |
+| Developer handoff | [docs/design/DEVELOPER_HANDOFF.md](docs/design/DEVELOPER_HANDOFF.md) |
+| Figma completion gate | [docs/design/FIGMA_COMPLETION_GATE.md](docs/design/FIGMA_COMPLETION_GATE.md) |
+| Figma audit report | [docs/design/FIGMA_AUDIT_REPORT.md](docs/design/FIGMA_AUDIT_REPORT.md) |
 | Security baseline | [docs/security/SECURITY_BASELINE.md](docs/security/SECURITY_BASELINE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
 | Production gate | [docs/execution/PRODUCTION_GATE.md](docs/execution/PRODUCTION_GATE.md) |
 | GitHub setup | [docs/execution/GITHUB_SETUP.md](docs/execution/GITHUB_SETUP.md) |
 | Definition of done | [docs/quality/DEFINITION_OF_DONE.md](docs/quality/DEFINITION_OF_DONE.md) |
 | Benchmark plan | [docs/quality/BENCHMARK_PLAN.md](docs/quality/BENCHMARK_PLAN.md) |
-| Firebase-to-AWS runbook | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
+| Cloud provider migration feasibility guide | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
 | Cost controls | [docs/operations/COST_CONTROLS.md](docs/operations/COST_CONTROLS.md) |
 
 ---

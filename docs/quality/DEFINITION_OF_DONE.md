@@ -49,6 +49,7 @@ A pull request may not be merged unless every applicable item in this checklist 
 - [ ] `CONTRIBUTING.md` is updated if the development process changed.
 - [ ] README links are valid.
 - [ ] Markdown linting passes.
+- [ ] If design-related: Figma frame reference, screen ID and component name are included in the PR description.
 
 ## Review
 
@@ -66,3 +67,6 @@ For PRs that implement production features (after the Production Gate is approve
 - [ ] Accessibility requirements are met (minimum WCAG 2.1 AA; TalkBack / VoiceOver).
 - [ ] English, Hindi and Kannada strings are complete.
 - [ ] The `staging` environment deployment is verified before merging to `main`.
+- [ ] Figma G4 (screen coverage) and G9 (developer handoff) are approved for the implemented screen.
+- [ ] Component names in code match the canonical names in `COMPONENT_INVENTORY.md`.
+- [ ] Design tokens are referenced by semantic name; no hardcoded hex values in UI code.
