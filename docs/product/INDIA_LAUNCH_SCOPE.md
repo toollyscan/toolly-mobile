@@ -161,7 +161,9 @@ Indian data-protection law (DPDP Act 2023) requires designation of a Grievance O
 
 - Target minimum Android version: to be confirmed; must cover the majority of the Indian
   Android install base. **[Evidence required: Play Console device distribution data.]**
-- Target minimum RAM: **[H]** 2 GB.
+- Target minimum RAM: **[H]** 1 GB. India's low-cost Android market includes many devices
+  with 1–2 GB of RAM; this hypothesis must be validated against Play Console device
+  distribution data for India before the minimum is finalised.
 - Camera requirements: must work with devices that have a rear camera but limited autofocus.
 - Storage: app size must be optimised for devices with limited internal storage.
 - Offline-first design is mandatory; not all low-cost devices have reliable data connectivity.

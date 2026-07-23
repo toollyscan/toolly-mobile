@@ -58,7 +58,7 @@ Toolly privacy-safe product metrics baseline.
 |-------|-------|
 | Product question | How long does it take a new user to complete their first scan from first app open? |
 | Event name | `first_scan_duration` |
-| Allowed properties | `duration_seconds: int` (rounded to nearest 30 s), `platform: enum[android, ios]`, `app_version: string` |
+| Allowed properties | `duration_seconds: int` (rounded to nearest 10 s), `platform: enum[android, ios]`, `app_version: string` |
 | Prohibited properties | Any document content, filename, phone number, account ID in plaintext. |
 | Retention | 90 days |
 | Owner | Product |

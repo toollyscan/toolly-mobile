@@ -87,12 +87,16 @@ Key questions requiring evidence:
 
 ## Store commission considerations
 
-- Google Play Store commission: 15 % for subscriptions after the first year; 30 % in year 1
-  (subject to Google Play policies at time of launch; verify current rates).
-- Apple App Store commission: 15 % for subscriptions after the first year; 30 % in year 1
-  (subject to Apple policies at time of launch; verify current rates).
+- Google Play Store commission: varies by programme (e.g. reduced rates for subscriptions after
+  the first year, and for developers qualifying for the reduced service fee programme). Verify
+  the exact current rate applicable to Toolly in the Google Play Developer Policy Centre before
+  setting prices.
+- Apple App Store commission: varies by programme (e.g. reduced rates for subscriptions after
+  the first year, and for developers qualifying for the Small Business Programme). Verify the
+  exact current rate applicable to Toolly in the App Store Review Guidelines before setting prices.
 - Commission directly reduces net revenue per subscriber.
 - Commission must be factored into the pricing framework before prices are set.
+- Commission rates are subject to change; the pricing model must be re-validated if rates change.
 
 ---
 

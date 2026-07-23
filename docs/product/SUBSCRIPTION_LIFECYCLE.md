@@ -90,12 +90,16 @@ stateDiagram-v2
 1. User initiates purchase in app.
 2. Platform billing sheet is presented.
 3. On success: platform returns a purchase token.
-4. App enters `VerificationPending`; cached entitlement state is `PremiumActive` optimistically.
+4. App enters `VerificationPending`; the UI shows a "processing" state — premium features are
+   **not** optimistically enabled until verification succeeds. This prevents a verification
+   timeout or repeated failure from granting premium access without a valid entitlement.
 5. App submits token to backend for verification.
 6. Backend verifies with platform and records the entitlement.
-7. On verification success: state transitions to `PremiumActive`.
+7. On verification success: state transitions to `PremiumActive`; premium features enabled.
 8. On verification failure: state transitions to `Free`; local documents are unaffected.
 9. Verification must not block the user from accessing locally owned documents.
+10. If verification is taking longer than expected, the app displays a non-blocking notice
+    ("Activating your subscription…") and continues retrying in the background.
 
 ### Restore purchase
 
@@ -136,7 +140,10 @@ stateDiagram-v2
 
 1. Backend verification call times out or returns a retryable error.
 2. State remains `VerificationPending`.
-3. App retries with exponential backoff (max retries: **[H]** 3; max delay: **[H]** 1 hour).
+3. App retries with exponential backoff (max retries: **[H]** 5; max delay between retries:
+   **[H]** 5 minutes for foreground retries; background retries may extend up to 1 hour).
+   *Note: A 1-hour maximum delay is suitable only for background retry; foreground retries
+   should be capped at a few minutes to avoid leaving the user waiting. See H-008.*
 4. Local documents remain accessible throughout.
 5. Premium entitlements are not granted until verification succeeds.
 
@@ -237,5 +244,5 @@ entitlement revocation.
 | ID | Hypothesis | Validation required |
 |----|-----------|-------------------|
 | H-007 | Entitlement cache freshness of 24 hours | Server cost modelling vs. entitlement staleness risk |
-| H-008 | Delayed verification max 3 retries, 1-hour max delay | UX research and server cost |
+| H-008 | Delayed verification: 5 foreground retries at up to 5-minute intervals; background retries up to 1 hour | UX research and server cost |
 | H-009 | Backup data retained for 90 days after expiry | Cloud cost and user expectations |
