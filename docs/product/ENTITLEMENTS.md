@@ -60,8 +60,8 @@ When a premium subscription expires:
 3. Cloud backup **pauses**; existing backup data is retained per the retention policy.
 4. Advanced processing and OCR revert to free-tier limits.
 5. Sync pauses; local copy remains accessible.
-6. Trusted-device count reverts to free limit; excess devices are not immediately revoked but
-   prompts the user to manage devices.
+6. Trusted-device and recovery security controls remain available; entitlement expiry cannot
+   revoke access or reduce the account security baseline.
 7. Search reverts to title-and-folder search; the OCR index is retained but not updated.
 
 ---
@@ -114,5 +114,5 @@ When a premium subscription expires:
 | H-001 | Free batch limit of 10 pages per document | User research; cost per-document analysis |
 | H-002 | Premium cloud-storage allowance of 5 GB | Cloud storage cost per active premium user |
 | H-003 | Multi-device sync limit of 5 devices | Sync compute and egress cost analysis |
-| H-004 | Free trusted-device limit of 1 device | Security and UX research |
-| H-005 | Premium trusted-device limit of 5 devices | Security and UX research |
+| H-004 | Superseded: do not define a free-tier security limit before TLY-005 | Security and UX research |
+| H-005 | Superseded: device policy is security evidence, not a premium guarantee | Security and UX research |
