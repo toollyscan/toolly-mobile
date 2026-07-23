@@ -35,6 +35,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Module boundaries | [docs/architecture/MODULE_BOUNDARIES.md](docs/architecture/MODULE_BOUNDARIES.md) |
 | Vault and processing contracts | [docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md](docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md) |
 | Sync and Firebase contracts | [docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md](docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md) |
+| Firebase environments and service boundaries | [docs/architecture/FIREBASE_ENVIRONMENTS.md](docs/architecture/FIREBASE_ENVIRONMENTS.md) · [docs/architecture/FIREBASE_SERVICE_BOUNDARIES.md](docs/architecture/FIREBASE_SERVICE_BOUNDARIES.md) |
 | Schema evolution | [docs/architecture/SCHEMA_EVOLUTION.md](docs/architecture/SCHEMA_EVOLUTION.md) |
 | Architecture fitness functions | [docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md](docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md) |
 | Dependency policy and review | [docs/architecture/DEPENDENCY_POLICY.md](docs/architecture/DEPENDENCY_POLICY.md) · [docs/architecture/DEPENDENCY_REVIEW_TEMPLATE.md](docs/architecture/DEPENDENCY_REVIEW_TEMPLATE.md) |
@@ -48,6 +49,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | ADR — Local outbox and conflict policy | [docs/adr/0006-local-outbox-and-conflict-policy.md](docs/adr/0006-local-outbox-and-conflict-policy.md) |
 | ADR — Encryption envelope and key hierarchy | [docs/adr/0007-encryption-envelope-and-key-hierarchy.md](docs/adr/0007-encryption-envelope-and-key-hierarchy.md) |
 | ADR — Dependency and supply-chain governance | [docs/adr/0008-dependency-and-supply-chain-governance.md](docs/adr/0008-dependency-and-supply-chain-governance.md) |
+| ADR — Firebase control plane and environment isolation | [docs/adr/0009-firebase-control-plane-and-environment-isolation.md](docs/adr/0009-firebase-control-plane-and-environment-isolation.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
 | Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
 | Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
@@ -74,6 +76,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Data inventory and lifecycle | [docs/security/DATA_INVENTORY.md](docs/security/DATA_INVENTORY.md) · [docs/security/DATA_LIFECYCLE.md](docs/security/DATA_LIFECYCLE.md) |
 | Authentication and recovery | [docs/security/AUTHENTICATION_ABUSE_CONTROLS.md](docs/security/AUTHENTICATION_ABUSE_CONTROLS.md) · [docs/security/TRUSTED_DEVICE_AND_RECOVERY.md](docs/security/TRUSTED_DEVICE_AND_RECOVERY.md) |
 | Telemetry and Firebase processing | [docs/security/TELEMETRY_POLICY.md](docs/security/TELEMETRY_POLICY.md) · [docs/security/FIREBASE_PROCESSING_INVENTORY.md](docs/security/FIREBASE_PROCESSING_INVENTORY.md) |
+| Firebase abuse and signed policy controls | [docs/security/FIREBASE_ABUSE_AND_POLICY_CONTROLS.md](docs/security/FIREBASE_ABUSE_AND_POLICY_CONTROLS.md) |
 | India privacy readiness | [docs/security/PRIVACY_READINESS.md](docs/security/PRIVACY_READINESS.md) |
 | Security operations | [docs/operations/SECURITY_INCIDENT_RESPONSE.md](docs/operations/SECURITY_INCIDENT_RESPONSE.md) · [docs/operations/VULNERABILITY_DISCLOSURE.md](docs/operations/VULNERABILITY_DISCLOSURE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
@@ -85,7 +88,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Benchmark governance and metrics | [docs/quality/BENCHMARK_GOVERNANCE.md](docs/quality/BENCHMARK_GOVERNANCE.md) · [docs/quality/BENCHMARK_METRICS.md](docs/quality/BENCHMARK_METRICS.md) |
 | Benchmark corpus, devices and evidence | [docs/quality/CORPUS_POLICY.md](docs/quality/CORPUS_POLICY.md) · [docs/quality/DEVICE_MATRIX.md](docs/quality/DEVICE_MATRIX.md) · [docs/quality/BENCHMARK_EVIDENCE.md](docs/quality/BENCHMARK_EVIDENCE.md) |
 | Cloud provider migration feasibility guide | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](docs/operations/FIREBASE_TO_AWS_RUNBOOK.md) |
-| Cost controls | [docs/operations/COST_CONTROLS.md](docs/operations/COST_CONTROLS.md) |
+| Firebase cost, IaC and evidence | [docs/operations/COST_CONTROLS.md](docs/operations/COST_CONTROLS.md) · [docs/operations/FIREBASE_IAC_AND_ACCESS.md](docs/operations/FIREBASE_IAC_AND_ACCESS.md) · [docs/operations/FIREBASE_EVIDENCE_CHECKLIST.md](docs/operations/FIREBASE_EVIDENCE_CHECKLIST.md) |
 
 ---
 
