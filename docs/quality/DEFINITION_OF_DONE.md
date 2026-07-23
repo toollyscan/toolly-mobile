@@ -1,6 +1,6 @@
 # Definition of Done
 
-A pull request may not be merged unless every applicable item in this checklist is satisfied.
+A pull request may not be merged unless every applicable item in this checklist is satisfied. Non-applicable checks must be marked N/A with a short reason; they must never be represented as executed or passed.
 
 ---
 
@@ -37,10 +37,10 @@ A pull request may not be merged unless every applicable item in this checklist 
 
 ## Tests
 
-- [ ] Unit tests cover the changed domain logic.
-- [ ] Tests cover failure, interruption, retry, offline and recovery paths.
-- [ ] All existing tests continue to pass.
-- [ ] Test results are linked or attached (not self-certified without evidence).
+- [ ] Unit tests cover the changed domain logic, or N/A is justified for documentation-only work.
+- [ ] Tests cover failure, interruption, retry, offline and recovery paths where executable behavior changes.
+- [ ] All applicable existing tests continue to pass.
+- [ ] Test results are linked or attached; unexecuted checks are never marked passed.
 
 ## Documentation
 
