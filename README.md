@@ -59,6 +59,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Security baseline | [docs/security/SECURITY_BASELINE.md](docs/security/SECURITY_BASELINE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
 | Production gate | [docs/execution/PRODUCTION_GATE.md](docs/execution/PRODUCTION_GATE.md) |
+| Foundation audit and pending work | [docs/execution/FOUNDATION_AUDIT_2026-07-23.md](docs/execution/FOUNDATION_AUDIT_2026-07-23.md) |
 | GitHub setup | [docs/execution/GITHUB_SETUP.md](docs/execution/GITHUB_SETUP.md) |
 | Definition of done | [docs/quality/DEFINITION_OF_DONE.md](docs/quality/DEFINITION_OF_DONE.md) |
 | Benchmark plan | [docs/quality/BENCHMARK_PLAN.md](docs/quality/BENCHMARK_PLAN.md) |
