@@ -19,6 +19,7 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] Canonical domain, module, vault, processing, sync, Firebase and schema contracts (TLY-004)
 - [x] Architecture fitness-function specification (TLY-004)
 - [x] Security, privacy, Firebase processing, telemetry, recovery and incident-response design baseline (TLY-005)
+- [x] Benchmark governance, corpus, device, metric and evidence contracts (TLY-006A)
 - [ ] TLY-005 implementation, legal, cryptographic and operational evidence
 - [ ] Figma completion gates G1–G10 approved (TLY-003B — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance
