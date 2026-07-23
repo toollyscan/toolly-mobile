@@ -2,42 +2,45 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Accepted |
-| Date | 2025-07-01 |
+| Status | Accepted; protocol evidence pending |
+| Date | 2026-07-23 |
 | Author | shivayogih |
 
 ---
 
 ## Context
 
-Toolly uses Firebase Authentication as the authentication provider. Firebase assigns each user a Firebase UID (a provider-scoped identifier).
+Toolly uses Firebase Authentication initially. Provider identities are useful credentials but must not define document ownership, encryption ownership or canonical account identity.
 
-If Firebase UID is used as the canonical document-owner ID throughout the application:
-
-- Migration to another authentication provider requires rewriting all ownership references.
-- Users who delete and recreate their Firebase account receive a new UID, breaking document ownership.
-- The UID is a Firebase internal identifier; Toolly has no control over its format or stability.
-
-Additionally, mobile-number authentication via OTP is the expected primary authentication method for the Indian market. OTP flows are vulnerable to abuse (rate-limiting, SIM-swap, SMS interception), requiring explicit controls.
+Authentication, recovery and trusted-device controls must support phone OTP, email/password, Google and Apple Sign In without leaking provider types into domain code.
 
 ---
 
 ## Decision
 
-1. Toolly assigns every account a **`ToollyAccountId`** (UUID v4) at registration. This is the canonical document-owner ID.
-2. Firebase UID is stored as a **provider credential** in the account record, alongside the `ToollyAccountId`. It is never used as a primary key in domain models.
-3. The account record maps `ToollyAccountId → [ProviderCredential]`, allowing multiple authentication providers per account.
-4. OTP abuse controls:
-   - Maximum 3 OTP requests per phone number per 10-minute window.
-   - Maximum 5 failed OTP attempts before a 30-minute lockout.
-   - OTP values are never logged, never sent to analytics and never appear in error messages.
-5. Trusted-device approval:
-   - A new device must be approved by an existing trusted device before accessing the vault.
-   - If no trusted device is available, account recovery requires a verified backup code.
-6. Account recovery:
-   - Recovery codes are generated at registration, displayed once, and stored encrypted in the local vault.
-   - Recovery codes are never stored in plaintext on the server.
-7. Phone numbers are stored as HMAC-SHA256 hashes for lookup. Plaintext phone numbers are never persisted in the database or logs.
+1. Authentication is required before the first scan. Guest scanning is excluded from V1 unless this ADR is explicitly superseded.
+2. V1 supports phone OTP, email/password, Google and Apple Sign In on iOS.
+3. Toolly assigns a canonical `ToollyAccountId` at account creation.
+4. Firebase identities are provider credentials mapped to `ToollyAccountId`; they never become canonical document-owner IDs.
+5. Domain models use Toolly-owned identity contracts and do not import Firebase SDK types.
+6. Toolly-owned databases do not duplicate plaintext phone numbers without an approved purpose, retention period and security review.
+7. Firebase Authentication processes provider identity data according to its configured service contract and privacy terms.
+8. Phone numbers, email addresses, OTPs, passwords, tokens and provider credentials never enter application logs or analytics.
+9. OTP resend floors, abuse thresholds, lockout values, account linking, trusted-device approval and recovery protocols require implementation spikes, threat analysis and approval before finalization.
+10. Returning authenticated users retain offline access to their existing local library during transient network or provider outages.
+
+---
+
+## Evidence required
+
+- Provider-account linking and canonical-ID contract tests.
+- OTP abuse and lifecycle-replay tests.
+- Account deletion, recreation and provider-linking scenarios.
+- Trusted-device and recovery threat model.
+- Recovery usability study.
+- Firebase data inventory, retention and deletion review.
+- Offline returning-user behavior tests.
+- Security review of key recovery and account takeover controls.
 
 ---
 
@@ -45,16 +48,16 @@ Additionally, mobile-number authentication via OTP is the expected primary authe
 
 **Positive:**
 
-- `ToollyAccountId` is stable across authentication provider migrations.
-- Phone numbers are not stored in recoverable plaintext.
-- OTP abuse controls reduce SIM-swap and SMS interception risk.
-- Multi-provider authentication is possible in future (e.g., Google, Apple Sign-In).
+- Document ownership remains stable across provider changes.
+- All approved sign-in methods share one canonical identity model.
+- Firebase remains fully usable without becoming the domain architecture.
+- Offline local-library access is separated from transient provider availability.
 
-**Negative:**
+**Costs and risks:**
 
-- Account registration is more complex: two IDs must be created and linked atomically.
-- Recovery-code UX requires careful design to prevent user confusion.
-- HMAC lookup requires the server to hold the HMAC key securely.
+- Account linking and recovery require explicit conflict handling.
+- Provider processing and Toolly-owned storage need separate data inventories.
+- Recovery and trusted-device mechanisms cannot be finalized without security and usability evidence.
 
 ---
 
@@ -62,6 +65,7 @@ Additionally, mobile-number authentication via OTP is the expected primary authe
 
 | Alternative | Reason rejected |
 |-------------|----------------|
-| Firebase UID as canonical ID | Creates lock-in; breaks ownership on account recreation. |
-| Plaintext phone number storage | Violates privacy-first requirement; DPDP Act 2023 obligation. |
-| No trusted-device approval | Allows any device with valid credentials to access the vault; insufficient for a document scanner. |
+| Firebase UID as canonical owner ID | Couples document ownership to one provider and account lifecycle. |
+| Guest scanning in V1 | Conflicts with the approved login-before-first-scan decision. |
+| OTP-only authentication | Conflicts with approved email/password, Google and Apple methods. |
+| Finalize recovery codes or lockout values without evidence | Creates security and usability risk before threat analysis and testing. |

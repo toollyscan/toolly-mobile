@@ -10,10 +10,7 @@ document.
 
 ## India-first rationale
 
-India is the largest addressable market for document-scanning utility applications in South
-Asia. UPI, Aadhaar and a large volume of government document workflows create strong demand.
-English, Hindi and Kannada cover the primary developer market (Bengaluru / Karnataka) and
-national language requirements. See DECISION_REGISTER D-001 and D-002.
+India is Toolly's selected first market. Market size, willingness to pay and workflow differentiation remain evidence requirements rather than approved claims. English, Hindi and Kannada support the selected India-first audience and Karnataka launch strategy. See DECISION_REGISTER D-001 and D-002.
 
 ---
 
@@ -53,7 +50,7 @@ national language requirements. See DECISION_REGISTER D-001 and D-002.
 - OTP via SMS to Indian mobile numbers.
 - Indian mobile number format: +91 followed by a 10-digit number.
 - Number must be validated against the +91 prefix and 10-digit format before OTP dispatch.
-- Phone number is stored as HMAC only; no plaintext phone number in the database or logs.
+- Toolly-owned application databases must not duplicate plaintext phone numbers without an approved purpose. Firebase Authentication processes provider identity data according to its configured service contract and privacy terms.
 - OTP abuse controls (rate limiting, lockout) must be in place before launch.
   See COST_CONTROLS.md.
 - Firebase Authentication is the OTP provider; it must remain behind a
@@ -65,7 +62,7 @@ national language requirements. See DECISION_REGISTER D-001 and D-002.
 
 - Input field must accept 10-digit numbers with or without the +91 prefix.
 - Display format in UI: `+91 XXXXX XXXXX` (5+5 grouping).
-- No plaintext phone number must be stored or logged.
+- Phone numbers must never be written to application logs or analytics; any Toolly-owned persistence requires an approved purpose, retention period and security review.
 - International number support (non-+91) is a post-V1 requirement.
 
 ---
@@ -159,8 +156,7 @@ Indian data-protection law (DPDP Act 2023) requires designation of a Grievance O
 
 ## Low-cost Android device support
 
-- Target minimum Android version: to be confirmed; must cover the majority of the Indian
-  Android install base. **[Evidence required: Play Console device distribution data.]**
+- Minimum Android version: API 26. The supported-device strategy must still be validated against representative India device data.
 - Target minimum RAM: **[H]** 1 GB. India's low-cost Android market includes many devices
   with 1–2 GB of RAM; this hypothesis must be validated against Play Console device
   distribution data for India before the minimum is finalised.

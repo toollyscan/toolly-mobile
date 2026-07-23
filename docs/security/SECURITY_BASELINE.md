@@ -1,6 +1,6 @@
 # Security Baseline
 
-This document summarises the security threat model, controls and compliance posture for Toolly.
+This document defines Toolly's security objectives and proposed baseline. Cryptographic algorithms, key derivation, recovery protocols, OTP thresholds and trusted-device mechanisms remain evidence pending until implementation spikes and qualified security review.
 
 ---
 
@@ -12,22 +12,22 @@ This document summarises the security threat model, controls and compliance post
 |-------|-------------|----------|
 | Document images and pages | High | Local vault (encrypted) |
 | OCR text | High | Local vault (encrypted) |
-| Phone number | High | HMAC-SHA256 hash only |
+| Phone identity | High | Firebase Authentication provider record; Toolly-owned duplication requires approved purpose |
 | ToollyAccountId | Medium | Local vault, cloud record |
-| Encryption keys | Critical | Platform hardware keystore |
-| Recovery codes | Critical | Local vault (encrypted), user-held |
-| OTP values | Critical | In-memory only; never persisted |
+| Encryption keys | Critical | Platform-protected storage design; evidence pending |
+| Recovery material | Critical | Proposed user-held and/or trusted-device design; evidence pending |
+| OTP values | Critical | Provider/app processing only; never persisted by Toolly application code or logged |
 | Firebase credentials | High | Outside source control; environment-managed |
 
 ### Threats and controls
 
 | Threat | Control |
 |--------|---------|
-| Device theft or loss | AES-256-GCM vault encryption; hardware-backed keys |
+| Device theft or loss | Authenticated local-vault encryption and platform-protected keys; exact mechanism pending review |
 | Cloud storage breach | End-to-end encryption; provider cannot decrypt |
 | OTP interception | OTP never logged; rate-limited; lockout enforced |
-| SIM-swap attack | Trusted-device approval required for new devices |
-| Credential stuffing | OTP-based auth; no password; rate limiting |
+| SIM-swap attack | Proposed trusted-device and recovery controls; protocol pending threat review |
+| Credential stuffing | Provider protections, password controls, OTP abuse controls and progressive backoff; thresholds pending testing |
 | Malicious dependency | Dependency policy: licence, CVE, size and removal analysis required |
 | Secret in source control | Gitleaks in CI; no credentials committed |
 | Log exfiltration | Document content, PII and key material never logged |
@@ -36,24 +36,27 @@ This document summarises the security threat model, controls and compliance post
 
 ---
 
-## Cryptography
+## Cryptography maturity
 
-| Purpose | Algorithm | Key storage |
-|---------|-----------|-------------|
-| Vault encryption | AES-256-GCM | Android Keystore / iOS Secure Enclave |
-| Cloud backup encryption | AES-256-GCM | Key derived from vault master key |
-| Phone number lookup | HMAC-SHA256 | Server-side HMAC key |
-| Recovery codes | CSPRNG (256-bit entropy) | Vault (encrypted) |
+| Security objective | Proposed mechanism | Required evidence | Status |
+|--------------------|--------------------|-------------------|--------|
+| Local vault confidentiality and integrity | Authenticated encryption with per-asset or per-document data keys | Algorithm/nonce review, benchmark and fault-injection tests | Evidence pending |
+| Platform key protection | Android Keystore and Apple Keychain/Secure Enclave capabilities through adapters | Device matrix and recovery analysis | Evidence pending |
+| Encrypted cloud backup | Client-side encryption and versioned wrapped-key envelopes | Restore, rotation and compromise-recovery drill | Evidence pending |
+| Account recovery | Trusted-device approval and/or user-held recovery material | Threat model, usability study and cryptographic review | Evidence pending |
+
+No algorithm, derivation method, entropy value or recovery format is approved by this document alone.
 
 ---
 
 ## Authentication controls
 
-- Primary method: phone number OTP.
-- OTP rate limit: 3 requests per phone number per 10-minute window.
-- OTP failure lockout: 5 failed attempts triggers a 30-minute lockout.
-- OTP values are in-memory only. They are never logged, persisted or sent to analytics.
-- New device access requires trusted-device approval or recovery code.
+- Login is required before the first scan.
+- V1 supports phone OTP, email/password, Google, and Apple Sign In on iOS.
+- OTP resend floors, rate limits, progressive backoff and lockout thresholds require abuse testing before final values are approved.
+- OTP values, passwords, tokens and provider credentials are never written to application logs or analytics.
+- Trusted-device approval and recovery protocols remain evidence pending.
+- Firebase identities map to canonical Toolly account IDs and never become document-owner IDs.
 
 ---
 
@@ -78,7 +81,7 @@ The following data must never appear in logs, crash reports, analytics or error 
 |-------------|--------|-------|
 | Data principal consent | Planned | Consent must be obtained before cloud backup is enabled. |
 | Purpose limitation | Planned | Document data used only for scanning and export. |
-| Data minimisation | Partial | Phone number stored as HMAC only. |
+| Data minimisation | Partial | Toolly-owned stores avoid duplicating provider identity data without an approved purpose. |
 | Data localisation | Under review | Firebase data residency for India must be confirmed. |
 | Right to erasure | Planned | Account deletion must purge vault and cloud objects. |
 | Grievance officer | Pending | Must be designated before launch. |
