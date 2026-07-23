@@ -24,7 +24,6 @@ firebase-debug.*.log
 *.xcuserdata/
 *.xcbkptlist
 Pods/
-Podfile.lock
 DerivedData/
 build/
 *.ipa
@@ -69,3 +68,7 @@ npm-debug.log*
 # Coverage
 .coverage/
 htmlcov/
+
+# Generated governance/release artifacts
+*.cdx.json
+*.intoto.jsonl
