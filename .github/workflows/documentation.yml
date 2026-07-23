@@ -48,6 +48,16 @@ jobs:
             --emit-sbom /tmp/toolly-governance.cdx.json
           python3 -m json.tool /tmp/toolly-governance.cdx.json >/dev/null
 
+  firebase-governance:
+    name: Firebase environment and cost governance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Validate Firebase governance
+        run: python3 scripts/validate_firebase_governance.py --self-test
+
   secret-scan:
     name: Secret scan
     runs-on: ubuntu-latest
