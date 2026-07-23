@@ -87,6 +87,30 @@ Each item below represents an area where a design assumption has been made but e
 | ID | Title | Notes |
 |----|-------|-------|
 | DA-006 | Dark mode | Required before general availability; not a launch blocker. |
-| DA-007 | Tablet layout (Android) | Required before general availability. |
-| DA-008 | iPad layout | Required before general availability. |
+| DA-007 | Tablet layout (Android) | Required before general availability. See RESPONSIVE_LAYOUTS.md. |
+| DA-008 | iPad layout | Required before general availability. See RESPONSIVE_LAYOUTS.md. |
 | DA-009 | Widget support | Post-launch enhancement. |
+
+---
+
+## Design specification status (TLY-003)
+
+The following design documents were created as part of TLY-003 to establish the repository-owned design specification baseline.
+
+| Document | Status |
+|----------|--------|
+| [FIGMA_INFORMATION_ARCHITECTURE.md](../design/FIGMA_INFORMATION_ARCHITECTURE.md) | Complete |
+| [SCREEN_INVENTORY.md](../design/SCREEN_INVENTORY.md) | Complete |
+| [USER_FLOW_MATRIX.md](../design/USER_FLOW_MATRIX.md) | Complete |
+| [COMPONENT_INVENTORY.md](../design/COMPONENT_INVENTORY.md) | Complete |
+| [COMPONENT_STATE_MATRIX.md](../design/COMPONENT_STATE_MATRIX.md) | Complete |
+| [RESPONSIVE_LAYOUTS.md](../design/RESPONSIVE_LAYOUTS.md) | Complete |
+| [ACCESSIBILITY_REQUIREMENTS.md](../design/ACCESSIBILITY_REQUIREMENTS.md) | Complete |
+| [LOCALIZATION_REQUIREMENTS.md](../design/LOCALIZATION_REQUIREMENTS.md) | Complete |
+| [CONTENT_GUIDELINES.md](../design/CONTENT_GUIDELINES.md) | Complete |
+| [DESIGN_TOKENS.md](../design/DESIGN_TOKENS.md) | Complete |
+| [DEVELOPER_HANDOFF.md](../design/DEVELOPER_HANDOFF.md) | Complete |
+| [FIGMA_COMPLETION_GATE.md](../design/FIGMA_COMPLETION_GATE.md) | Complete |
+| [FIGMA_AUDIT_REPORT.md](../design/FIGMA_AUDIT_REPORT.md) | Complete |
+
+Live Figma implementation and visual review remain gated. See [FIGMA_AUDIT_REPORT.md](../design/FIGMA_AUDIT_REPORT.md) and [FIGMA_COMPLETION_GATE.md](../design/FIGMA_COMPLETION_GATE.md).

@@ -15,6 +15,8 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] CI: Markdown lint and secret scan
 - [x] Product scope, entitlements, monetization and subscription lifecycle (TLY-002)
 - [x] India launch scope and product metrics (TLY-002)
+- [x] Design specification baseline: screen inventory, component inventory, tokens, accessibility, localization, Figma IA, user flow matrix, content guidelines, developer handoff, Figma completion gates (TLY-003)
+- [ ] Figma completion gates G1–G10 approved (TLY-003 — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance
 - [ ] GitHub branch protection and environment configuration (see GITHUB_SETUP.md)
 

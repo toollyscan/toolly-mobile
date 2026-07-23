@@ -43,6 +43,19 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Product metrics | [docs/product/PRODUCT_METRICS.md](docs/product/PRODUCT_METRICS.md) |
 | India launch scope | [docs/product/INDIA_LAUNCH_SCOPE.md](docs/product/INDIA_LAUNCH_SCOPE.md) |
 | Design audit | [docs/product/DESIGN_AUDIT.md](docs/product/DESIGN_AUDIT.md) |
+| Figma information architecture | [docs/design/FIGMA_INFORMATION_ARCHITECTURE.md](docs/design/FIGMA_INFORMATION_ARCHITECTURE.md) |
+| Screen inventory | [docs/design/SCREEN_INVENTORY.md](docs/design/SCREEN_INVENTORY.md) |
+| User flow matrix | [docs/design/USER_FLOW_MATRIX.md](docs/design/USER_FLOW_MATRIX.md) |
+| Component inventory | [docs/design/COMPONENT_INVENTORY.md](docs/design/COMPONENT_INVENTORY.md) |
+| Component state matrix | [docs/design/COMPONENT_STATE_MATRIX.md](docs/design/COMPONENT_STATE_MATRIX.md) |
+| Responsive layouts | [docs/design/RESPONSIVE_LAYOUTS.md](docs/design/RESPONSIVE_LAYOUTS.md) |
+| Accessibility requirements | [docs/design/ACCESSIBILITY_REQUIREMENTS.md](docs/design/ACCESSIBILITY_REQUIREMENTS.md) |
+| Localization requirements | [docs/design/LOCALIZATION_REQUIREMENTS.md](docs/design/LOCALIZATION_REQUIREMENTS.md) |
+| Content guidelines | [docs/design/CONTENT_GUIDELINES.md](docs/design/CONTENT_GUIDELINES.md) |
+| Design tokens | [docs/design/DESIGN_TOKENS.md](docs/design/DESIGN_TOKENS.md) |
+| Developer handoff | [docs/design/DEVELOPER_HANDOFF.md](docs/design/DEVELOPER_HANDOFF.md) |
+| Figma completion gate | [docs/design/FIGMA_COMPLETION_GATE.md](docs/design/FIGMA_COMPLETION_GATE.md) |
+| Figma audit report | [docs/design/FIGMA_AUDIT_REPORT.md](docs/design/FIGMA_AUDIT_REPORT.md) |
 | Security baseline | [docs/security/SECURITY_BASELINE.md](docs/security/SECURITY_BASELINE.md) |
 | Roadmap | [docs/execution/ROADMAP.md](docs/execution/ROADMAP.md) |
 | Production gate | [docs/execution/PRODUCTION_GATE.md](docs/execution/PRODUCTION_GATE.md) |
