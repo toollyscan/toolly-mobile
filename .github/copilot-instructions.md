@@ -14,7 +14,8 @@ These instructions apply to every Copilot suggestion and agent session in this r
 6. For model, persistence, processing, sync, Firebase or schema work, read all TLY-004 architecture contracts.
 7. Read the [Definition of Done](docs/quality/DEFINITION_OF_DONE.md).
 8. Read the [Production Gate](docs/execution/PRODUCTION_GATE.md).
-9. Confirm the change is within the scope of the assigned issue before writing any code.
+9. For identity, cryptography, storage, telemetry, Firebase, recovery, deletion or export work, read `docs/security/SECURITY_BASELINE.md` and every linked applicable specification.
+10. Confirm the change is within the scope of the assigned issue before writing any code.
 
 ---
 
@@ -52,6 +53,15 @@ Never log or send to analytics:
 - Phone numbers, email addresses or any PII.
 - OTPs, authentication tokens or session identifiers.
 - Encryption keys, key material or derived secrets.
+
+Additional rules:
+
+- Telemetry events and properties are deny-by-default and must be registered in the generated allowlist before use.
+- Never derive encryption keys from passwords, OTPs, phone numbers, provider tokens or other identity credentials.
+- Never invent an algorithm, nonce rule, recovery format, retention period, legal deadline or compliance claim. Follow the approved ADR/policy and retain evidence-pending status where required.
+- Treat Firebase location, retention and deletion as service-specific; never claim blanket India residency.
+- Security, privacy, deletion, export and recovery protections must not be paywalled.
+- Update the threat model, data inventory, Firebase inventory and telemetry registry in the same PR when the implemented processing changes.
 
 ---
 
