@@ -31,10 +31,18 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Area | Link |
 |---|---|
 | Architecture overview | [docs/architecture/README.md](docs/architecture/README.md) |
+| Canonical domain model | [docs/architecture/CANONICAL_DOMAIN_MODEL.md](docs/architecture/CANONICAL_DOMAIN_MODEL.md) |
+| Module boundaries | [docs/architecture/MODULE_BOUNDARIES.md](docs/architecture/MODULE_BOUNDARIES.md) |
+| Vault and processing contracts | [docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md](docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md) |
+| Sync and Firebase contracts | [docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md](docs/architecture/SYNC_AND_FIREBASE_CONTRACTS.md) |
+| Schema evolution | [docs/architecture/SCHEMA_EVOLUTION.md](docs/architecture/SCHEMA_EVOLUTION.md) |
+| Architecture fitness functions | [docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md](docs/architecture/ARCHITECTURE_FITNESS_FUNCTIONS.md) |
 | ADR — KMP boundary | [docs/adr/0001-kotlin-multiplatform-boundary.md](docs/adr/0001-kotlin-multiplatform-boundary.md) |
 | ADR — Local vault source of truth | [docs/adr/0002-local-vault-source-of-truth.md](docs/adr/0002-local-vault-source-of-truth.md) |
 | ADR — Cloud provider portability | [docs/adr/0003-cloud-provider-portability.md](docs/adr/0003-cloud-provider-portability.md) |
 | ADR — Authentication and account boundary | [docs/adr/0004-authentication-and-account-boundary.md](docs/adr/0004-authentication-and-account-boundary.md) |
+| ADR — Canonical data and operation model | [docs/adr/0005-canonical-data-and-operation-model.md](docs/adr/0005-canonical-data-and-operation-model.md) |
+| ADR — Local outbox and conflict policy | [docs/adr/0006-local-outbox-and-conflict-policy.md](docs/adr/0006-local-outbox-and-conflict-policy.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
 | Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
 | Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
