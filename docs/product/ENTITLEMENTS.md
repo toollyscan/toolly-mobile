@@ -43,8 +43,8 @@ are finalised. Do not treat them as commitments.
 | **Cloud backup** | Not included | Included — opt-in, end-to-end encrypted | No | Firebase Storage | Storage, egress, encryption | Backup paused on expiry; local documents unchanged; data retained per retention policy | Backup quota enforced | Cloud backup is a premium capability and a cost driver. |
 | **Cloud-storage allowance** | None | **[H]** Up to 5 GB encrypted backup storage | No | Cloud | Storage cost per user | Quota enforced on expiry; uploads paused; existing backup retained per retention policy | Quota hard limit + alerts | Hypothesis H-002; requires cloud cost validation. |
 | **Multi-device synchronisation** | Not included | Included (requires backup) | Partial — local copy synced when online | Cloud | Sync compute, storage, egress | Sync paused on expiry; last synced state retained | Concurrent device limit **[H]** 5 devices | Hypothesis H-003; requires cost validation. |
-| **Trusted devices** | 1 trusted device **[H]** | Up to **[H]** 5 trusted devices | Yes (cached trust state) | None for offline check | Negligible | Reverts to free limit on expiry | Device revocation required | Security control; limit is a hypothesis. |
-| **Recovery** | Standard recovery codes | Priority recovery + device management | No for priority | Cloud | Support and compute | Standard recovery available post-expiry | Recovery attempt rate limit | Premium recovery reduces support cost. |
+| **Trusted devices** | Security baseline; mechanism and limits evidence pending | Same security baseline | Evidence pending | Provider interaction may be required | Security and support | Unchanged after expiry | Revocation and abuse controls pending TLY-005 | Security controls are not weakened by subscription tier. |
+| **Recovery** | Secure recovery baseline; mechanism evidence pending | Same secure baseline | Evidence pending | Provider interaction may be required | Security and support | Unchanged after expiry | Recovery abuse controls pending TLY-005 | Access recovery is a security capability, not a paywall. |
 | **Premium support** | Community / self-serve | Priority email support | No | Support channel | Support staff cost | Reverts to standard on expiry | Anti-abuse at support tier | Differentiator for premium users. |
 | **Advanced processing** | Not included | Included (future server-side operations where explicitly permitted) | No | Server compute | Cloud compute, egress | Reverts to no advanced processing on expiry | Per-operation rate limit; explicit user consent required | Future premium capability; must not be enabled before Production Gate is approved. |
 | **Future AI features** | Not included | Included (subject to individual feature gates) | Subject to feature design | Subject to feature design | Subject to feature design | Reverts on expiry | Per-feature controls | Future capability; no commitment made in V1. |
@@ -60,8 +60,8 @@ When a premium subscription expires:
 3. Cloud backup **pauses**; existing backup data is retained per the retention policy.
 4. Advanced processing and OCR revert to free-tier limits.
 5. Sync pauses; local copy remains accessible.
-6. Trusted-device count reverts to free limit; excess devices are not immediately revoked but
-   prompts the user to manage devices.
+6. Trusted-device and recovery security controls remain available; entitlement expiry cannot
+   revoke access or reduce the account security baseline.
 7. Search reverts to title-and-folder search; the OCR index is retained but not updated.
 
 ---
@@ -101,7 +101,7 @@ When a premium subscription expires:
 | Encrypted cloud backup | — | ✓ |
 | Multi-device sync | — | ✓ |
 | Higher cloud storage allowance | — | ✓ |
-| Priority recovery and device management | — | ✓ |
+| Secure recovery baseline | ✓ | ✓ |
 | Future AI features | — | ✓ |
 | Premium support | — | ✓ |
 
@@ -114,5 +114,5 @@ When a premium subscription expires:
 | H-001 | Free batch limit of 10 pages per document | User research; cost per-document analysis |
 | H-002 | Premium cloud-storage allowance of 5 GB | Cloud storage cost per active premium user |
 | H-003 | Multi-device sync limit of 5 devices | Sync compute and egress cost analysis |
-| H-004 | Free trusted-device limit of 1 device | Security and UX research |
-| H-005 | Premium trusted-device limit of 5 devices | Security and UX research |
+| H-004 | Superseded: do not define a free-tier security limit before TLY-005 | Security and UX research |
+| H-005 | Superseded: device policy is security evidence, not a premium guarantee | Security and UX research |

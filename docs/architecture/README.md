@@ -1,119 +1,91 @@
 # Architecture Overview
 
-This document describes the high-level architecture of Toolly: Document Scanner.
+Toolly is a privacy-first, offline-first document scanner for Android and iOS. Firebase is the
+approved initial cloud platform behind Toolly-owned ports. AWS is not implemented now.
 
----
-
-## Product summary
-
-Toolly is a privacy-first, offline-first document-scanning application for Android and iOS.
-
-- **Canonical domain:** toollyscan.com · toollyscan.in
-- **Android application ID:** com.toollyscan.app
-- **iOS bundle ID:** com.toollyscan.app
-- **Initial market:** India
-- **Launch languages:** English · Hindi · Kannada
-
----
-
-## Architecture principles
+## Principles
 
 1. The encrypted local vault is the source of truth.
-2. Capture, processing, organisation and local export must work offline.
+2. Capture, processing, organisation and local export work offline.
 3. Cloud backup is optional, explicit, encrypted and resumable.
-4. Firebase is the cloud infrastructure provider. Firebase SDK code is confined to the data layer only, not a domain dependency.
-5. All provider SDK implementations must remain behind Toolly-owned contracts and adapters, preserving migration feasibility.
-6. Canonical IDs, schemas, encryption envelopes, sync contracts and object keys belong to Toolly.
-7. Firebase UID must not become the canonical document-owner ID.
-8. Provider SDK types must not enter shared domain models.
-9. Document content and personal information must never enter logs or analytics.
-10. Production feature implementation is blocked until the production-readiness gate is approved.
+4. Canonical IDs, schemas, recipes, revisions, operations and object keys belong to Toolly.
+5. Provider/platform SDK types remain inside adapters.
+6. Source assets and revision history are immutable.
+7. User mutations, revisions and outbox entries commit atomically.
+8. Sync uses revision ancestry and preserves divergence; timestamps cannot silently overwrite data.
+9. Firebase is implemented now; future provider evaluation does not add current dual-provider code.
+10. Sensitive document and identity data never enters logs or analytics.
 
----
-
-## Layer model
+## System structure
 
 ```mermaid
 graph TD
-    P[Presentation\nJetpack Compose / SwiftUI] --> D[Domain\nKotlin Multiplatform]
-    D --> DA[Data\nAndroid implementations]
-    D --> DI[Data\niOS implementations]
-    DA --> V[Local vault\nSQLCipher]
-    DI --> V
-    DA --> C[Cloud sync\nFirebase → AWS]
-    DI --> C
+    Android[Android Compose app] --> UseCases[Shared use cases]
+    IOS[iOS SwiftUI app] --> UseCases
+    UseCases --> Domain[Canonical domain model]
+    UseCases --> Ports[Toolly-owned ports]
+    Sync[Shared sync policy] --> Domain
+    Sync --> Ports
+    Processing[Processing recipes] --> Domain
+    Processing --> Ports
+    Vault[Platform vault adapters] --> Ports
+    Native[Camera, crypto, export adapters] --> Ports
+    Firebase[Firebase adapters] --> Ports
+    Billing[Play and StoreKit adapters] --> Ports
 ```
 
-Dependencies flow inward. The domain layer has no dependency on Android, iOS, Firebase or AWS.
+Dependencies point toward canonical policy and contracts. Platform/provider implementations plug
+in through composition roots.
 
----
-
-## Module boundary
-
-| Layer | Shared (KMP) | Android-only | iOS-only |
-|-------|-------------|-------------|---------|
-| Domain models | Yes | No | No |
-| Use cases | Yes | No | No |
-| Repository interfaces | Yes | No | No |
-| Repository implementations | No | Yes | Yes |
-| Presentation (ViewModel) | Evaluated per ADR-0001 | Fallback | Fallback |
-| UI | No | Compose | SwiftUI |
-
-See [ADR-0001](../adr/0001-kotlin-multiplatform-boundary.md) for the KMP feasibility boundary.
-
----
-
-## Data flow — offline capture
+## Core data flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant UI as Presentation
-    participant UC as Use case (domain)
-    participant Vault as Local vault (encrypted)
+    participant UI as Platform UI
+    participant UC as Shared use case
+    participant V as Local vault
+    participant O as Outbox
+    participant F as Firebase adapter
 
-    U->>UI: Tap capture
-    UI->>UC: CaptureDocumentUseCase(pages)
-    UC->>Vault: persist(EncryptedDocument)
-    Vault-->>UC: DocumentId (Toolly canonical)
-    UC-->>UI: DocumentId
-    UI-->>U: Confirmation
+    UI->>UC: Execute versioned operation
+    UC->>V: Commit operation + revision + metadata
+    V->>O: Commit outbox row in same transaction
+    V-->>UI: Local success
+    O->>F: Retry-safe encrypted sync
+    F-->>O: Idempotent acknowledgement or conflict
 ```
 
----
+Local success does not depend on cloud availability.
 
-## Canonical identity
+## Responsibility summary
 
-- Every document is assigned a `DocumentId` (UUID v4) by Toolly before any cloud write.
-- Every account is assigned a `ToollyAccountId` by Toolly. Firebase UID is stored as a provider credential, not as the primary identity.
-- Canonical IDs are stable across provider migrations.
+| Shared KMP | Platform-specific |
+|------------|-------------------|
+| Canonical models and IDs | Camera and image buffers |
+| Use cases and validation | Key protection and encrypted storage implementation |
+| Repository/service ports | PDF/share integrations |
+| Processing recipes/geometry | GPU/native processing engine |
+| Sync, outbox and conflict policy | Firebase SDK adapter |
+| Entitlement evaluation | Play Billing/StoreKit mapping |
 
-See [ADR-0004](../adr/0004-authentication-and-account-boundary.md).
+Native UI remains the default until Compose Multiplatform evidence changes ADR-0001.
 
----
+## Contract index
 
-## Cloud sync (optional)
+| Contract | Purpose |
+|----------|---------|
+| [Canonical domain model](CANONICAL_DOMAIN_MODEL.md) | Account, document, page, asset, revision, operation and entitlement |
+| [Module boundaries](MODULE_BOUNDARIES.md) | KMP/platform responsibilities and forbidden dependencies |
+| [Vault and processing](VAULT_AND_PROCESSING_CONTRACTS.md) | Transactions, recovery and recipe versioning |
+| [Sync and Firebase](SYNC_AND_FIREBASE_CONTRACTS.md) | Outbox, conflict, idempotency and adapter tests |
+| [Schema evolution](SCHEMA_EVOLUTION.md) | Compatibility, migration and rollout |
+| [Fitness functions](ARCHITECTURE_FITNESS_FUNCTIONS.md) | CI enforcement contracts |
 
-```mermaid
-graph LR
-    V[Local vault] -->|Encrypted chunks| S[Sync engine]
-    S -->|Provider-neutral contract| F[Firebase Storage]
-    S -.->|Feasibility: future migration| A[Alternative provider]
-```
+## ADR index
 
-The sync engine operates against a provider-neutral contract. The Firebase implementation is the only provider being built now; the architecture preserves migration feasibility without requiring domain changes if a migration is ever approved.
-
-See [ADR-0003](../adr/0003-cloud-provider-portability.md).
-
----
-
-## Related documents
-
-| Document | Link |
-|----------|------|
-| ADR-0001 | [Kotlin Multiplatform boundary](../adr/0001-kotlin-multiplatform-boundary.md) |
-| ADR-0002 | [Local vault source of truth](../adr/0002-local-vault-source-of-truth.md) |
-| ADR-0003 | [Cloud provider portability](../adr/0003-cloud-provider-portability.md) |
-| ADR-0004 | [Authentication and account boundary](../adr/0004-authentication-and-account-boundary.md) |
-| Security baseline | [docs/security/SECURITY_BASELINE.md](../security/SECURITY_BASELINE.md) |
-| Firebase-to-AWS runbook | [docs/operations/FIREBASE_TO_AWS_RUNBOOK.md](../operations/FIREBASE_TO_AWS_RUNBOOK.md) |
+- [ADR-0001 — KMP boundary](../adr/0001-kotlin-multiplatform-boundary.md)
+- [ADR-0002 — Local vault](../adr/0002-local-vault-source-of-truth.md)
+- [ADR-0003 — Cloud portability](../adr/0003-cloud-provider-portability.md)
+- [ADR-0004 — Authentication/account](../adr/0004-authentication-and-account-boundary.md)
+- [ADR-0005 — Canonical data/operations](../adr/0005-canonical-data-and-operation-model.md)
+- [ADR-0006 — Outbox/conflicts](../adr/0006-local-outbox-and-conflict-policy.md)

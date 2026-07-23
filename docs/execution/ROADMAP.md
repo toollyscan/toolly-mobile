@@ -16,7 +16,9 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] Product scope, entitlements, monetization and subscription lifecycle (TLY-002)
 - [x] India launch scope and product metrics (TLY-002)
 - [x] Design specification baseline: screen inventory, component inventory, tokens, accessibility, localization, Figma IA, user flow matrix, content guidelines, developer handoff, Figma completion gates (TLY-003)
-- [ ] Figma completion gates G1–G10 approved (TLY-003 — live Figma work; evidence pending)
+- [x] Canonical domain, module, vault, processing, sync, Firebase and schema contracts (TLY-004)
+- [x] Architecture fitness-function specification (TLY-004)
+- [ ] Figma completion gates G1–G10 approved (TLY-003B — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance
 - [ ] GitHub branch protection and environment configuration (see GITHUB_SETUP.md)
 
@@ -69,16 +71,17 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 
 ## Phase 4 — Authentication and account
 
-**Goal:** Phone-number OTP authentication with canonical account identity.
+**Goal:** Approved multi-provider authentication with canonical account identity.
 
 *Blocked until Production Gate is approved.*
 
 - [ ] `ToollyAccountId` generation at registration
-- [ ] Firebase Authentication integration (behind provider-neutral interface)
-- [ ] OTP abuse controls (rate limiting, lockout)
-- [ ] Trusted-device approval
-- [ ] Account recovery via recovery codes
-- [ ] Phone number stored as HMAC only
+- [ ] Firebase Authentication integration behind the canonical authentication port
+- [ ] Phone OTP, email/password, Google and Apple Sign In on iOS
+- [ ] Provider-account linking and canonical-ID contract tests
+- [ ] OTP abuse controls validated in staging
+- [ ] Trusted-device and account-recovery design approved under TLY-005
+- [ ] Provider identity processing, Toolly persistence, retention and deletion reviewed
 
 ---
 
@@ -88,10 +91,10 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 
 *Blocked until Phase 4 is complete and data-residency requirements are confirmed.*
 
-- [ ] Provider-neutral sync engine
-- [ ] Firebase Storage implementation
-- [ ] Resumable upload and download
-- [ ] Conflict resolution (local-wins)
+- [ ] Provider-neutral sync engine and atomic local outbox
+- [ ] Firebase metadata/object adapters
+- [ ] Resumable verified upload, download and restore
+- [ ] Revision-ancestry reconciliation and conflict preservation
 - [ ] User-controlled backup toggle
 - [ ] DPDP Act 2023 consent flow
 
