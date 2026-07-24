@@ -22,6 +22,16 @@ jobs:
           python3 scripts/validate_markdown.py --self-test
           python3 scripts/validate_markdown.py
 
+  platform-parity:
+    name: Platform parity and localized strings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate parity policy and production strings
+        run: python3 scripts/validate_platform_parity.py --self-test
+
   benchmark-contracts:
     name: Benchmark evidence contracts
     runs-on: ubuntu-latest

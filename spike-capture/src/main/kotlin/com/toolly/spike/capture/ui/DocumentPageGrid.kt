@@ -10,12 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentPage
+import com.toolly.spike.capture.R
 import java.io.File
 
 @Composable
@@ -39,7 +41,10 @@ fun DocumentPageGrid(
                 .build()
             AsyncImage(
                 model = request,
-                contentDescription = "Document page ${page.ordinal + 1}",
+                contentDescription = stringResource(
+                    R.string.document_page_description,
+                    page.ordinal + 1,
+                ),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()

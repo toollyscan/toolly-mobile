@@ -10,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.toolly.spike.capture.R
 import com.toolly.spike.capture.domain.ScannedPage
 import com.toolly.spike.capture.domain.TemporaryAssetId
 import java.io.File
@@ -40,7 +42,10 @@ fun ThumbnailGrid(
                 .build()
             AsyncImage(
                 model = request,
-                contentDescription = "Scanned page ${page.index + 1}",
+                contentDescription = stringResource(
+                    R.string.scanned_page_description,
+                    page.index + 1,
+                ),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
