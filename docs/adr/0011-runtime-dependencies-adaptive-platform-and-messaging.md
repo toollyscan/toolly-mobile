@@ -126,7 +126,7 @@ flowchart LR
     Import --> Process["On-device processing"]
     Process --> Encrypt["Vault encryption"]
     Encrypt --> Files["Encrypted assets"]
-    Encrypt --> Database["Room plus SQLCipher"]
+    Encrypt --> Database["Encrypted payloads in Room/platform SQLite"]
     Database --> Library["Adaptive Compose library"]
     Files --> Library
     Library --> Export["Local PDF or JPEG export"]

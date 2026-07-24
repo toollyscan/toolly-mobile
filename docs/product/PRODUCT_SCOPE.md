@@ -279,7 +279,7 @@ The following require network access:
 |------|----------|--------|
 | Compose Multiplatform production readiness | DA-001 | Open |
 | Camera and processing API coverage in KMP | DA-002 | Open |
-| SQLCipher vs. platform encryption | DA-003 | Open |
+| Platform-only local vault cryptography | DA-003 / ADR-0012 | Architecture selected; evidence open |
 | OCR engine selection | DA-004 | Open |
 | Accessibility compliance audit | DA-005 | Open |
 | Dark mode | DA-006 | Non-blocking |

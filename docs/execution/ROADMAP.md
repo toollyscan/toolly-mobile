@@ -62,8 +62,8 @@ material are available.
 - [ ] Shared English, Hindi and Kannada resources with native-language review
 - [ ] Shared accessibility semantics with TalkBack and VoiceOver evidence
 - [ ] Android and iOS composition roots with provider-neutral platform adapters
-- [ ] Room/current SQLCipher Android and Apple encrypted-vault prototypes against ADR-0007,
-  including migration, nonce, rotation, key-invalidation and failure tests
+- [ ] ADR-0012 Android Keystore/JCA and Apple Keychain/CryptoKit encrypted-vault prototypes,
+  including encrypted metadata, asset envelopes, migration, nonce, key-invalidation and failure tests
 - [ ] ML Kit Android scanner adapter and Apple VisionKit/AVFoundation adapter
 - [ ] Manual capture/crop fallback boundary on both platforms
 - [ ] Image loading proving no decrypted disk cache on either platform
