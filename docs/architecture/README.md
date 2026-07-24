@@ -95,3 +95,4 @@ Native UI remains the default until Compose Multiplatform evidence changes ADR-0
 - [ADR-0008 — Dependency/supply-chain governance](../adr/0008-dependency-and-supply-chain-governance.md)
 - [ADR-0009 — Firebase control plane/environment isolation](../adr/0009-firebase-control-plane-and-environment-isolation.md)
 - [ADR-0010 — First-party CI trust boundary](../adr/0010-first-party-ci-trust-boundary.md)
+- [ADR-0011 — Runtime dependencies, adaptive platforms and messaging](../adr/0011-runtime-dependencies-adaptive-platform-and-messaging.md)
