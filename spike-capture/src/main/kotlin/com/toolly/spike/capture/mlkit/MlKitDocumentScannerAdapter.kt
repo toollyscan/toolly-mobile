@@ -48,6 +48,10 @@ class MlKitDocumentScannerAdapter(
 
     private var pendingResult: CompletableDeferred<Pair<Int, List<String>>>? = null
 
+    companion object {
+        private const val TAG = "MlKitDocumentScannerAdapter"
+    }
+
     /** Called by the hosting Activity when [ActivityResultLauncher] is ready. */
     fun setLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
         this.launcher = launcher
@@ -99,6 +103,12 @@ class MlKitDocumentScannerAdapter(
             MlKitResultMapper.map(resultCode, pageUris)
         } catch (e: Exception) {
             deferred.cancel()
+            // Log the exception class name at debug level for diagnostics.
+            // The exception message is not logged because it may contain device-specific
+            // or Play Services initialization details that could include non-sensitive
+            // but unpredictable content. Class name is sufficient to identify the failure
+            // category (PlayServices, MlKitException, CancellationException, etc.).
+            android.util.Log.d(TAG, "Capture initialization failed: ${e.javaClass.simpleName}")
             MlKitResultMapper.mapServiceUnavailable()
         } finally {
             pendingResult = null

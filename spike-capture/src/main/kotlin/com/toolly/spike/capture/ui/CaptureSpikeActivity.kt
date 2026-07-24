@@ -1,6 +1,5 @@
 package com.toolly.spike.capture.ui
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,8 +10,6 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.spike.capture.domain.DocumentScanner
-import com.toolly.spike.capture.domain.ScanConfig
-import com.toolly.spike.capture.domain.ScanResult
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import kotlinx.coroutines.launch
 
@@ -27,21 +24,25 @@ import kotlinx.coroutines.launch
  */
 class CaptureSpikeActivity : ComponentActivity() {
 
-    private lateinit var scanner: DocumentScanner
-
-    // The launcher MUST be registered before STARTED; do it in the class body.
-    private val mlKitAdapter by lazy { MlKitDocumentScannerAdapter(activity = this) }
+    // mlKitAdapter is non-null only when Play Services are available.
+    // The launcher is always registered (lifecycle requirement) but only wired to the
+    // adapter when it is selected; the callback is a no-op when mlKitAdapter is null.
+    private var mlKitAdapter: MlKitDocumentScannerAdapter? = null
 
     private val scanLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
-        mlKitAdapter.onActivityResult(result.resultCode, result.data)
+        mlKitAdapter?.onActivityResult(result.resultCode, result.data)
     }
+
+    private lateinit var scanner: DocumentScanner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         scanner = if (isPlayServicesAvailable()) {
-            mlKitAdapter.setLauncher(scanLauncher)
-            mlKitAdapter
+            MlKitDocumentScannerAdapter(activity = this).also { adapter ->
+                adapter.setLauncher(scanLauncher)
+                mlKitAdapter = adapter
+            }
         } else {
             CameraXDocumentScannerAdapter()
         }
