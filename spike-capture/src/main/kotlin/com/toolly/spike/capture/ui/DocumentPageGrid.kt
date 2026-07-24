@@ -9,12 +9,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentPage
 import com.toolly.spike.capture.R
@@ -26,7 +22,6 @@ fun DocumentPageGrid(
     resolveAsset: (AssetId) -> File?,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 140.dp),
         modifier = modifier.fillMaxWidth(),
@@ -34,13 +29,8 @@ fun DocumentPageGrid(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(pages, key = { it.id.value }) { page ->
-            val request = ImageRequest.Builder(context)
-                .data(resolveAsset(page.sourceAssetId))
-                .diskCachePolicy(CachePolicy.DISABLED)
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .build()
-            AsyncImage(
-                model = request,
+            PrivateFileImage(
+                file = resolveAsset(page.sourceAssetId),
                 contentDescription = stringResource(
                     R.string.document_page_description,
                     page.ordinal + 1,

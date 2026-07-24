@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "registry_id": "toolly-dependency-register",
-  "registry_version": "1.0.0",
+  "registry_version": "1.1.0",
   "entries": [
     {
       "id": "ci-actions-checkout",
@@ -415,12 +415,12 @@
       "requested_version": "3.1.0",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
-      "purpose": "Coil 3.1 Compose integration — loads temporary JPEG thumbnails from Toolly-owned app-private files. Disk and memory caches are explicitly disabled for spike document pixels. Version 3.1 matches the reviewed Kotlin 2.1, Compose 1.7 and API 35 toolchain.",
+      "purpose": "Rejected historical candidate. Android platform image decoding replaces Coil in the document data path.",
       "owner": "shivayogih",
       "upstream": "https://github.com/coil-kt/coil",
       "licence_spdx": "Apache-2.0",
       "licence_evidence": "https://github.com/coil-kt/coil/blob/main/LICENSE.txt",
-      "approval_status": "conditional",
+      "approval_status": "rejected",
       "approval_issue": 22,
       "approved_by": null,
       "approved_at": null,
@@ -452,7 +452,7 @@
         "Picasso",
         "Manual Bitmap loading — no async support"
       ],
-      "removal_plan": "Replaced when spike module is promoted to production or deleted. Production uses a Toolly-owned Coil fetcher with vault decryption and no disk cache."
+      "removal_plan": "Removed from the version catalog, runtime dependency graph and document UI by TLY-006F."
     },
     {
       "id": "gradle-lib-coroutines-android",

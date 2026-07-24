@@ -57,9 +57,6 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.activity.compose)
 
-    // Coil — thumbnail display; disk cache disabled for all vault-origin content (ADR-0011)
-    implementation(libs.coil.compose)
-
     // Coroutines
     implementation(libs.coroutines.android)
 
