@@ -104,7 +104,7 @@ private fun LibraryScreen(
 }
 
 @Composable
-private fun DocumentList(
+private fun ColumnScope.DocumentList(
     documents: List<DocumentListItem>,
     actions: ToollyUiActions,
 ) {
