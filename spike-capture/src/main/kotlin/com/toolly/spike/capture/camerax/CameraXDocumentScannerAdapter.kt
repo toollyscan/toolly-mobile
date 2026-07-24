@@ -15,18 +15,17 @@ import com.toolly.spike.capture.domain.ScanResult
  *
  * 1. **Play Services unavailable** — `GoogleApiAvailability.isGooglePlayServicesAvailable`
  *    does not return `ConnectionResult.SUCCESS`.
- * 2. **Device below ML Kit minimum capability** — the ML Kit Document Scanner initialization
- *    task fails with `MlKitException.UNSUPPORTED`.
+ * 2. **Device below ML Kit minimum capability** — the ML Kit initialization task reports
+ *    the provider as unsupported. ML Kit documents a minimum total-RAM requirement of
+ *    1.7 GB; Toolly does not invent a separate memory-class threshold.
  * 3. **Dynamic-feature delivery failed** — the on-demand ML Kit module download fails
  *    (network error, insufficient storage, or Play Store unavailable).
- * 4. **Low-memory pressure** — the system reports memory class below the ML Kit minimum
- *    (`ActivityManager.getMemoryClass() < 512` MiB).
- * 5. **Manual-capture user preference** — a future settings flag may allow users to opt
+ * 4. **Manual-capture user preference** — a future settings flag may allow users to opt
  *    into a manual crop workflow regardless of ML Kit availability.
  *
  * ## Current state
  *
- * This is a **stub implementation** for TLY-006B. Full CameraX camera lifecycle, permission
+ * This is a **dependency-free stub implementation** for TLY-006B. Full CameraX camera lifecycle, permission
  * handling, rotation tracking and manual boundary-crop are not yet implemented. The stub
  * returns [ScanError.ServiceUnavailable] so callers can verify the fallback path is reached
  * without crashing.
