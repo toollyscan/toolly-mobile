@@ -19,7 +19,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.1-spike"
-        testInstrumentationRunner = "android.test.InstrumentationTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -62,4 +62,8 @@ dependencies {
     // Unit tests — JVM only, no Robolectric required for domain and mapper tests
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+
+    // Google AndroidX test-only libraries; not packaged in the production APK.
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
