@@ -26,6 +26,7 @@ This roadmap describes the phases of Toolly development. Dates are indicative.
 - [x] ADR-0010: first-party CI trust boundary (TLY-009)
 - [x] Concise release/rollback checklist and release evidence template (TLY-009)
 - [x] Minimal incident-response checklist (TLY-009)
+- [x] Runtime dependency, adaptive device, future web and notification baseline (ADR-0011)
 - [ ] TLY-005 implementation, legal, cryptographic and operational evidence
 - [ ] Figma completion gates G1–G10 approved (TLY-003B — live Figma work; evidence pending)
 - [ ] Domain and trademark clearance
@@ -57,8 +58,12 @@ material are available.
 **Goal:** Validate the KMP boundary and encrypted vault before production implementation.
 
 - [ ] KMP module structure (domain, data interfaces)
-- [ ] Encrypted local vault prototype against ADR-0007 candidate choices, including nonce, rotation, key-invalidation and failure tests
-- [ ] `expect`/`actual` camera capture boundary prototype
+- [ ] Room, current SQLCipher Android, Keystore and encrypted-asset vault prototype against ADR-0007, including migration, nonce, rotation, key-invalidation and failure tests
+- [ ] ML Kit scanner adapter spike covering first use, dynamic delivery, offline-after-install, cancellation and unsupported devices
+- [ ] CameraX and manual-crop fallback boundary prototype
+- [ ] Coil encrypted-vault fetcher proving no decrypted disk cache
+- [ ] Adaptive Android phone/tablet shell covering compact, medium and expanded layouts
+- [ ] Local and FCM notification prototype covering safe payloads, channels, consent and token lifecycle
 - [ ] Compose Multiplatform rendering benchmark on representative devices (DA-001)
 - [ ] OCR engine evaluation on Indian documents (DA-004)
 - [ ] Production Gate review
@@ -71,13 +76,15 @@ material are available.
 
 *Blocked until Production Gate is approved.*
 
-- [ ] Camera capture (no commercial SDK)
-- [ ] Page cropping and enhancement
+- [ ] ML Kit document capture behind the Toolly scanner port, with CameraX/manual fallback
+- [ ] Page cropping and enhancement with versioned Toolly processing recipes
 - [ ] Encrypted vault persistence
 - [ ] Local PDF/JPEG export
 - [ ] English, Hindi and Kannada UI strings
 - [ ] Accessibility (TalkBack, minimum WCAG 2.1 AA)
-- [ ] Benchmark on representative Android devices
+- [ ] Adaptive phone/tablet layouts, landscape and multi-window behavior
+- [ ] Security, processing, backup, billing and consented marketing notification channels
+- [ ] Benchmark on representative Android phones and tablets
 
 ---
 
