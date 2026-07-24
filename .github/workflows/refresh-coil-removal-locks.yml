@@ -1,0 +1,31 @@
+name: Refresh Coil removal locks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-locks:
+    name: Generate reviewed dependency lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Resolve all spike configurations and rewrite lock
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace --write-locks :spike-capture:dependencies
+
+      - name: Publish generated lock
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: coil-removal-lock-${{ github.sha }}
+          path: spike-capture/gradle.lockfile
+          if-no-files-found: error
+          retention-days: 1
