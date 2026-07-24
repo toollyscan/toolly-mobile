@@ -31,6 +31,9 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | Area | Link |
 |---|---|
 | Architecture overview | [docs/architecture/README.md](docs/architecture/README.md) |
+| Android runtime stack | [docs/architecture/ANDROID_RUNTIME_STACK.md](docs/architecture/ANDROID_RUNTIME_STACK.md) |
+| ADR — Runtime dependencies, adaptive platforms and messaging | [docs/adr/0011-runtime-dependencies-adaptive-platform-and-messaging.md](docs/adr/0011-runtime-dependencies-adaptive-platform-and-messaging.md) |
+| Notification and messaging policy | [docs/product/NOTIFICATION_AND_MESSAGING_POLICY.md](docs/product/NOTIFICATION_AND_MESSAGING_POLICY.md) |
 | Canonical domain model | [docs/architecture/CANONICAL_DOMAIN_MODEL.md](docs/architecture/CANONICAL_DOMAIN_MODEL.md) |
 | Module boundaries | [docs/architecture/MODULE_BOUNDARIES.md](docs/architecture/MODULE_BOUNDARIES.md) |
 | Vault and processing contracts | [docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md](docs/architecture/VAULT_AND_PROCESSING_CONTRACTS.md) |
