@@ -10,6 +10,8 @@ APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 BOOTSTRAP_DIR="$APP_HOME/.gradle-bootstrap"
 WRAPPER_JAR="$BOOTSTRAP_DIR/gradle-wrapper-8.9.jar"
 WRAPPER_SOURCE="$APP_HOME/gradle/wrapper/gradle-wrapper.jar.base64"
+WRAPPER_PROPERTIES="$BOOTSTRAP_DIR/gradle-wrapper-8.9.properties"
+WRAPPER_PROPERTIES_SOURCE="$APP_HOME/gradle/wrapper/gradle-wrapper.properties"
 WRAPPER_SHA256="498495120a03b9a6ab5d155f5de3c8f0d986a449153702fb80fc80e134484f17"
 
 mkdir -p "$BOOTSTRAP_DIR"
@@ -37,6 +39,8 @@ if [ ! -f "$WRAPPER_JAR" ] || [ "$(checksum "$WRAPPER_JAR")" != "$WRAPPER_SHA256
     fi
     mv "$pending" "$WRAPPER_JAR"
 fi
+
+cp "$WRAPPER_PROPERTIES_SOURCE" "$WRAPPER_PROPERTIES"
 
 if [ -n "${JAVA_HOME:-}" ]; then
     JAVA_CMD="$JAVA_HOME/bin/java"
