@@ -1,14 +1,23 @@
 package com.toolly.spike.capture
 
 import android.net.Uri
-import android.test.InstrumentationTestCase
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
 import java.io.File
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
 
-class TemporaryScanStoreInstrumentedTest : InstrumentationTestCase() {
+@RunWith(AndroidJUnit4::class)
+class TemporaryScanStoreInstrumentedTest {
 
-    fun testImportCopiesValidatedJpegAndCloseDeletesIt() {
-        val context = instrumentation.targetContext
+    @Test
+    fun importCopiesValidatedJpegAndCloseDeletesIt() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
         val source = File(context.cacheDir, "synthetic-source.jpg")
         source.writeBytes(
             byteArrayOf(
@@ -35,8 +44,9 @@ class TemporaryScanStoreInstrumentedTest : InstrumentationTestCase() {
         source.delete()
     }
 
-    fun testRejectsNonJpegAndLeavesNoOwnedAsset() {
-        val context = instrumentation.targetContext
+    @Test
+    fun rejectsNonJpegAndLeavesNoOwnedAsset() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
         val source = File(context.cacheDir, "synthetic-invalid.bin")
         source.writeBytes(byteArrayOf(0x01, 0x02, 0x03, 0x04))
         val store = TemporaryScanStore(context)
