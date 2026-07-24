@@ -1,0 +1,32 @@
+name: Android CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  android-build:
+    name: Android build, lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Build, lint and test
+        run: |
+          python3 scripts/validate_android_permissions.py
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace --write-verification-metadata sha256 --write-locks \
+            :spike-capture:assembleDebug \
+            :spike-capture:assembleDebugAndroidTest \
+            :spike-capture:lintDebug \
+            :spike-capture:testDebugUnitTest
+          python3 scripts/emit_gradle_evidence.py
