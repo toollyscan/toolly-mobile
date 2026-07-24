@@ -11,4 +11,15 @@ data class ScanConfig(
     val maxPages: Int = 10,
     /** Whether the scanner UI should offer gallery import in addition to live camera. */
     val galleryImportEnabled: Boolean = false,
-)
+) {
+    init {
+        require(maxPages in MIN_PAGES..MAX_PAGES) {
+            "maxPages must be between $MIN_PAGES and $MAX_PAGES"
+        }
+    }
+
+    companion object {
+        const val MIN_PAGES = 1
+        const val MAX_PAGES = 50
+    }
+}
