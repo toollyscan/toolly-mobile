@@ -263,7 +263,7 @@ def _validate_exception_entry(exc: object) -> str | None:
     - 'expires_at' must be a valid ISO date (checked in _load_exceptions).
     """
     if not isinstance(exc, dict):
-        return "exception entry is not a JSON object"
+        return f"exception entry is not a JSON object (got {type(exc).__name__})"
     exc_id = exc.get("id")
     if not isinstance(exc_id, str) or not exc_id.strip():
         return "exception missing non-empty 'id'"
@@ -319,7 +319,7 @@ def _load_exceptions(path: Path) -> list[dict]:
                 file=sys.stderr,
             )
             continue
-        if expires <= today:
+        if expires < today:
             print(
                 f"WARNING: Exception '{exc.get('id')}' expired {expires}; "
                 f"treating as inactive.",
@@ -710,7 +710,7 @@ def _self_test() -> list[str]:
         exc_path.write_text(json.dumps({
             "schema_version": 1,
             "exceptions": [
-                _good_exc({"id": "valid-exc", "expires_at": future_date}),
+                _good_exc({"id": "valid-exc"}),
                 _good_exc({
                     "id": "expired-exc",
                     "expires_at": past_date,
