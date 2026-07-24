@@ -10,7 +10,9 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.spike.capture.domain.DocumentScanner
+import com.toolly.spike.capture.domain.FallbackDocumentScanner
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
+import com.toolly.spike.capture.mlkit.TemporaryScanStore
 import kotlinx.coroutines.launch
 
 /**
@@ -34,15 +36,24 @@ class CaptureSpikeActivity : ComponentActivity() {
     }
 
     private lateinit var scanner: DocumentScanner
+    private lateinit var temporaryStore: TemporaryScanStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        temporaryStore = TemporaryScanStore(applicationContext)
 
         scanner = if (isPlayServicesAvailable()) {
-            MlKitDocumentScannerAdapter(activity = this).also { adapter ->
+            val primary = MlKitDocumentScannerAdapter(
+                activity = this,
+                temporaryStore = temporaryStore,
+            ).also { adapter ->
                 adapter.setLauncher(scanLauncher)
                 mlKitAdapter = adapter
             }
+            FallbackDocumentScanner(
+                primary = primary,
+                fallback = CameraXDocumentScannerAdapter(),
+            )
         } else {
             CameraXDocumentScannerAdapter()
         }
@@ -56,9 +67,17 @@ class CaptureSpikeActivity : ComponentActivity() {
                             onResult(result)
                         }
                     },
+                    resolveAsset = temporaryStore::resolve,
+                    onReleaseAssets = temporaryStore::release,
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        mlKitAdapter?.close()
+        if (::temporaryStore.isInitialized) temporaryStore.close()
+        super.onDestroy()
     }
 
     private fun isPlayServicesAvailable(): Boolean =
