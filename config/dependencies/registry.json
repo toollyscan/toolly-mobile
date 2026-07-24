@@ -149,7 +149,7 @@
       "id": "gradle-plugin-kotlin-android",
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.android",
-      "requested_version": "2.2.20",
+      "requested_version": "2.3.20",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Android compiler plugin — enables Kotlin compilation for the spike module.",
@@ -167,7 +167,7 @@
         "last_reviewed_at": "2026-07-24",
         "result": "no_known_critical_high",
         "sources": [
-          "https://github.com/JetBrains/kotlin/releases/tag/v2.2.20",
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
           "https://kotlinlang.org/docs/gradle-configure-project.html"
         ]
       },
@@ -193,7 +193,7 @@
       "id": "gradle-plugin-kotlin-compose",
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.plugin.compose",
-      "requested_version": "2.2.20",
+      "requested_version": "2.3.20",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Compose compiler plugin (Kotlin 2.0+) — enables @Composable annotation processing for the adaptive spike UI. Same version as the Kotlin toolchain.",
@@ -211,7 +211,7 @@
         "last_reviewed_at": "2026-07-24",
         "result": "no_known_critical_high",
         "sources": [
-          "https://github.com/JetBrains/kotlin/releases/tag/v2.2.20",
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
           "https://kotlinlang.org/docs/gradle-configure-project.html"
         ]
       },
@@ -731,7 +731,7 @@
         "last_reviewed_at": "2026-07-24",
         "result": "no_known_critical_high",
         "sources": [
-          "https://github.com/JetBrains/kotlin/releases/tag/v2.2.20",
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
           "https://kotlinlang.org/docs/gradle-configure-project.html"
         ]
       },
@@ -751,12 +751,12 @@
       "id": "gradle-plugin-kotlin-multiplatform",
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.multiplatform",
-      "requested_version": "2.2.20",
+      "requested_version": "2.3.20",
       "immutable_ref": "gradle/verification-metadata.xml+shared-ui/gradle.lockfile",
       "purpose": "Compile Toolly-owned common models, presentation state and iOS/Android framework targets.",
       "upstream": "https://github.com/JetBrains/kotlin",
       "licence_spdx": "Apache-2.0",
-      "licence_evidence": "https://github.com/JetBrains/kotlin/blob/v2.2.20/license/LICENSE.txt",
+      "licence_evidence": "https://github.com/JetBrains/kotlin/blob/v2.3.20/license/LICENSE.txt",
       "alternatives": [
         "Separate Kotlin Android and Swift implementations, rejected by ADR-0001 because it increases product divergence."
       ],

@@ -4,7 +4,7 @@
 
 [versions]
 agp = "8.7.3"
-kotlin = "2.2.20"
+kotlin = "2.3.20"
 compose-multiplatform = "1.11.1"
 mlkit-document-scanner = "16.0.0"
 compose-ui = "1.7.8"
