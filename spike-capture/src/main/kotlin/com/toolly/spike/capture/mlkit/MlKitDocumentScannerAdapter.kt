@@ -1,117 +1,125 @@
 package com.toolly.spike.capture.mlkit
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import com.toolly.spike.capture.domain.DocumentScanner
 import com.toolly.spike.capture.domain.ScanConfig
+import com.toolly.spike.capture.domain.ScanError
 import com.toolly.spike.capture.domain.ScanResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
-/**
- * [DocumentScanner] adapter backed by Google ML Kit Document Scanner.
- *
- * ## Lifecycle contract
- * The [launcher] must be registered via [androidx.activity.ComponentActivity.registerForActivityResult]
- * before the Activity reaches STARTED. Typical usage:
- *
- * ```kotlin
- * private val adapter = MlKitDocumentScannerAdapter(activity = this)
- * private val launcher = registerForActivityResult(StartIntentSenderForResult()) { result ->
- *     adapter.onActivityResult(result.resultCode, result.data)
- * }
- * // Pass launcher to adapter after construction:
- * // adapter.setLauncher(launcher)
- * ```
- *
- * ## Fallback selection
- * [MlKitDocumentScannerAdapter] is selected when Google Play Services are available and the
- * device meets the minimum ML Kit Document Scanner capability requirement. When either
- * condition is not met, [com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter]
- * is used instead.
- *
- * ## Privacy note
- * This adapter processes synthetic test-document images during the spike. No production
- * user documents, PII, tokens or credentials flow through this adapter. Temporary JPEG
- * files written by ML Kit are held only until [ScanResult] is delivered, then deleted
- * by the caller.
- */
+/** Android adapter for Google ML Kit Document Scanner. */
 class MlKitDocumentScannerAdapter(
     private val activity: Activity,
+    private val temporaryStore: TemporaryScanStore,
     private var launcher: ActivityResultLauncher<IntentSenderRequest>? = null,
-) : DocumentScanner {
+) : DocumentScanner, AutoCloseable {
 
-    private var pendingResult: CompletableDeferred<Pair<Int, List<String>>>? = null
+    private val active = AtomicBoolean(false)
+    private val closed = AtomicBoolean(false)
+    private val pendingResult = AtomicReference<CompletableDeferred<RawScanResult>?>(null)
 
-    companion object {
-        private const val TAG = "MlKitDocumentScannerAdapter"
-    }
-
-    /** Called by the hosting Activity when [ActivityResultLauncher] is ready. */
     fun setLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+        check(!closed.get()) { "Adapter is closed" }
         this.launcher = launcher
     }
 
-    /**
-     * Called by the hosting Activity's [ActivityResultLauncher] callback to deliver the
-     * scan result. The [resultCode] and [intent] originate from the ML Kit scanner UI.
-     *
-     * No document pixels, paths or personal data are logged here.
-     */
-    fun onActivityResult(resultCode: Int, data: android.content.Intent?) {
-        val pageUris: List<String> = if (resultCode == Activity.RESULT_OK && data != null) {
+    /** Activity-result callback. Provider URIs remain inside the Android adapter. */
+    fun onActivityResult(resultCode: Int, data: Intent?) {
+        val pageUris = if (resultCode == Activity.RESULT_OK && data != null) {
             GmsDocumentScanningResult.fromActivityResultIntent(data)
                 ?.pages
-                ?.mapNotNull { it.imageUri?.toString() }
+                ?.mapNotNull { it.imageUri }
                 .orEmpty()
         } else {
             emptyList()
         }
-        pendingResult?.complete(Pair(resultCode, pageUris))
+        pendingResult.getAndSet(null)?.complete(RawScanResult(resultCode, pageUris))
     }
 
     override suspend fun launch(config: ScanConfig): ScanResult {
+        if (closed.get()) return ScanResult.Failure(ScanError.LifecycleEnded)
+        if (!active.compareAndSet(false, true)) {
+            return ScanResult.Failure(ScanError.Busy)
+        }
+
         val activeLauncher = launcher
-            ?: return MlKitResultMapper.mapServiceUnavailable()
+        if (activeLauncher == null) {
+            active.set(false)
+            return MlKitResultMapper.mapServiceUnavailable()
+        }
 
-        val options = GmsDocumentScannerOptions.Builder()
-            .setGalleryImportAllowed(config.galleryImportEnabled)
-            .setPageLimit(config.maxPages)
-            .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
-            .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
-            .build()
-
-        val deferred = CompletableDeferred<Pair<Int, List<String>>>()
-        pendingResult = deferred
+        val deferred = CompletableDeferred<RawScanResult>()
+        if (!pendingResult.compareAndSet(null, deferred)) {
+            active.set(false)
+            return ScanResult.Failure(ScanError.Busy)
+        }
 
         return try {
+            val options = GmsDocumentScannerOptions.Builder()
+                .setGalleryImportAllowed(config.galleryImportEnabled)
+                .setPageLimit(config.maxPages)
+                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                .build()
             val client = GmsDocumentScanning.getClient(options)
-            val intentSenderResult = withContext(Dispatchers.IO) {
-                com.google.android.gms.tasks.Tasks.await(
-                    client.getStartScanIntent(activity)
-                )
+            val intentSender = withContext(Dispatchers.IO) {
+                Tasks.await(client.getStartScanIntent(activity))
             }
-            activeLauncher.launch(
-                IntentSenderRequest.Builder(intentSenderResult.intentSender).build()
-            )
-            val (resultCode, pageUris) = deferred.await()
-            MlKitResultMapper.map(resultCode, pageUris)
-        } catch (e: Exception) {
-            deferred.cancel()
-            // Log the exception class name at debug level for diagnostics.
-            // The exception message is not logged because it may contain device-specific
-            // or Play Services initialization details that could include non-sensitive
-            // but unpredictable content. Class name is sufficient to identify the failure
-            // category (PlayServices, MlKitException, CancellationException, etc.).
-            android.util.Log.d(TAG, "Capture initialization failed: ${e.javaClass.simpleName}")
+            activeLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+
+            val rawResult = deferred.await()
+            if (rawResult.resultCode != Activity.RESULT_OK || rawResult.pageUris.isEmpty()) {
+                MlKitResultMapper.map(rawResult.resultCode, emptyList())
+            } else {
+                withContext(Dispatchers.IO) {
+                    when (val imported = temporaryStore.importPages(rawResult.pageUris)) {
+                        is TemporaryScanStore.ImportOutcome.Success ->
+                            MlKitResultMapper.map(rawResult.resultCode, imported.assetIds)
+                        is TemporaryScanStore.ImportOutcome.Partial ->
+                            MlKitResultMapper.mapPartialCapture(
+                                imported.assetIds,
+                                imported.reason,
+                            )
+                        TemporaryScanStore.ImportOutcome.Failure ->
+                            ScanResult.Failure(ScanError.StorageFailure)
+                    }
+                }
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
             MlKitResultMapper.mapServiceUnavailable()
         } finally {
-            pendingResult = null
+            pendingResult.compareAndSet(deferred, null)
+            active.set(false)
         }
     }
+
+    override fun close() {
+        if (closed.compareAndSet(false, true)) {
+            pendingResult.getAndSet(null)?.cancel(
+                CancellationException("Capture host lifecycle ended"),
+            )
+            active.set(false)
+            launcher = null
+        }
+    }
+
+    private data class RawScanResult(
+        val resultCode: Int,
+        val pageUris: List<Uri>,
+    )
 }
