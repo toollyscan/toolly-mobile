@@ -537,6 +537,93 @@
         "runBlocking (no virtual time or cancellation testing)"
       ],
       "removal_plan": "Removed with the spike module or replaced when the test framework is standardised for production."
+    },
+    {
+      "id": "gradle-test-androidx-junit",
+      "ecosystem": "gradle-library",
+      "immutable_ref": "artifact-checksums-pending-ci-verification",
+      "scope": "androidTest",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/test",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/android/android-test/blob/main/LICENSE",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/test"
+        ]
+      },
+      "transitives": {
+        "status": "resolved_by_gradle_verification_and_lock",
+        "count": null
+      },
+      "size": {
+        "status": "test_only_not_packaged_in_production_apk",
+        "delta_bytes": 0
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Legacy android.test APIs are unavailable in current SDK stubs"
+      ],
+      "removal_plan": "Remove with the instrumented test source set; never promote to implementation/runtime scope.",
+      "coordinate": "androidx.test.ext:junit",
+      "requested_version": "1.3.0",
+      "purpose": "Google AndroidX JUnit extension for compiling and running Toolly manifest and temporary-storage instrumented tests. Test-only; not shipped in the production APK."
+    },
+    {
+      "id": "gradle-test-androidx-runner",
+      "ecosystem": "gradle-library",
+      "immutable_ref": "artifact-checksums-pending-ci-verification",
+      "scope": "androidTest",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/test",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/android/android-test/blob/main/LICENSE",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/test"
+        ]
+      },
+      "transitives": {
+        "status": "resolved_by_gradle_verification_and_lock",
+        "count": null
+      },
+      "size": {
+        "status": "test_only_not_packaged_in_production_apk",
+        "delta_bytes": 0
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Legacy android.test APIs are unavailable in current SDK stubs"
+      ],
+      "removal_plan": "Remove with the instrumented test source set; never promote to implementation/runtime scope.",
+      "coordinate": "androidx.test:runner",
+      "requested_version": "1.7.0",
+      "purpose": "Google AndroidX instrumentation runner for executing Toolly Android device tests. Test-only; not shipped in the production APK."
     }
   ]
 }
+
