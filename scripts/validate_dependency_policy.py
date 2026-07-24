@@ -176,20 +176,31 @@ def validate_registry(
             errors.append(f"{item_location}: GitHub Action requires full commit SHA")
         if ecosystem == "container-action" and not SHA256_REF.fullmatch(immutable_ref):
             errors.append(f"{item_location}: container requires sha256 digest")
-        if entry.get("approval_status") == "approved":
+        approval_status = entry.get("approval_status")
+        approved_at: dt.date | None = None
+        if approval_status == "approved":
             if entry.get("licence_spdx") not in allowed_licences:
                 errors.append(
                     f"{item_location}: approved dependency licence is not engineering-allowed"
                 )
             if not entry.get("approved_by"):
                 errors.append(f"{item_location}: approved_by is required")
-        elif entry.get("approval_status") not in {"conditional", "rejected"}:
+            approved_at, date_errors = parse_date(
+                entry.get("approved_at"), f"{item_location}:approved_at"
+            )
+            errors.extend(date_errors)
+        elif approval_status in {"conditional", "rejected"}:
+            if entry.get("approved_by") is not None:
+                errors.append(
+                    f"{item_location}: approved_by must be null until approved"
+                )
+            if entry.get("approved_at") is not None:
+                errors.append(
+                    f"{item_location}: approved_at must be null until approved"
+                )
+        else:
             errors.append(f"{item_location}: invalid approval_status")
 
-        approved_at, date_errors = parse_date(
-            entry.get("approved_at"), f"{item_location}:approved_at"
-        )
-        errors.extend(date_errors)
         review_due, date_errors = parse_date(
             entry.get("review_due_at"), f"{item_location}:review_due_at"
         )
