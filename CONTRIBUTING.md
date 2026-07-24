@@ -37,8 +37,17 @@ Be respectful and constructive. Harassment of any kind is not tolerated.
 3. Run the documentation workflow locally before opening the PR:
 
    ```bash
-   # Markdown linting
-   npx markdownlint-cli2 "**/*.md"
+   # Markdown linting (Toolly-owned Python script)
+   python3 scripts/validate_markdown.py --self-test
+   python3 scripts/validate_markdown.py
+
+   # Secret scan (tracked files only for local runs)
+   python3 scripts/scan_secrets.py --self-test
+   python3 scripts/scan_secrets.py --no-history
+
+   # CI trust-policy enforcement
+   python3 scripts/validate_ci_trust_policy.py --self-test
+   python3 scripts/validate_ci_trust_policy.py
 
    # Benchmark, dependency and Firebase governance
    python3 scripts/validate_benchmark_evidence.py --self-test

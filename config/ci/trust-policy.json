@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "policy_id": "toolly-ci-trust-policy",
+  "policy_version": "1.0.0",
+  "description": "Toolly CI first-party trust boundary. Only Toolly-owned scripts and official GitHub-maintained actions pinned to full immutable commit SHAs are permitted in CI workflows.",
+  "approved_action_owners": [
+    "actions"
+  ],
+  "require_full_sha_for_actions": true,
+  "prohibited_workflow_patterns": [
+    "docker://",
+    "curl ",
+    "curl\t",
+    "wget ",
+    "wget\t",
+    "pip install ",
+    "npm install ",
+    "npx ",
+    "bash <(",
+    "sh <(",
+    "eval "
+  ],
+  "approved_script_paths": [
+    "scripts/"
+  ],
+  "registry_path": "config/dependencies/registry.json",
+  "notes": [
+    "Community GitHub Actions are prohibited regardless of pinning.",
+    "Container actions (docker://) are prohibited regardless of digest pinning.",
+    "Mutable action references (tags, branches, HEAD) are prohibited.",
+    "Remote-script execution (curl|wget piped to shell, eval, dynamic pip/npm/npx installs) is prohibited.",
+    "All external CI dependencies must appear in the dependency registry.",
+    "This policy is enforced by scripts/validate_ci_trust_policy.py on every PR."
+  ]
+}

@@ -17,7 +17,7 @@ Navigate to **Settings → Branches → Add rule** and apply the following to th
 | Dismiss stale pull request approvals when new commits are pushed | Enabled |
 | Require review from Code Owners | Enabled |
 | Require status checks to pass before merging | Enabled |
-| Required status checks | `markdown-lint`, `secret-scan` |
+| Required status checks | `markdown-lint`, `benchmark-contracts`, `dependency-policy`, `firebase-governance`, `ci-trust-policy`, `secret-scan` |
 | Require branches to be up to date before merging | Enabled |
 | Restrict who can push to matching branches | `shivayogih` only |
 | Allow force pushes | Disabled |

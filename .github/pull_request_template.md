@@ -78,7 +78,8 @@ Closes #
 
 ```bash
 # Example
-npx markdownlint-cli2 "**/*.md"
+python3 scripts/validate_markdown.py --self-test
+python3 scripts/validate_markdown.py
 ```
 
 ---
