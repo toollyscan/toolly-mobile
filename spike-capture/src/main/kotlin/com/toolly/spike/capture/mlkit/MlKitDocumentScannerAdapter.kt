@@ -63,9 +63,9 @@ class MlKitDocumentScannerAdapter(
      *
      * No document pixels, paths or personal data are logged here.
      */
-    fun onActivityResult(resultCode: Int, intent: android.content.Intent?) {
-        val pageUris: List<String> = if (resultCode == Activity.RESULT_OK && intent != null) {
-            GmsDocumentScanningResult.fromActivityResultIntent(intent)
+    fun onActivityResult(resultCode: Int, data: android.content.Intent?) {
+        val pageUris: List<String> = if (resultCode == Activity.RESULT_OK && data != null) {
+            GmsDocumentScanningResult.fromActivityResultIntent(data)
                 ?.pages
                 ?.mapNotNull { it.imageUri?.toString() }
                 .orEmpty()
