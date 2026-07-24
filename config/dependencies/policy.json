@@ -119,6 +119,16 @@
         "/billing/",
         "/composition/"
       ]
+    },
+    {
+      "id": "sqlcipher-vault-adapter-only",
+      "tokens": [
+        "net.zetetic.database"
+      ],
+      "allowed_path_fragments": [
+        "/vault/metadata/",
+        "adapter-vault-room-sqlcipher"
+      ]
     }
   ],
   "domain_forbidden_tokens": [

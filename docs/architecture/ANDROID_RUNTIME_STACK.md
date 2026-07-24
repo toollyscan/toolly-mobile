@@ -19,7 +19,7 @@ verification and SBOM requirements are satisfied.
 | Crop and enhancement | ML Kit first; versioned Toolly recipe | `PageProcessor` | Preserve original, record recipe/version and verify deterministic export |
 | Metadata database | Room with current SQLCipher Android | `VaultMetadataStore` | Keystore-protected random passphrase, migrations, corruption and recovery |
 | Asset vault | App-private files with Toolly encryption envelope | `VaultAssetStore` | Authenticated encryption, unique nonces, atomic writes and no plaintext backup |
-| Images and thumbnails | Coil 3 Compose | `VaultImageLoader` | Custom encrypted fetcher, no decrypted disk cache, bounded memory cache |
+| Images and thumbnails | Android bitmap APIs | `VaultImageLoader` | Off-main bounded decode, no persistent plaintext cache, clear memory on vault lock |
 | Document library | Compose Material 3 Adaptive, Paging and Flow | `DocumentRepository` | Compact/medium/expanded layouts, accessibility and stable paging keys |
 | PDF preview | Android `PdfRenderer` | `PdfPreviewer` | Worker-thread rendering, bounded bitmap size and untrusted-file handling |
 | PDF generation | Android `PdfDocument` | `DocumentExporter` | Background execution, cancellation, atomic finalization and cleanup |
@@ -38,11 +38,10 @@ verification and SBOM requirements are satisfied.
 
 ## Dependency rules
 
-1. Domain and use-case modules import no Android, Google Play services, Firebase, Coil, Room or
-   SQLCipher types.
+1. Domain and use-case modules import no Android, Google Play services, Firebase, Room or SQLCipher types.
 2. Every SDK has one adapter owned by a platform or infrastructure module.
 3. SDK-specific models are mapped at the adapter boundary.
-4. No decrypted page or thumbnail is stored in Coil disk cache.
+4. No decrypted page or thumbnail is stored in any persistent image cache.
 5. SQLCipher encrypts the database; Toolly asset encryption separately protects binary files.
 6. Firebase receives no plaintext document page, thumbnail, title, OCR text or encryption key.
 7. Notifications receive no sensitive document data.
@@ -68,7 +67,7 @@ adapter-scanner-mlkit
 adapter-scanner-camerax
 adapter-vault-room-sqlcipher
 adapter-vault-files
-adapter-image-coil
+adapter-image-platform
 adapter-firebase
 adapter-notifications
 ```

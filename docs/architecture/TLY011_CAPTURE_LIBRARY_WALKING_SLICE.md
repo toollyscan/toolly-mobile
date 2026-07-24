@@ -65,7 +65,7 @@ changing product UI and use cases.
 - invalid or duplicate captured pages fail before persistence;
 - incomplete writes are never listed;
 - committed documents reopen through a new repository instance;
-- Coil disk and memory caches remain disabled for document pixels;
+- Android platform decoding creates no persistent plaintext image cache;
 - the manifest requests no Android permission;
 - build, lint, unit tests and instrumented-test APK compilation pass;
 - debug APKs remain downloadable from first-party GitHub Actions.

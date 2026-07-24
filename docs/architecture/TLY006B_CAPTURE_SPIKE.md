@@ -78,8 +78,8 @@ The spike never uploads these files or promotes them into a persistent vault.
 | `< 600 dp` | Stacked capture controls and adaptive thumbnail grid |
 | `>= 600 dp` | Fixed controls pane and flexible thumbnail pane |
 
-Coil receives app-private `File` objects resolved at the UI adapter boundary. Disk and
-memory caching are explicitly disabled for spike document pixels. Page descriptions
+Android platform bitmap decoding receives app-private `File` objects at the UI adapter boundary.
+Decoding is bounded and off-main, with no persistent plaintext cache. Page descriptions
 contain only ordinal numbers, and status changes use a polite accessibility live region.
 
 ## Result contract

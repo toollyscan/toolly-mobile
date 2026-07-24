@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "registry_id": "toolly-dependency-register",
-  "registry_version": "1.0.0",
+  "registry_version": "1.1.0",
   "entries": [
     {
       "id": "ci-actions-checkout",
@@ -415,12 +415,12 @@
       "requested_version": "3.1.0",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
-      "purpose": "Coil 3.1 Compose integration — loads temporary JPEG thumbnails from Toolly-owned app-private files. Disk and memory caches are explicitly disabled for spike document pixels. Version 3.1 matches the reviewed Kotlin 2.1, Compose 1.7 and API 35 toolchain.",
+      "purpose": "Historical Coil candidate, rejected by the data-path dependency policy. Android platform decoding replaces it.",
       "owner": "shivayogih",
       "upstream": "https://github.com/coil-kt/coil",
       "licence_spdx": "Apache-2.0",
       "licence_evidence": "https://github.com/coil-kt/coil/blob/main/LICENSE.txt",
-      "approval_status": "conditional",
+      "approval_status": "rejected",
       "approval_issue": 22,
       "approved_by": null,
       "approved_at": null,
@@ -452,7 +452,7 @@
         "Picasso",
         "Manual Bitmap loading — no async support"
       ],
-      "removal_plan": "Replaced when spike module is promoted to production or deleted. Production uses a Toolly-owned Coil fetcher with vault decryption and no disk cache."
+      "removal_plan": "Removed from the version catalog, Android runtime and document UI in TLY-006F."
     },
     {
       "id": "gradle-lib-coroutines-android",
@@ -805,6 +805,226 @@
         "Separate Jetpack Compose and SwiftUI product screens, rejected by ADR-0001."
       ],
       "removal_plan": "Replace with native UI implementations only through an approved parity-preserving ADR and migration."
+    },
+    {
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 26,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/google/ksp/releases/tag/2.3.9",
+          "https://github.com/google/ksp/security"
+        ]
+      },
+      "transitives": {
+        "status": "lock_and_checksum_generation_pending",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-plugin-ksp",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "com.google.devtools.ksp",
+      "requested_version": "2.3.9",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "build",
+      "purpose": "Google KSP2 processor host for Room schema and DAO generation.",
+      "upstream": "https://github.com/google/ksp",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/google/ksp/blob/2.3.9/LICENSE",
+      "alternatives": [
+        "Room annotation processing with KAPT, rejected because KSP2 is the maintained Kotlin path."
+      ],
+      "removal_plan": "Remove with Room code generation or replace through an approved persistence adapter migration."
+    },
+    {
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 26,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/room",
+          "https://android.googlesource.com/platform/frameworks/support/"
+        ]
+      },
+      "transitives": {
+        "status": "lock_and_checksum_generation_pending",
+        "count": null
+      },
+      "size": {
+        "status": "pending_measured_release_delta",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-lib-room-runtime",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.room:room-runtime",
+      "requested_version": "2.8.4",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Google AndroidX metadata schema, DAO and migration boundary for the local vault.",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/room",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://android.googlesource.com/platform/frameworks/support/+/androidx-main/LICENSE.txt",
+      "alternatives": [
+        "Direct SupportSQLite APIs increase migration and query correctness risk."
+      ],
+      "removal_plan": "Export canonical Toolly metadata through VaultMetadataStore and import into the replacement adapter."
+    },
+    {
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 26,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/room"
+        ]
+      },
+      "transitives": {
+        "status": "lock_and_checksum_generation_pending",
+        "count": null
+      },
+      "size": {
+        "status": "not_packaged_compile_only",
+        "delta_bytes": 0
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-lib-room-compiler",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.room:room-compiler",
+      "requested_version": "2.8.4",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "build",
+      "purpose": "Google AndroidX compile-time Room schema and DAO generator.",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/room",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://android.googlesource.com/platform/frameworks/support/+/androidx-main/LICENSE.txt",
+      "alternatives": [
+        "Handwritten DAO mapping, rejected because it increases schema drift risk."
+      ],
+      "removal_plan": "Remove with Room; generated code is never a domain contract."
+    },
+    {
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 26,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/sqlite"
+        ]
+      },
+      "transitives": {
+        "status": "lock_and_checksum_generation_pending",
+        "count": null
+      },
+      "size": {
+        "status": "pending_measured_release_delta",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-lib-androidx-sqlite",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.sqlite:sqlite",
+      "requested_version": "2.6.2",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Google AndroidX SupportSQLite API required by Room and current SQLCipher Android.",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/sqlite",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://android.googlesource.com/platform/frameworks/support/+/androidx-main/LICENSE.txt",
+      "alternatives": [
+        "Android framework SQLite cannot supply the SupportSQLite integration required by Room."
+      ],
+      "removal_plan": "Remove with the Room/SQLCipher adapter after canonical metadata migration."
+    },
+    {
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 26,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/sqlcipher/sqlcipher-android/releases/tag/v4.15.0",
+          "https://github.com/sqlcipher/sqlcipher-android/security",
+          "https://www.zetetic.net/blog/2026/04/28/sqlcipher-4.15.0-release/"
+        ]
+      },
+      "transitives": {
+        "status": "lock_and_checksum_generation_pending",
+        "count": null
+      },
+      "size": {
+        "status": "pending_measured_release_delta",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-lib-sqlcipher-android",
+      "ecosystem": "gradle-library",
+      "coordinate": "net.zetetic:sqlcipher-android",
+      "requested_version": "4.15.0",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Sole approved non-platform/non-Google persistent-data dependency; encrypts the Android Room metadata database locally.",
+      "upstream": "https://github.com/sqlcipher/sqlcipher-android",
+      "licence_spdx": "BSD-3-Clause",
+      "licence_evidence": "https://www.zetetic.net/sqlcipher/license/",
+      "alternatives": [
+        "Custom encrypted database engine is prohibited.",
+        "Unencrypted Room violates Toolly's local-vault security objective."
+      ],
+      "removal_plan": "Use VaultMetadataStore export/re-encrypt/import or dual-read/write-new migration; SQLCipher APIs remain isolated to the Android vault adapter."
     }
   ]
 }

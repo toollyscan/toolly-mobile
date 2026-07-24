@@ -36,17 +36,23 @@ tests.
 
 ### Image loading
 
-Coil 3 is the initial Compose image loader. Glide is not added at the same time.
+Android platform bitmap decoding is the initial image path. Coil, Glide and other third-party image
+loaders are not used for document pixels. Decoding runs off the main thread, applies bounded sample
+sizes and creates no persistent plaintext cache.
 
-Vault images use a Toolly-owned Coil fetcher that reads through the vault port and decrypts into
-memory. Plaintext vault paths are never exposed to UI code. Disk caching is disabled for decrypted
-document pages and thumbnails. Memory caching is bounded and cleared when the vault locks or the
-session ends.
+The UI reads through a Toolly-owned image boundary. When encrypted assets replace the current
+candidate files, decryption remains inside the vault adapter and only bounded in-memory pixels reach
+the UI. Plaintext vault paths never enter shared domain or presentation contracts.
 
 ### Encrypted local storage
 
-Room provides the metadata and query model. The current `sqlcipher-android` package provides
-database encryption; the deprecated `android-database-sqlcipher` package is prohibited.
+Room provides the metadata and query model. SQLCipher Community Edition is the sole approved
+non-platform, non-Google runtime dependency permitted to access the persistent local-vault
+database. It runs locally with no account, licence key, paid service or runtime network connection.
+The current `sqlcipher-android` package is used; the deprecated
+`android-database-sqlcipher` package is prohibited. The narrow exception, attribution,
+supply-chain and replacement controls are defined in
+[SQLCipher Dependency Policy](../security/SQLCIPHER_DEPENDENCY_POLICY.md).
 
 A random high-entropy SQLCipher passphrase is protected by Android Keystore. It is not hardcoded,
 derived directly from a short PIN, stored in DataStore or sent to Firebase. Page images,
@@ -105,7 +111,7 @@ Platform SDKs stay in adapters:
 
 | Platform | Initial adapters |
 |----------|------------------|
-| Android phone/tablet | ML Kit, CameraX fallback, SQLCipher, Keystore, Coil and Firebase Android |
+| Android phone/tablet | ML Kit, CameraX fallback, SQLCipher, Keystore, Android platform image decoding and Firebase Android |
 | iPhone/iPad | Native camera/scanner, Keychain/Secure Enclave, native encrypted storage and Firebase Apple |
 | Web, future | Browser capture/import, Web Crypto, browser storage and provider adapters |
 
@@ -121,7 +127,6 @@ themselves:
 | Capability | Candidate |
 |------------|-----------|
 | Scanner | `com.google.android.gms:play-services-mlkit-document-scanner:16.0.0` |
-| Compose image loading | `io.coil-kt.coil3:coil-compose:3.5.0` |
 | Encrypted SQLite | `net.zetetic:sqlcipher-android:4.15.0@aar` |
 | Firebase compatibility | `com.google.firebase:firebase-bom:34.16.0` |
 
@@ -149,7 +154,7 @@ flowchart LR
 - The first Android slice can use a mature scanner while retaining a fallback and replacement
   boundary.
 - SQLCipher and file-level encryption provide separate database and asset protection.
-- Coil simplifies adaptive Compose rendering without allowing plaintext disk caching.
+- Platform image decoding avoids another data-path dependency and persistent plaintext image caching.
 - Firebase capabilities are available without making Firebase the product architecture.
 - Vendor metrics and processing disclosures must remain accurate; on-device processing does not
   mean that every SDK emits zero operational metadata.
@@ -165,7 +170,7 @@ Before production approval:
 2. Verify ML Kit first-use, offline-after-install, unsupported-device and low-memory behavior.
 3. Verify CameraX/manual fallback behavior.
 4. Verify SQLCipher migration, corruption, key invalidation, 16 KB pages and recovery.
-5. Verify Coil never writes decrypted vault content to disk cache.
+5. Verify platform image decoding creates no persistent plaintext cache and stays within memory bounds.
 6. Verify Firebase rules, App Check, deletion, consent withdrawal and encrypted-backup boundaries.
 7. Verify notification payload and marketing-consent tests.
 8. Verify compact, medium and expanded layouts on physical phones and tablets.
@@ -176,7 +181,7 @@ Before production approval:
 
 - [ML Kit Document Scanner](https://developers.google.com/ml-kit/vision/doc-scanner/android)
 - [ML Kit terms and privacy](https://developers.google.com/ml-kit/terms)
-- [Coil documentation](https://coil-kt.github.io/coil/)
+- [SQLCipher dependency policy](../security/SQLCIPHER_DEPENDENCY_POLICY.md)
 - [SQLCipher for Android](https://github.com/sqlcipher/sqlcipher-android)
 - [Firebase Android setup](https://firebase.google.com/docs/android/setup)
 - [Android adaptive apps](https://developer.android.com/develop/adaptive-apps)

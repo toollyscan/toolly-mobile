@@ -1,20 +1,24 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// Build script for the TLY-006B capture spike module.
-//
-// Coordinates use version-catalog aliases only; no direct version literals appear here.
-// Every coordinate below has a corresponding approved entry in config/dependencies/registry.json.
+// Build script for the Android capture and encrypted-vault evidence application.
+// Coordinates use version-catalog aliases only and are governed by the dependency registry.
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.generateKotlin", "true")
 }
 
 android {
@@ -42,6 +46,10 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = false
     }
+
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 dependencyLocking {
@@ -49,21 +57,24 @@ dependencyLocking {
 }
 
 dependencies {
-    // ML Kit Document Scanner (primary capture path)
+    // Google ML Kit Document Scanner (primary capture path).
     implementation(libs.mlkit.document.scanner)
 
-    // Compose UI
+    // Google AndroidX UI.
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.activity.compose)
 
-    // Coil — thumbnail display; disk cache disabled for all vault-origin content (ADR-0011)
-    implementation(libs.coil.compose)
-
-    // Coroutines
+    // Kotlin coroutines.
     implementation(libs.coroutines.android)
 
-    // Unit tests — JVM only, no Robolectric required for domain and mapper tests
+    // Encrypted metadata candidate. SQLCipher is isolated to the Android vault adapter.
+    implementation(libs.room.runtime)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.sqlcipher.android)
+    ksp(libs.room.compiler)
+
+    // Unit tests.
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
 
