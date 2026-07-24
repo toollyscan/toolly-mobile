@@ -8,7 +8,7 @@
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:label="Toolly Capture Spike"
+        android:label="Toolly"
         android:supportsRtl="true"
         android:theme="@style/Theme.Toolly.CaptureSpike"
         android:usesCleartextTraffic="false">
