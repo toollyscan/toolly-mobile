@@ -692,7 +692,7 @@
         ]
       },
       "transitives": {
-        "status": "pending_generated_lock_and_checksum_evidence",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -736,7 +736,7 @@
         ]
       },
       "transitives": {
-        "status": "pending_generated_lock_and_checksum_evidence",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -780,7 +780,7 @@
         ]
       },
       "transitives": {
-        "status": "pending_generated_lock_and_checksum_evidence",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
