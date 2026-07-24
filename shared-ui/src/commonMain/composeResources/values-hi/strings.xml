@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Toolly</string>
+    <string name="library_subtitle">आपके दस्तावेज़ ऑफ़लाइन उपलब्ध रहते हैं।</string>
+    <string name="working">काम जारी है</string>
+    <string name="scan_document">दस्तावेज़ स्कैन करें</string>
+    <string name="no_documents">अभी कोई दस्तावेज़ नहीं है</string>
+    <string name="scanned_document">स्कैन किया गया दस्तावेज़</string>
+    <plurals name="document_page_count">
+        <item quantity="one">%1$d पृष्ठ</item>
+        <item quantity="other">%1$d पृष्ठ</item>
+    </plurals>
+    <string name="review_scan">स्कैन की समीक्षा करें</string>
+    <plurals name="review_page_count">
+        <item quantity="one">%1$d स्कैन किया गया पृष्ठ</item>
+        <item quantity="other">%1$d स्कैन किए गए पृष्ठ</item>
+    </plurals>
+    <string name="discard">हटाएँ</string>
+    <string name="save">सहेजें</string>
+    <string name="back">वापस</string>
+</resources>

@@ -60,21 +60,21 @@
     {
       "id": "document-library",
       "android": "candidate",
-      "ios": "pending",
+      "ios": "in-progress",
       "gap_reason": "The merged walking slice currently has an Android composition root.",
       "tracking_issue": 38
     },
     {
       "id": "capture-review",
       "android": "candidate",
-      "ios": "pending",
+      "ios": "in-progress",
       "gap_reason": "The iOS capture adapter and application target are part of TLY-012.",
       "tracking_issue": 38
     },
     {
       "id": "document-viewer",
       "android": "candidate",
-      "ios": "pending",
+      "ios": "in-progress",
       "gap_reason": "Shared Compose UI extraction is part of TLY-012.",
       "tracking_issue": 38
     },
@@ -115,16 +115,16 @@
     },
     {
       "id": "localization",
-      "android": "in-progress",
-      "ios": "pending",
-      "gap_reason": "Android resource extraction begins in TLY-012; shared resources remain pending.",
+      "android": "implemented",
+      "ios": "in-progress",
+      "gap_reason": "Shared Compose resources exist; iOS framework and native-language review evidence remain pending.",
       "tracking_issue": 38
     },
     {
       "id": "accessibility",
       "android": "in-progress",
-      "ios": "pending",
-      "gap_reason": "TalkBack candidates exist; shared semantics and VoiceOver evidence remain pending.",
+      "ios": "in-progress",
+      "gap_reason": "Shared semantics exist; TalkBack and VoiceOver physical-device evidence remains pending.",
       "tracking_issue": 38
     }
   ]

@@ -1,11 +1,11 @@
 # Canonical Gradle dependency and plugin catalog.
 # Every entry here must have a corresponding approved entry in config/dependencies/registry.json.
 # Versions are immutable; dynamic patterns (+, SNAPSHOT, RELEASE, ranges) are prohibited.
-# Spike-capture dependencies are conditionally approved for TLY-006B; see registry.json.
 
 [versions]
 agp = "8.7.3"
-kotlin = "2.1.21"
+kotlin = "2.2.20"
+compose-multiplatform = "1.11.1"
 mlkit-document-scanner = "16.0.0"
 compose-ui = "1.7.8"
 compose-material3 = "1.3.2"
@@ -32,5 +32,8 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }

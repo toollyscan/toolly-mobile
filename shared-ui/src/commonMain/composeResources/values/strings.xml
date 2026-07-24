@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Toolly</string>
+    <string name="library_subtitle">Your documents stay available offline.</string>
+    <string name="working">Working</string>
+    <string name="scan_document">Scan document</string>
+    <string name="no_documents">No documents yet</string>
+    <string name="scanned_document">Scanned document</string>
+    <plurals name="document_page_count">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+    <string name="review_scan">Review scan</string>
+    <plurals name="review_page_count">
+        <item quantity="one">%1$d captured page</item>
+        <item quantity="other">%1$d captured pages</item>
+    </plurals>
+    <string name="discard">Discard</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+</resources>

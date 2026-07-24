@@ -135,10 +135,10 @@
     "org.sqlite"
   ],
   "domain_path_fragments": [
-    "/commonMain/",
     "/domain-model/",
     "/domain-contracts/",
     "/domain-usecases/",
-    "/domain/"
+    "/domain/",
+    "/shared-ui/src/commonMain/kotlin/com/toolly/shared/model/"
   ]
 }
