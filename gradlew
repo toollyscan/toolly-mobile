@@ -28,9 +28,9 @@ if [ ! -f "$WRAPPER_JAR" ] || [ "$(checksum "$WRAPPER_JAR")" != "$WRAPPER_SHA256
     pending="$WRAPPER_JAR.pending"
     rm -f "$pending"
     if base64 --help 2>&1 | grep -q -- '-d'; then
-        base64 -d "$WRAPPER_SOURCE" > "$pending"
+        base64 -d < "$WRAPPER_SOURCE" > "$pending"
     else
-        base64 -D "$WRAPPER_SOURCE" > "$pending"
+        base64 -D < "$WRAPPER_SOURCE" > "$pending"
     fi
     if [ "$(checksum "$pending")" != "$WRAPPER_SHA256" ]; then
         rm -f "$pending"
