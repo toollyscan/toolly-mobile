@@ -21,6 +21,7 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] ADR-0005 canonical IDs/models and explicit mapper tests pass.
 - [ ] ADR-0006 atomic outbox, replay and conflict tests pass.
 - [ ] ADR-0007 encryption design is accepted after evidence and qualified review.
+- [ ] ADR-0012 platform-only vault metadata, asset envelope, key-custody and failure contracts pass Android and Apple evidence.
 - [ ] Module dependency, forbidden-import and public-API fitness functions pass.
 - [ ] No platform, provider, billing or database SDK types leak into shared domain contracts.
 - [ ] Schema, recipe, wire and backup migrations pass interruption and compatibility tests.
@@ -47,7 +48,7 @@ The gate must be reviewed by `@shivayogih` before code that processes real user 
 - [ ] Invalid/expired policy pauses new cloud writes but cannot disable local scan, vault read/write or export.
 - [ ] Secrets are absent from source control and release artifacts.
 - [ ] Dependency and mobile security checks pass for the release commit.
-- [ ] Qualified cryptography review approves ADR-0007 and implementation evidence.
+- [ ] Qualified cryptography review approves ADR-0007, ADR-0012 and implementation evidence.
 
 ## Privacy and data-protection gate
 
