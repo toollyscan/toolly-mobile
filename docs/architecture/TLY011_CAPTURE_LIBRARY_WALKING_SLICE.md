@@ -54,8 +54,8 @@ content-safe error handling are enforced. Document assets are not uploaded and t
 filenames, titles or bytes are not logged.
 
 The current candidate still stores committed JPEG bytes as app-private plaintext. It must not ship
-to beta or production. TLY-006F must replace it with the reviewed SQLCipher/key-envelope and
-encrypted-asset adapter, prove tamper/recovery/migration behavior and provide qualified
+to beta or production. TLY-006F must replace it with the ADR-0012 platform-key/encrypted-metadata and encrypted-asset
+adapters, prove tamper/recovery/migration behavior and provide qualified
 cryptographic review evidence. The `DocumentRepository` contract prevents that replacement from
 changing product UI and use cases.
 
@@ -65,7 +65,7 @@ changing product UI and use cases.
 - invalid or duplicate captured pages fail before persistence;
 - incomplete writes are never listed;
 - committed documents reopen through a new repository instance;
-- Coil disk and memory caches remain disabled for document pixels;
+- platform image decoding creates no persistent plaintext cache;
 - the manifest requests no Android permission;
 - build, lint, unit tests and instrumented-test APK compilation pass;
 - debug APKs remain downloadable from first-party GitHub Actions.

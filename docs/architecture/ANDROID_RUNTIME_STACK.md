@@ -17,9 +17,9 @@ verification and SBOM requirements are satisfied.
 | Capture fallback | CameraX and Android Photo Picker | `DocumentScanner`, `DocumentImporter` | Camera lifecycle, permissions, rotation, manual crop and low-memory tests |
 | Boundary detection and edit | ML Kit first; Toolly geometry contracts | `BoundaryEngine` | Canonical normalized coordinates; no SDK geometry types in domain |
 | Crop and enhancement | ML Kit first; versioned Toolly recipe | `PageProcessor` | Preserve original, record recipe/version and verify deterministic export |
-| Metadata database | Room with current SQLCipher Android | `VaultMetadataStore` | Keystore-protected random passphrase, migrations, corruption and recovery |
-| Asset vault | App-private files with Toolly encryption envelope | `VaultAssetStore` | Authenticated encryption, unique nonces, atomic writes and no plaintext backup |
-| Images and thumbnails | Coil 3 Compose | `VaultImageLoader` | Custom encrypted fetcher, no decrypted disk cache, bounded memory cache |
+| Metadata index | Room/platform SQLite with encrypted payload BLOBs | `VaultMetadataStore` | Opaque plaintext index only; AES-GCM before persistence; migrations, leakage, corruption and recovery tests |
+| Asset vault | App-private files with platform AES-GCM envelope | `VaultAssetStore` | Unique per-asset keys/nonces, authenticated chunks, atomic writes and no plaintext backup |
+| Images and thumbnails | Android platform bitmap/image APIs | `VaultImageSource` | Vault stream, off-main bounded decode, no persistent plaintext cache |
 | Document library | Compose Material 3 Adaptive, Paging and Flow | `DocumentRepository` | Compact/medium/expanded layouts, accessibility and stable paging keys |
 | PDF preview | Android `PdfRenderer` | `PdfPreviewer` | Worker-thread rendering, bounded bitmap size and untrusted-file handling |
 | PDF generation | Android `PdfDocument` | `DocumentExporter` | Background execution, cancellation, atomic finalization and cleanup |
@@ -38,17 +38,18 @@ verification and SBOM requirements are satisfied.
 
 ## Dependency rules
 
-1. Domain and use-case modules import no Android, Google Play services, Firebase, Coil, Room or
-   SQLCipher types.
+1. Domain and use-case modules import no Android, Google Play services, Firebase, Room, SQLite,
+   Keystore or platform cryptography types.
 2. Every SDK has one adapter owned by a platform or infrastructure module.
 3. SDK-specific models are mapped at the adapter boundary.
-4. No decrypted page or thumbnail is stored in Coil disk cache.
-5. SQLCipher encrypts the database; Toolly asset encryption separately protects binary files.
+4. No decrypted page or thumbnail is stored in any persistent image cache.
+5. Sensitive metadata is encrypted before SQLite persistence; unique per-asset keys separately protect binary files.
 6. Firebase receives no plaintext document page, thumbnail, title, OCR text or encryption key.
 7. Notifications receive no sensitive document data.
 8. Scanner, vault and local export remain usable when Firebase is unavailable.
 9. Marketing consent never gates security, local scanning, vault access or document export.
 10. A dependency may be replaced without changing domain models or use-case APIs.
+11. No non-platform dependency may receive vault keys, plaintext persistent metadata or document bytes.
 
 ## Proposed Android modules
 
@@ -66,9 +67,9 @@ feature-export
 feature-settings
 adapter-scanner-mlkit
 adapter-scanner-camerax
-adapter-vault-room-sqlcipher
+adapter-vault-platform
 adapter-vault-files
-adapter-image-coil
+adapter-image-platform
 adapter-firebase
 adapter-notifications
 ```

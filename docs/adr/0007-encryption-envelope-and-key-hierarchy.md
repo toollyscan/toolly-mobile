@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Proposed; qualified cryptographic review required |
+| Status | Partially accepted by ADR-0012; qualified cryptographic review required |
 | Date | 2026-07-23 |
 | Author | shivayogih |
 
@@ -12,8 +12,9 @@ Toolly stores critical document content locally and may optionally back up ciphe
 needs asset isolation, key rotation, multi-device authorization and recovery without giving
 Toolly, Firebase or support plaintext key custody.
 
-This ADR fixes the hierarchy and safety contracts. It does not approve a concrete algorithm suite,
-entropy value, platform capability claim or recovery format before prototype evidence and review.
+This ADR fixes the hierarchy and safety contracts. ADR-0012 selects platform AES-GCM and platform
+key custody for the local implementation, while exact envelope encoding, chunking, recovery and
+platform capability claims remain pending prototype evidence and qualified review.
 
 ## Proposed hierarchy
 
@@ -109,7 +110,8 @@ The spike compares platform-supported authenticated-encryption and key-wrapping 
 - interoperability and version migration;
 - maintained implementation and certification posture.
 
-No custom cryptographic primitive or protocol is permitted.
+No custom cryptographic primitive is permitted. The Toolly storage envelope is versioned and must
+receive qualified review before production.
 
 ## Approval evidence
 
