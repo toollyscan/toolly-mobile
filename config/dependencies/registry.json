@@ -362,10 +362,10 @@
       "id": "gradle-lib-coil-compose",
       "ecosystem": "gradle-library",
       "coordinate": "io.coil-kt.coil3:coil-compose",
-      "requested_version": "3.5.0",
+      "requested_version": "3.4.0",
       "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
       "scope": "runtime",
-      "purpose": "Coil 3 Compose integration — loads temporary JPEG thumbnails from app-private URIs in the spike thumbnail grid. Disk cache disabled for all vault-origin content per ADR-0011.",
+      "purpose": "Coil 3.4 Compose integration — loads temporary JPEG thumbnails from Toolly-owned app-private files. Disk and memory caches are explicitly disabled for spike document pixels. Version 3.4 preserves the reviewed API 35 toolchain boundary.",
       "owner": "shivayogih",
       "upstream": "https://github.com/coil-kt/coil",
       "licence_spdx": "Apache-2.0",
@@ -540,4 +540,3 @@
     }
   ]
 }
-
