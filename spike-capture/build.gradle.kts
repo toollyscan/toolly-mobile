@@ -19,6 +19,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.1-spike"
+        testInstrumentationRunner = "android.test.InstrumentationTestRunner"
     }
 
     buildFeatures {
@@ -33,17 +34,19 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = false
+    }
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 dependencies {
     // ML Kit Document Scanner (primary capture path)
     implementation(libs.mlkit.document.scanner)
-
-    // CameraX (fallback path — currently stub, wired for future implementation)
-    implementation(libs.camerax.core)
-    implementation(libs.camerax.camera2)
-    implementation(libs.camerax.lifecycle)
-    implementation(libs.camerax.view)
 
     // Compose UI
     implementation(libs.compose.ui)
