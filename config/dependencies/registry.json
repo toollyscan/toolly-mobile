@@ -65,8 +65,8 @@
       "licence_evidence": "https://developer.android.com/studio/terms",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -109,8 +109,8 @@
       "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -153,8 +153,8 @@
       "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -190,15 +190,15 @@
       "requested_version": "16.0.0",
       "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
       "scope": "runtime",
-      "purpose": "Google ML Kit Document Scanner — on-device document boundary detection, capture, crop and JPEG export behind the Toolly DocumentScanner port. Spike scope: synthetic test documents only; no production user documents processed.",
+      "purpose": "Google ML Kit Document Scanner — capture UI, boundary detection, crop and JPEG export behind Toolly's DocumentScanner port. ML Kit owns camera capture UI and requires no Toolly CAMERA permission. Synthetic test documents only in this spike.",
       "owner": "shivayogih",
       "upstream": "https://developers.google.com/ml-kit/vision/doc-scanner/android",
       "licence_spdx": "Apache-2.0",
       "licence_evidence": "https://developers.google.com/ml-kit/terms",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -220,194 +220,13 @@
       "data_processing": {
         "processes_user_documents": false,
         "network_hosts": [],
-        "permissions": [
-          "CAMERA"
-        ]
+        "permissions": []
       },
       "alternatives": [
         "CameraX with manual boundary crop (TLY-006B fallback — stub implemented)",
         "Custom ML model behind DocumentScanner port"
       ],
       "removal_plan": "Replace with CameraXDocumentScannerAdapter or alternative if Play Services unavailable requirement grows. Port interface remains unchanged."
-    },
-    {
-      "id": "gradle-lib-camerax-core",
-      "ecosystem": "gradle-library",
-      "coordinate": "androidx.camera:camera-core",
-      "requested_version": "1.4.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
-      "scope": "runtime",
-      "purpose": "CameraX Core — camera abstraction layer used by the fallback DocumentScanner adapter. Stub in spike; full implementation in follow-up.",
-      "owner": "shivayogih",
-      "upstream": "https://developer.android.com/training/camerax",
-      "licence_spdx": "Apache-2.0",
-      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
-      "approval_status": "conditional",
-      "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
-      "review_due_at": "2026-10-22",
-      "cve_review": {
-        "status": "manual_baseline",
-        "last_reviewed_at": "2026-07-24",
-        "result": "no_known_critical_high",
-        "sources": [
-          "https://developer.android.com/jetpack/androidx/releases/camera",
-          "https://ossindex.sonatype.org/"
-        ]
-      },
-      "transitives": {
-        "status": "not_fully_enumerated_spike",
-        "count": null
-      },
-      "size": {
-        "status": "pending_device_measurement",
-        "delta_bytes": null
-      },
-      "data_processing": {
-        "processes_user_documents": false,
-        "network_hosts": [],
-        "permissions": [
-          "CAMERA"
-        ]
-      },
-      "alternatives": [
-        "Camera2 API directly (higher complexity)",
-        "ML Kit Document Scanner (primary path)"
-      ],
-      "removal_plan": "Replaced by the production adapter implementation or removed if the CameraX fallback is superseded."
-    },
-    {
-      "id": "gradle-lib-camerax-camera2",
-      "ecosystem": "gradle-library",
-      "coordinate": "androidx.camera:camera-camera2",
-      "requested_version": "1.4.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
-      "scope": "runtime",
-      "purpose": "CameraX Camera2 implementation — binds CameraX to the Camera2 hardware API for the fallback path.",
-      "owner": "shivayogih",
-      "upstream": "https://developer.android.com/training/camerax",
-      "licence_spdx": "Apache-2.0",
-      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
-      "approval_status": "conditional",
-      "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
-      "review_due_at": "2026-10-22",
-      "cve_review": {
-        "status": "manual_baseline",
-        "last_reviewed_at": "2026-07-24",
-        "result": "no_known_critical_high",
-        "sources": [
-          "https://developer.android.com/jetpack/androidx/releases/camera",
-          "https://ossindex.sonatype.org/"
-        ]
-      },
-      "transitives": {
-        "status": "not_fully_enumerated_spike",
-        "count": null
-      },
-      "size": {
-        "status": "pending_device_measurement",
-        "delta_bytes": null
-      },
-      "data_processing": {
-        "processes_user_documents": false,
-        "network_hosts": [],
-        "permissions": [
-          "CAMERA"
-        ]
-      },
-      "alternatives": [
-        "Camera2 API directly"
-      ],
-      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
-    },
-    {
-      "id": "gradle-lib-camerax-lifecycle",
-      "ecosystem": "gradle-library",
-      "coordinate": "androidx.camera:camera-lifecycle",
-      "requested_version": "1.4.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
-      "scope": "runtime",
-      "purpose": "CameraX Lifecycle — binds camera sessions to AndroidX lifecycle owners for safe camera teardown during rotation and backgrounding.",
-      "owner": "shivayogih",
-      "upstream": "https://developer.android.com/training/camerax",
-      "licence_spdx": "Apache-2.0",
-      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
-      "approval_status": "conditional",
-      "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
-      "review_due_at": "2026-10-22",
-      "cve_review": {
-        "status": "manual_baseline",
-        "last_reviewed_at": "2026-07-24",
-        "result": "no_known_critical_high",
-        "sources": [
-          "https://developer.android.com/jetpack/androidx/releases/camera"
-        ]
-      },
-      "transitives": {
-        "status": "not_fully_enumerated_spike",
-        "count": null
-      },
-      "size": {
-        "status": "pending_device_measurement",
-        "delta_bytes": null
-      },
-      "data_processing": {
-        "processes_user_documents": false,
-        "network_hosts": [],
-        "permissions": []
-      },
-      "alternatives": [
-        "Manual camera lifecycle management with Camera2 API"
-      ],
-      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
-    },
-    {
-      "id": "gradle-lib-camerax-view",
-      "ecosystem": "gradle-library",
-      "coordinate": "androidx.camera:camera-view",
-      "requested_version": "1.4.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
-      "scope": "runtime",
-      "purpose": "CameraX View — PreviewView composable binding for the CameraX fallback capture path preview.",
-      "owner": "shivayogih",
-      "upstream": "https://developer.android.com/training/camerax",
-      "licence_spdx": "Apache-2.0",
-      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
-      "approval_status": "conditional",
-      "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
-      "review_due_at": "2026-10-22",
-      "cve_review": {
-        "status": "manual_baseline",
-        "last_reviewed_at": "2026-07-24",
-        "result": "no_known_critical_high",
-        "sources": [
-          "https://developer.android.com/jetpack/androidx/releases/camera"
-        ]
-      },
-      "transitives": {
-        "status": "not_fully_enumerated_spike",
-        "count": null
-      },
-      "size": {
-        "status": "pending_device_measurement",
-        "delta_bytes": null
-      },
-      "data_processing": {
-        "processes_user_documents": false,
-        "network_hosts": [],
-        "permissions": []
-      },
-      "alternatives": [
-        "Direct Camera2 SurfaceView binding"
-      ],
-      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
     },
     {
       "id": "gradle-lib-compose-ui",
@@ -423,8 +242,8 @@
       "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -466,8 +285,8 @@
       "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -510,8 +329,8 @@
       "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -553,8 +372,8 @@
       "licence_evidence": "https://github.com/coil-kt/coil/blob/main/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -599,8 +418,8 @@
       "licence_evidence": "https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -644,8 +463,8 @@
       "licence_evidence": "https://github.com/junit-team/junit4/blob/main/LICENSE-junit.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -689,8 +508,8 @@
       "licence_evidence": "https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt",
       "approval_status": "conditional",
       "approval_issue": 22,
-      "approved_by": "shivayogih",
-      "approved_at": "2026-07-24",
+      "approved_by": null,
+      "approved_at": null,
       "review_due_at": "2026-10-22",
       "cve_review": {
         "status": "manual_baseline",
@@ -721,3 +540,4 @@
     }
   ]
 }
+
