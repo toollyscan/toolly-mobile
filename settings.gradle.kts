@@ -1,6 +1,3 @@
-// Gradle settings for the TLY-006B capture spike.
-// Only the spike-capture module is included; no production feature modules are scaffolded.
-
 pluginManagement {
     repositories {
         google()
@@ -17,5 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "toolly-spike-capture"
+rootProject.name = "toolly-mobile"
+include(":shared-ui")
 include(":spike-capture")

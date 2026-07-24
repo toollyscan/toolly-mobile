@@ -1,9 +1,9 @@
-// Root build script for the TLY-006B capture spike.
-// Plugin declarations use version-catalog aliases so no direct version literal appears
-// in this file. All dependencies are registered in config/dependencies/registry.json.
-
+// Root plugin declarations are version-catalog backed and dependency-governed.
 plugins {
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
 }

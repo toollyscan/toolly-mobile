@@ -149,7 +149,7 @@
       "id": "gradle-plugin-kotlin-android",
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.android",
-      "requested_version": "2.1.21",
+      "requested_version": "2.3.20",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Android compiler plugin — enables Kotlin compilation for the spike module.",
@@ -158,7 +158,7 @@
       "licence_spdx": "Apache-2.0",
       "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
       "approval_status": "conditional",
-      "approval_issue": 22,
+      "approval_issue": 38,
       "approved_by": null,
       "approved_at": null,
       "review_due_at": "2026-10-22",
@@ -167,8 +167,8 @@
         "last_reviewed_at": "2026-07-24",
         "result": "no_known_critical_high",
         "sources": [
-          "https://github.com/JetBrains/kotlin/releases",
-          "https://ossindex.sonatype.org/"
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
+          "https://kotlinlang.org/docs/gradle-configure-project.html"
         ]
       },
       "transitives": {
@@ -193,7 +193,7 @@
       "id": "gradle-plugin-kotlin-compose",
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.plugin.compose",
-      "requested_version": "2.1.21",
+      "requested_version": "2.3.20",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Compose compiler plugin (Kotlin 2.0+) — enables @Composable annotation processing for the adaptive spike UI. Same version as the Kotlin toolchain.",
@@ -202,7 +202,7 @@
       "licence_spdx": "Apache-2.0",
       "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
       "approval_status": "conditional",
-      "approval_issue": 22,
+      "approval_issue": 38,
       "approved_by": null,
       "approved_at": null,
       "review_due_at": "2026-10-22",
@@ -211,8 +211,8 @@
         "last_reviewed_at": "2026-07-24",
         "result": "no_known_critical_high",
         "sources": [
-          "https://github.com/JetBrains/kotlin/releases",
-          "https://ossindex.sonatype.org/"
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
+          "https://kotlinlang.org/docs/gradle-configure-project.html"
         ]
       },
       "transitives": {
@@ -673,6 +673,138 @@
       "coordinate": "androidx.test:runner",
       "requested_version": "1.7.0",
       "purpose": "Google AndroidX instrumentation runner for executing Toolly Android device tests. Test-only; not shipped in the production APK."
+    },
+    {
+      "scope": "build",
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 38,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/build/releases/gradle-plugin#release-notes",
+          "https://developer.android.com/privacy-and-security/risks"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-plugin-android-library",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "com.android.library",
+      "requested_version": "8.7.3",
+      "immutable_ref": "gradle/verification-metadata.xml+shared-ui/gradle.lockfile",
+      "purpose": "Android library plugin for the shared KMP/Compose module.",
+      "upstream": "https://developer.android.com/build/releases/gradle-plugin",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://developer.android.com/studio/terms",
+      "alternatives": [
+        "Keep shared code in the Android application module, which prevents an iOS framework target."
+      ],
+      "removal_plan": "Replace only if the shared module moves to a future supported KMP Android DSL."
+    },
+    {
+      "scope": "build",
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 38,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/JetBrains/kotlin/releases/tag/v2.3.20",
+          "https://kotlinlang.org/docs/gradle-configure-project.html"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-plugin-kotlin-multiplatform",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "org.jetbrains.kotlin.multiplatform",
+      "requested_version": "2.3.20",
+      "immutable_ref": "gradle/verification-metadata.xml+shared-ui/gradle.lockfile",
+      "purpose": "Compile Toolly-owned common models, presentation state and iOS/Android framework targets.",
+      "upstream": "https://github.com/JetBrains/kotlin",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/JetBrains/kotlin/blob/v2.3.20/license/LICENSE.txt",
+      "alternatives": [
+        "Separate Kotlin Android and Swift implementations, rejected by ADR-0001 because it increases product divergence."
+      ],
+      "removal_plan": "Remove if Toolly replaces Kotlin Multiplatform through an approved architecture decision and migration."
+    },
+    {
+      "scope": "build",
+      "owner": "shivayogih",
+      "approval_status": "conditional",
+      "approval_issue": 38,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/JetBrains/compose-multiplatform/releases/tag/v1.11.1",
+          "https://github.com/JetBrains/compose-multiplatform/security"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "id": "gradle-plugin-compose-multiplatform",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "org.jetbrains.compose",
+      "requested_version": "1.11.1",
+      "immutable_ref": "gradle/verification-metadata.xml+shared-ui/gradle.lockfile",
+      "purpose": "Compile Toolly-owned shared Compose UI for Android and iOS.",
+      "upstream": "https://github.com/JetBrains/compose-multiplatform",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/JetBrains/compose-multiplatform/blob/v1.11.1/LICENSE",
+      "alternatives": [
+        "Separate Jetpack Compose and SwiftUI product screens, rejected by ADR-0001."
+      ],
+      "removal_plan": "Replace with native UI implementations only through an approved parity-preserving ADR and migration."
     }
   ]
 }

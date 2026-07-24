@@ -53,7 +53,7 @@ class TemporaryScanStore(context: Context) : AutoCloseable {
 
     fun release(assetIds: Collection<TemporaryAssetId>) {
         synchronized(lock) {
-            assetIds.forEach { assetId ->
+            for (assetId in assetIds) {
                 File(directory, "${assetId.value}.jpg").delete()
             }
         }
@@ -62,7 +62,7 @@ class TemporaryScanStore(context: Context) : AutoCloseable {
     fun clear() {
         synchronized(lock) {
             if (directory.exists()) {
-                directory.listFiles()?.forEach { file ->
+                for (file in directory.listFiles().orEmpty()) {
                     if (file.isFile) file.delete()
                 }
             }
