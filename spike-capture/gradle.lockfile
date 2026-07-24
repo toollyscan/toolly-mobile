@@ -1,0 +1,6 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+# Spike placeholder — regenerate with: ./gradlew :spike-capture:dependencies --write-locks
+# Review the generated diff before committing. See docs/architecture/TLY006B_CAPTURE_SPIKE.md.
+empty=

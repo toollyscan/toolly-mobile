@@ -50,6 +50,674 @@
         "GitHub REST archive download with independent digest verification"
       ],
       "removal_plan": "Replace the checkout step with a reviewed immutable source retrieval step."
+    },
+    {
+      "id": "gradle-plugin-android-application",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "com.android.application",
+      "requested_version": "8.7.3",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "build",
+      "purpose": "Android Gradle Plugin — compiles and packages the TLY-006B capture spike APK. Spike scope only; not approved for production feature modules.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/build/releases/gradle-plugin",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://developer.android.com/studio/terms",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/build/releases/gradle-plugin#release-notes",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_enumerated_build_only",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Gradle without AGP (manual Android task wiring — impractical for Compose)"
+      ],
+      "removal_plan": "Removed when the spike module is deleted or replaced by the production module scaffold."
+    },
+    {
+      "id": "gradle-plugin-kotlin-android",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "org.jetbrains.kotlin.android",
+      "requested_version": "2.1.21",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "build",
+      "purpose": "Kotlin Android compiler plugin — enables Kotlin compilation for the spike module.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/JetBrains/kotlin",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/JetBrains/kotlin/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_enumerated_build_only",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Java-only build — not viable for Compose UI"
+      ],
+      "removal_plan": "Removed when the spike module is deleted or replaced."
+    },
+    {
+      "id": "gradle-plugin-kotlin-compose",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "org.jetbrains.kotlin.plugin.compose",
+      "requested_version": "2.1.21",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "build",
+      "purpose": "Kotlin Compose compiler plugin (Kotlin 2.0+) — enables @Composable annotation processing for the adaptive spike UI. Same version as the Kotlin toolchain.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/JetBrains/kotlin",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/JetBrains/kotlin/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_enumerated_build_only",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_build_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "kotlin-android plugin only with Compose disabled — removes spike adaptive UI"
+      ],
+      "removal_plan": "Removed when the spike module is deleted or replaced."
+    },
+    {
+      "id": "gradle-lib-mlkit-document-scanner",
+      "ecosystem": "gradle-library",
+      "coordinate": "com.google.android.gms:play-services-mlkit-document-scanner",
+      "requested_version": "16.0.0",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Google ML Kit Document Scanner — on-device document boundary detection, capture, crop and JPEG export behind the Toolly DocumentScanner port. Spike scope: synthetic test documents only; no production user documents processed.",
+      "owner": "shivayogih",
+      "upstream": "https://developers.google.com/ml-kit/vision/doc-scanner/android",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://developers.google.com/ml-kit/terms",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developers.google.com/ml-kit/terms",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": [
+          "CAMERA"
+        ]
+      },
+      "alternatives": [
+        "CameraX with manual boundary crop (TLY-006B fallback — stub implemented)",
+        "Custom ML model behind DocumentScanner port"
+      ],
+      "removal_plan": "Replace with CameraXDocumentScannerAdapter or alternative if Play Services unavailable requirement grows. Port interface remains unchanged."
+    },
+    {
+      "id": "gradle-lib-camerax-core",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.camera:camera-core",
+      "requested_version": "1.4.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "CameraX Core — camera abstraction layer used by the fallback DocumentScanner adapter. Stub in spike; full implementation in follow-up.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/training/camerax",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/camera",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": [
+          "CAMERA"
+        ]
+      },
+      "alternatives": [
+        "Camera2 API directly (higher complexity)",
+        "ML Kit Document Scanner (primary path)"
+      ],
+      "removal_plan": "Replaced by the production adapter implementation or removed if the CameraX fallback is superseded."
+    },
+    {
+      "id": "gradle-lib-camerax-camera2",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.camera:camera-camera2",
+      "requested_version": "1.4.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "CameraX Camera2 implementation — binds CameraX to the Camera2 hardware API for the fallback path.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/training/camerax",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/camera",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": [
+          "CAMERA"
+        ]
+      },
+      "alternatives": [
+        "Camera2 API directly"
+      ],
+      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
+    },
+    {
+      "id": "gradle-lib-camerax-lifecycle",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.camera:camera-lifecycle",
+      "requested_version": "1.4.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "CameraX Lifecycle — binds camera sessions to AndroidX lifecycle owners for safe camera teardown during rotation and backgrounding.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/training/camerax",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/camera"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Manual camera lifecycle management with Camera2 API"
+      ],
+      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
+    },
+    {
+      "id": "gradle-lib-camerax-view",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.camera:camera-view",
+      "requested_version": "1.4.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "CameraX View — PreviewView composable binding for the CameraX fallback capture path preview.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/training/camerax",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/camera"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Direct Camera2 SurfaceView binding"
+      ],
+      "removal_plan": "Replaced or removed with the CameraX fallback adapter."
+    },
+    {
+      "id": "gradle-lib-compose-ui",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.compose.ui:ui",
+      "requested_version": "1.7.8",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Jetpack Compose UI runtime — foundational Compose library for the adaptive capture harness.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/compose",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/compose-ui"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Android View system — not viable for adaptive spike UI"
+      ],
+      "removal_plan": "Replaced when spike module is promoted to production or deleted."
+    },
+    {
+      "id": "gradle-lib-compose-material3",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.compose.material3:material3",
+      "requested_version": "1.3.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Compose Material 3 — Material Design 3 components for the capture spike harness (Button, Surface, Text, CircularProgressIndicator).",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/compose-material3",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/compose-material3"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Compose Material 2",
+        "No design system — raw Compose layout"
+      ],
+      "removal_plan": "Replaced when spike module is promoted to production or deleted."
+    },
+    {
+      "id": "gradle-lib-activity-compose",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.activity:activity-compose",
+      "requested_version": "1.9.3",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Activity Compose extensions — setContent() integration for launching Compose from ComponentActivity.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/activity",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/activity"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Manual ComposeView inflation in Activity.setContentView"
+      ],
+      "removal_plan": "Replaced when spike module is promoted to production or deleted."
+    },
+    {
+      "id": "gradle-lib-coil-compose",
+      "ecosystem": "gradle-library",
+      "coordinate": "io.coil-kt.coil3:coil-compose",
+      "requested_version": "3.5.0",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Coil 3 Compose integration — loads temporary JPEG thumbnails from app-private URIs in the spike thumbnail grid. Disk cache disabled for all vault-origin content per ADR-0011.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/coil-kt/coil",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/coil-kt/coil/blob/main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/coil-kt/coil/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Glide — explicitly excluded by ADR-0011",
+        "Picasso",
+        "Manual Bitmap loading — no async support"
+      ],
+      "removal_plan": "Replaced when spike module is promoted to production or deleted. Production uses a Toolly-owned Coil fetcher with vault decryption and no disk cache."
+    },
+    {
+      "id": "gradle-lib-coroutines-android",
+      "ecosystem": "gradle-library",
+      "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+      "requested_version": "1.9.0",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "runtime",
+      "purpose": "Kotlin Coroutines Android — provides Main dispatcher and Android-specific coroutine integration for the capture spike lifecycle.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/Kotlin/kotlinx.coroutines",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/Kotlin/kotlinx.coroutines/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Java ExecutorService",
+        "Android HandlerThread"
+      ],
+      "removal_plan": "Replaced when spike module is promoted to production or deleted."
+    },
+    {
+      "id": "gradle-lib-junit",
+      "ecosystem": "gradle-library",
+      "coordinate": "junit:junit",
+      "requested_version": "4.13.2",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "test",
+      "purpose": "JUnit 4 — test runner for spike unit tests (result mapper, contract tests, CameraX stub tests). JVM-only; no Robolectric required.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/junit-team/junit4",
+      "licence_spdx": "EPL-2.0",
+      "licence_evidence": "https://github.com/junit-team/junit4/blob/main/LICENSE-junit.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/junit-team/junit4/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_test_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "JUnit 5 (Jupiter)",
+        "Kotlin Test"
+      ],
+      "removal_plan": "Removed with the spike module or replaced when the test framework is standardised for production."
+    },
+    {
+      "id": "gradle-lib-coroutines-test",
+      "ecosystem": "gradle-library",
+      "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-test",
+      "requested_version": "1.9.0",
+      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "scope": "test",
+      "purpose": "Kotlin Coroutines Test — runTest and TestCoroutineScheduler for suspend-function unit tests in the spike.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/Kotlin/kotlinx.coroutines",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/Kotlin/kotlinx.coroutines/releases",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "not_fully_enumerated_spike",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_test_only",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "runBlocking (no virtual time or cancellation testing)"
+      ],
+      "removal_plan": "Removed with the spike module or replaced when the test framework is standardised for production."
     }
   ]
 }
