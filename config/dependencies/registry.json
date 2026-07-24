@@ -52,6 +52,56 @@
       "removal_plan": "Replace the checkout step with a reviewed immutable source retrieval step."
     },
     {
+      "id": "ci-actions-upload-artifact",
+      "ecosystem": "github-action",
+      "coordinate": "actions/upload-artifact",
+      "requested_version": "v7.0.1",
+      "immutable_ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+      "scope": "ci",
+      "purpose": "Publish the reviewed debug app APK and Android instrumentation-test APK as short-lived, authenticated GitHub Actions artifacts for physical-device validation.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/actions/upload-artifact",
+      "licence_spdx": "MIT",
+      "licence_evidence": "https://github.com/actions/upload-artifact/blob/v7.0.1/LICENSE",
+      "approval_status": "approved",
+      "approval_issue": 22,
+      "approved_by": "shivayogih",
+      "approved_at": "2026-07-24",
+      "review_due_at": "2026-10-22",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-07-24",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/actions/upload-artifact/security",
+          "https://github.com/actions/upload-artifact/releases/tag/v7.0.1"
+        ]
+      },
+      "transitives": {
+        "status": "bundled_upstream_not_enumerated",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_ci_tool",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [
+          "github.com",
+          "api.github.com",
+          "results-receiver.actions.githubusercontent.com"
+        ],
+        "permissions": [
+          "actions-runtime-artifact-upload"
+        ]
+      },
+      "alternatives": [
+        "Download the APK from a trusted local Android build without retaining it in GitHub Actions"
+      ],
+      "removal_plan": "Remove when physical-device validation no longer needs downloadable CI APKs or when an approved first-party distribution pipeline replaces workflow artifacts."
+    },
+    {
       "id": "gradle-plugin-android-application",
       "ecosystem": "gradle-plugin",
       "coordinate": "com.android.application",
@@ -626,4 +676,3 @@
     }
   ]
 }
-
