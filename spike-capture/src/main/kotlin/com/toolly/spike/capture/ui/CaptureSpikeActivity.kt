@@ -8,27 +8,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.toolly.domain.model.CapturedPageDraft
+import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
+import com.toolly.domain.usecases.ListDocumentsUseCase
+import com.toolly.domain.usecases.OpenDocumentUseCase
+import com.toolly.domain.usecases.SaveCapturedDocumentUseCase
+import com.toolly.foundation.OpaqueIdGenerator
+import com.toolly.foundation.ToollyClock
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.spike.capture.domain.DocumentScanner
 import com.toolly.spike.capture.domain.FallbackDocumentScanner
+import com.toolly.spike.capture.domain.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
+import com.toolly.spike.capture.vault.AppPrivateDocumentRepository
+import java.util.UUID
 import kotlinx.coroutines.launch
 
 /**
- * Entry-point Activity for the TLY-006B capture spike.
- *
- * Selects between [MlKitDocumentScannerAdapter] (default) and [CameraXDocumentScannerAdapter]
- * (fallback) based on Play Services availability. Both adapters implement [DocumentScanner],
- * so the Compose UI works identically regardless of which adapter is active.
+ * Android composition root for the TLY-011 capture-to-library walking slice.
  *
  * No document pixels, paths, OCR text, filenames or PII are logged at any level.
  */
 class CaptureSpikeActivity : ComponentActivity() {
 
-    // mlKitAdapter is non-null only when Play Services are available.
-    // The launcher is always registered (lifecycle requirement) but only wired to the
-    // adapter when it is selected; the callback is a no-op when mlKitAdapter is null.
     private var mlKitAdapter: MlKitDocumentScannerAdapter? = null
 
     private val scanLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
@@ -37,10 +40,14 @@ class CaptureSpikeActivity : ComponentActivity() {
 
     private lateinit var scanner: DocumentScanner
     private lateinit var temporaryStore: TemporaryScanStore
+    private lateinit var documentRepository: AppPrivateDocumentRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         temporaryStore = TemporaryScanStore(applicationContext)
+        documentRepository = AppPrivateDocumentRepository(applicationContext) { rawId ->
+            temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
+        }
 
         scanner = if (isPlayServicesAvailable()) {
             val primary = MlKitDocumentScannerAdapter(
@@ -58,16 +65,49 @@ class CaptureSpikeActivity : ComponentActivity() {
             CameraXDocumentScannerAdapter()
         }
 
+        val saveDocument = SaveCapturedDocumentUseCase(
+            repository = documentRepository,
+            clock = ToollyClock(System::currentTimeMillis),
+            idGenerator = OpaqueIdGenerator {
+                UUID.randomUUID().toString().lowercase()
+            },
+        )
+        val listDocuments = ListDocumentsUseCase(documentRepository)
+        val openDocument = OpenDocumentUseCase(documentRepository)
+
         setContent {
             MaterialTheme {
-                CaptureSpikeScreen(
+                ToollyDocumentApp(
                     onLaunchCapture = { config, onResult ->
                         lifecycleScope.launch {
-                            val result = scanner.launch(config)
-                            onResult(result)
+                            onResult(scanner.launch(config))
                         }
                     },
-                    resolveAsset = temporaryStore::resolve,
+                    onLoadDocuments = { onResult ->
+                        lifecycleScope.launch {
+                            onResult(listDocuments())
+                        }
+                    },
+                    onSavePages = { pages, onResult ->
+                        lifecycleScope.launch {
+                            val drafts = pages.sortedBy { it.index }.mapIndexed { index, page ->
+                                CapturedPageDraft(
+                                    temporaryAssetId = DomainTemporaryAssetId(page.assetId.value),
+                                    ordinal = index,
+                                    widthPixels = null,
+                                    heightPixels = null,
+                                )
+                            }
+                            onResult(saveDocument(drafts))
+                        }
+                    },
+                    onOpenDocument = { documentId, onResult ->
+                        lifecycleScope.launch {
+                            onResult(openDocument(documentId))
+                        }
+                    },
+                    resolveTemporaryAsset = temporaryStore::resolve,
+                    resolveDocumentAsset = documentRepository::resolveAsset,
                     onReleaseAssets = temporaryStore::release,
                 )
             }

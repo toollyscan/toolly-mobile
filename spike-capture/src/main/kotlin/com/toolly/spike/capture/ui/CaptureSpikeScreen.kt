@@ -1,21 +1,25 @@
 package com.toolly.spike.capture.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +32,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.toolly.domain.model.AssetId
+import com.toolly.domain.model.DocumentDetails
+import com.toolly.domain.model.DocumentId
+import com.toolly.domain.model.DocumentSummary
+import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.domain.ScanConfig
 import com.toolly.spike.capture.domain.ScanError
 import com.toolly.spike.capture.domain.ScanResult
@@ -36,200 +45,308 @@ import com.toolly.spike.capture.domain.TemporaryAssetId
 import java.io.File
 
 /**
- * Minimal adaptive Compose harness for the TLY-006B capture spike.
+ * First production-shaped Toolly Android walking slice.
  *
- * Layout adapts to available window width:
- * - **Compact (phone)**: stacked — capture button above thumbnail row.
- * - **Expanded (tablet, >= 600 dp)**: side-by-side — capture controls on the left,
- *   thumbnail grid on the right.
- *
- * No document pixels, filenames or PII are stored in Compose state or logged.
+ * The UI depends on Toolly models and callback boundaries. It has no filesystem, database,
+ * Firebase, ML Kit or provider types in its state.
  */
 @Composable
-fun CaptureSpikeScreen(
+fun ToollyDocumentApp(
     onLaunchCapture: (ScanConfig, onResult: (ScanResult) -> Unit) -> Unit,
-    resolveAsset: (TemporaryAssetId) -> File?,
+    onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
+    onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    resolveTemporaryAsset: (TemporaryAssetId) -> File?,
+    resolveDocumentAsset: (AssetId) -> File?,
     onReleaseAssets: (Collection<TemporaryAssetId>) -> Unit,
 ) {
-    val screenWidthDp = LocalConfiguration.current.screenWidthDp
-    val isExpanded = screenWidthDp >= 600
+    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Library) }
+    var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
+    var isWorking by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
 
-    var pages by remember { mutableStateOf<List<ScannedPage>>(emptyList()) }
-    var isCapturing by remember { mutableStateOf(false) }
-    var statusMessage by remember { mutableStateOf<String?>(null) }
+    fun refreshLibrary() {
+        isWorking = true
+        onLoadDocuments { result ->
+            isWorking = false
+            when (result) {
+                is ToollyResult.Success -> {
+                    documents = result.value
+                    message = null
+                }
+                is ToollyResult.Failure -> message = result.error.safeMessage
+            }
+        }
+    }
 
-    val onCaptureClick = {
-        if (!isCapturing) {
-            isCapturing = true
-            statusMessage = null
-            onLaunchCapture(ScanConfig()) { result ->
-                isCapturing = false
-                when (result) {
-                    is ScanResult.Success -> {
-                        onReleaseAssets(pages.map { it.assetId })
-                        pages = result.pages
-                        statusMessage = "Captured ${result.pages.size} page(s)"
-                    }
-                    is ScanResult.Cancelled -> {
-                        statusMessage = "Capture cancelled"
-                    }
-                    is ScanResult.Failure -> {
-                        statusMessage = when (result.error) {
-                            is ScanError.ServiceUnavailable ->
-                                "Scanner unavailable on this device"
-                            is ScanError.PermissionDenied ->
-                                "Camera permission required"
-                            is ScanError.PartialCapture ->
-                                (result.error as ScanError.PartialCapture).let { partial ->
-                                    onReleaseAssets(pages.map { it.assetId })
-                                    pages = partial.capturedPages
-                                    "Partial capture: ${partial.capturedPages.size} page(s) available"
+    LaunchedEffect(Unit) {
+        refreshLibrary()
+    }
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        when (val current = screen) {
+            AppScreen.Library -> LibraryScreen(
+                documents = documents,
+                isWorking = isWorking,
+                message = message,
+                onScan = {
+                    if (!isWorking) {
+                        isWorking = true
+                        message = null
+                        onLaunchCapture(ScanConfig()) { result ->
+                            isWorking = false
+                            when (result) {
+                                is ScanResult.Success -> {
+                                    screen = AppScreen.CapturePreview(result.pages)
                                 }
-                            is ScanError.Busy ->
-                                "A capture is already in progress"
-                            is ScanError.InvalidResult ->
-                                "The scanner returned an invalid result"
-                            is ScanError.StorageFailure ->
-                                "Captured pages could not be stored safely"
-                            is ScanError.LifecycleEnded ->
-                                "Capture stopped because this screen closed"
-                            else ->
-                                "Capture failed"
+                                ScanResult.Cancelled -> message = "Capture cancelled"
+                                is ScanResult.Failure -> {
+                                    message = safeCaptureMessage(result.error)
+                                    if (result.error is ScanError.PartialCapture) {
+                                        screen = AppScreen.CapturePreview(
+                                            result.error.capturedPages,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                onOpen = { documentId ->
+                    isWorking = true
+                    onOpenDocument(documentId) { result ->
+                        isWorking = false
+                        when (result) {
+                            is ToollyResult.Success -> screen = AppScreen.Document(result.value)
+                            is ToollyResult.Failure -> message = result.error.safeMessage
+                        }
+                    }
+                },
+            )
+
+            is AppScreen.CapturePreview -> CapturePreviewScreen(
+                pages = current.pages,
+                isSaving = isWorking,
+                message = message,
+                resolveAsset = resolveTemporaryAsset,
+                onDiscard = {
+                    onReleaseAssets(current.pages.map { it.assetId })
+                    message = null
+                    screen = AppScreen.Library
+                },
+                onSave = {
+                    isWorking = true
+                    message = null
+                    onSavePages(current.pages) { result ->
+                        isWorking = false
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                onReleaseAssets(current.pages.map { it.assetId })
+                                message = "Document saved"
+                                screen = AppScreen.Library
+                                refreshLibrary()
+                            }
+                            is ToollyResult.Failure -> message = result.error.safeMessage
+                        }
+                    }
+                },
+            )
+
+            is AppScreen.Document -> DocumentScreen(
+                document = current.details,
+                resolveAsset = resolveDocumentAsset,
+                onBack = {
+                    message = null
+                    screen = AppScreen.Library
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LibraryScreen(
+    documents: List<DocumentSummary>,
+    isWorking: Boolean,
+    message: String?,
+    onScan: () -> Unit,
+    onOpen: (DocumentId) -> Unit,
+) {
+    val expanded = LocalConfiguration.current.screenWidthDp >= 600
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = if (expanded) 920.dp else 640.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("Toolly", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "Your documents stay available offline.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(
+                onClick = onScan,
+                enabled = !isWorking,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (isWorking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.semantics {
+                            contentDescription = "Working"
+                        },
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text("Scan document")
+                }
+            }
+            StatusMessage(message)
+            if (documents.isEmpty() && !isWorking) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "No documents yet",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(documents, key = { it.id.value }) { document ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onOpen(document.id) },
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    "Scanned document",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Text(
+                                    "${document.pageCount} page(s)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-        if (isExpanded) {
-            TabletLayout(
-                pages = pages,
-                isCapturing = isCapturing,
-                statusMessage = statusMessage,
-                onCaptureClick = onCaptureClick,
-                resolveAsset = resolveAsset,
-            )
-        } else {
-            PhoneLayout(
-                pages = pages,
-                isCapturing = isCapturing,
-                statusMessage = statusMessage,
-                onCaptureClick = onCaptureClick,
-                resolveAsset = resolveAsset,
-            )
-        }
-    }
 }
 
 @Composable
-private fun PhoneLayout(
+private fun CapturePreviewScreen(
     pages: List<ScannedPage>,
-    isCapturing: Boolean,
-    statusMessage: String?,
-    onCaptureClick: () -> Unit,
+    isSaving: Boolean,
+    message: String?,
     resolveAsset: (TemporaryAssetId) -> File?,
+    onDiscard: () -> Unit,
+    onSave: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        CaptureControls(
-            isCapturing = isCapturing,
-            statusMessage = statusMessage,
-            onCaptureClick = onCaptureClick,
+        Text("Review scan", style = MaterialTheme.typography.headlineSmall)
+        Text("${pages.size} page(s)", style = MaterialTheme.typography.bodyMedium)
+        ThumbnailGrid(
+            pages = pages,
+            resolveAsset = resolveAsset,
+            modifier = Modifier.weight(1f),
         )
-        if (pages.isNotEmpty()) {
-            ThumbnailGrid(
-                pages = pages,
-                resolveAsset = resolveAsset,
+        StatusMessage(message)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedButton(
+                onClick = onDiscard,
+                enabled = !isSaving,
                 modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun TabletLayout(
-    pages: List<ScannedPage>,
-    isCapturing: Boolean,
-    statusMessage: String?,
-    onCaptureClick: () -> Unit,
-    resolveAsset: (TemporaryAssetId) -> File?,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        CaptureControls(
-            isCapturing = isCapturing,
-            statusMessage = statusMessage,
-            onCaptureClick = onCaptureClick,
-            modifier = Modifier.width(280.dp),
-        )
-        if (pages.isNotEmpty()) {
-            ThumbnailGrid(
-                pages = pages,
-                resolveAsset = resolveAsset,
+            ) {
+                Text("Discard")
+            }
+            Button(
+                onClick = onSave,
+                enabled = !isSaving,
                 modifier = Modifier.weight(1f),
-            )
-        } else {
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                Text("No pages yet", style = MaterialTheme.typography.bodyLarge)
+            ) {
+                Text(if (isSaving) "Saving…" else "Save")
             }
         }
     }
 }
 
 @Composable
-private fun CaptureControls(
-    isCapturing: Boolean,
-    statusMessage: String?,
-    onCaptureClick: () -> Unit,
-    modifier: Modifier = Modifier,
+private fun DocumentScreen(
+    document: DocumentDetails,
+    resolveAsset: (AssetId) -> File?,
+    onBack: () -> Unit,
 ) {
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = "Toolly Capture Spike",
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Button(
-            onClick = onCaptureClick,
-            enabled = !isCapturing,
+        Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (isCapturing) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .height(20.dp)
-                        .width(20.dp)
-                        .semantics {
-                            contentDescription = "Scanning document"
-                        },
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Text("Scan document")
+            OutlinedButton(onClick = onBack) {
+                Text("Back")
             }
+            Text("Scanned document", style = MaterialTheme.typography.headlineSmall)
         }
-        statusMessage?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.semantics {
-                    liveRegion = LiveRegionMode.Polite
-                },
-            )
-        }
+        Text(
+            "${document.summary.pageCount} page(s)",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        DocumentPageGrid(
+            pages = document.pages,
+            resolveAsset = resolveAsset,
+            modifier = Modifier.weight(1f),
+        )
     }
+}
+
+@Composable
+private fun StatusMessage(message: String?) {
+    message?.let {
+        Text(
+            text = it,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics {
+                liveRegion = LiveRegionMode.Polite
+            },
+        )
+    }
+}
+
+private fun safeCaptureMessage(error: ScanError): String = when (error) {
+    is ScanError.ServiceUnavailable -> "Scanner unavailable on this device"
+    is ScanError.PermissionDenied -> "Camera permission is required"
+    is ScanError.PartialCapture -> "Some captured pages are available"
+    is ScanError.Busy -> "A capture is already in progress"
+    is ScanError.InvalidResult -> "The scanner returned an invalid result"
+    is ScanError.StorageFailure -> "Captured pages could not be stored safely"
+    is ScanError.LifecycleEnded -> "Capture stopped because this screen closed"
+    else -> "Capture failed"
+}
+
+private sealed interface AppScreen {
+    data object Library : AppScreen
+    data class CapturePreview(val pages: List<ScannedPage>) : AppScreen
+    data class Document(val details: DocumentDetails) : AppScreen
 }
