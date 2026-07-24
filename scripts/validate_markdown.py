@@ -1,8 +1,21 @@
 #!/usr/bin/env python3
-"""Validate Toolly Markdown files against the project lint policy.
+"""Validate Toolly Markdown files against the Toolly lint policy.
 
-Uses only the Python standard library.  Enforces the rules enabled by
-.markdownlint.json (default: true with MD013, MD033, MD041, MD060 disabled).
+Uses only the Python standard library.
+
+Enforces the following Toolly-selected rules:
+  MD001 — heading levels must increment by at most one level at a time.
+  MD009 — no trailing whitespace (exactly two trailing spaces for a line
+           break is the only permitted exception).
+  MD010 — no hard tab characters outside fenced code blocks.
+  MD012 — no more than two consecutive blank lines.
+  MD018 — a space is required after the ATX heading hash character(s).
+  MD019 — only one space is allowed after the ATX heading hash character(s).
+  MD022 — headings must be preceded by a blank line (or the start of file).
+  MD047 — every file must end with a single newline character.
+
+This validator does not claim compatibility with the markdownlint project
+and does not consume .markdownlint.json.
 
 Exit code 0 = all files pass.
 Exit code 1 = one or more violations found (printed to stderr).
@@ -151,8 +164,8 @@ def _check_file(path: Path, root: Path) -> list[Violation]:
 
         prev_blank = is_blank
 
-    # MD022 — last heading must be followed by blank line or end of file is fine
-    # (markdownlint only checks preceded-by, not followed-by for last heading)
+    # MD022 — the Toolly rule checks that headings are preceded by a blank line.
+    # No check is applied for a blank line after the final heading.
 
     # MD047 — file should end with a single newline
     if text and not text.endswith("\n"):
