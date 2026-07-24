@@ -4,7 +4,8 @@ package com.toolly.spike.capture.domain
  * Outcome of a [DocumentScanner.launch] call.
  *
  * All variants are terminal: the session is complete when a result is delivered.
- * Callers must handle every branch; ignoring [Failure] or [Cancelled] silently is
+ * Callers must handle every branch; ignoring [ScanResult.Failure] or
+ * [ScanResult.Cancelled] silently is
  * a contract violation.
  */
 sealed class ScanResult {
