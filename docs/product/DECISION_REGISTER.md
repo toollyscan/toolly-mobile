@@ -7,7 +7,7 @@ Add a row when a decision is made. Update the status column when a decision is r
 |----|------|--------|-------|-----------|-------|
 | D-001 | 2026-07-23 | Accepted | India-first launch | India is the selected first market; market sizing and workflow differentiation require evidence before launch claims are made. | shivayogih |
 | D-002 | 2026-07-23 | Accepted | English, Hindi and Kannada as launch languages | Supports the selected India-first audience and Karnataka launch strategy; translation quality requires native-language review. | shivayogih |
-| D-003 | 2026-07-23 | Accepted | Android and iOS dual-platform from day one | Avoid market fragmentation; KMP boundary ADR manages shared code risk. | shivayogih |
+| D-003 | 2026-07-23 | Superseded | Android and iOS dual-platform from day one | Superseded by D-043: retain cross-platform contracts but sequence Android phone/tablet implementation first. | shivayogih |
 | D-004 | 2026-07-23 | Accepted | Encrypted local vault as source of truth | Privacy-first requirement; offline-first requirement; cloud is optional. See ADR-0002. | shivayogih |
 | D-005 | 2026-07-23 | Accepted | Firebase as the approved cloud provider | Firebase is approved for initial development and production releases. AWS migration may be evaluated after approximately two years based on cost, scale, reliability and business needs; no AWS implementation is included now. See ADR-0003. | shivayogih |
 | D-006 | 2026-07-23 | Accepted | Toolly-owned canonical document and account IDs | Prevents provider lock-in and enables migration without data loss. See ADR-0004. | shivayogih |
