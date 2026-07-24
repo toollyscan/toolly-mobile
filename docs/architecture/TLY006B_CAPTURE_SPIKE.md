@@ -1,147 +1,115 @@
 # TLY-006B — ML Kit Capture Spike: Architecture Note
 
 - **Issue:** toollyscan/toolly-mobile#22
-- **Status:** Spike executable code merged; physical-device evidence pending
+- **Status:** Draft implementation; CI and physical-device evidence pending
 - **Date:** 2026-07-24
 - **Owner:** shivayogih
 
 ## Purpose
 
-This note records the architecture of the TLY-006B capture spike: a minimal executable
-Android module that proves the ML Kit Document Scanner capture boundary on phones and
-tablets using synthetic test documents only.
+TLY-006B is a minimal Android phone/tablet spike for the document-capture boundary.
+Only synthetic test documents are allowed. It does not include production vault,
+authentication, Firebase, sync, billing, upload, or download behavior.
 
-## Module
+## Boundaries
 
-The spike lives in `spike-capture/`. It is a self-contained Android application module
-added for TLY-006B only. No production authentication, vault, sync or billing modules
-are scaffolded.
-
-## DocumentScanner port
-
-```
-com.toolly.spike.capture.domain.DocumentScanner
-```
-
-A Kotlin interface with a single `suspend fun launch(config: ScanConfig): ScanResult`.
-No Android, ML Kit, or CameraX imports are present. The port is intentionally free of
-provider SDK types so it can be moved to a shared KMP contracts module without changes.
-
-## Adapter layer
-
-```
+```text
+CaptureSpikeScreen
+        |
+        v
 domain.DocumentScanner
-    ├── mlkit.MlKitDocumentScannerAdapter   (primary — requires Play Services)
-    └── camerax.CameraXDocumentScannerAdapter (fallback — stub for spike)
+        |
+        +-- domain.FallbackDocumentScanner
+              |-- mlkit.MlKitDocumentScannerAdapter
+              +-- camerax.CameraXDocumentScannerAdapter (dependency-free stub)
+                         |
+                         v
+              mlkit.TemporaryScanStore
+                         |
+                         v
+              TemporaryAssetId (domain-safe handle)
 ```
 
-### MlKitDocumentScannerAdapter
+The domain package contains no Android or provider types. `ScannedPage` carries a
+validated Toolly `TemporaryAssetId`, not a URI, path, filename, or ML Kit object.
+Provider `Uri` values remain inside the ML Kit adapter.
 
-- Uses `GmsDocumentScanning` behind the `DocumentScanner` port.
-- Bridges the Android `ActivityResultLauncher` callback to a Kotlin coroutine via
-  `CompletableDeferred`.
-- Delegates result mapping to `MlKitResultMapper` (pure object, no Android imports,
-  fully unit-testable on the JVM).
-- Returns `ScanResult.Failure(ScanError.ServiceUnavailable)` on any Play Services,
-  initialization, or intent-sender failure.
+## Capture and fallback flow
 
-### CameraXDocumentScannerAdapter (stub)
-
-Returns `ScanResult.Failure(ScanError.ServiceUnavailable)` in all cases.
-
-Selected over the ML Kit adapter when:
-
-1. `GoogleApiAvailability.isGooglePlayServicesAvailable` ≠ `SUCCESS`
-2. ML Kit initialization fails with `UNSUPPORTED`
-3. On-demand ML Kit module download fails
-4. Device memory class is below the ML Kit minimum
-5. User has opted into a manual-capture preference (future)
-
-Full CameraX implementation (permission handling, camera lifecycle, rotation, manual
-boundary crop) is a follow-up tracked in the TLY-006B issue.
-
-## Adapter selection
-
-`CaptureSpikeActivity` checks Play Services at startup and wires the appropriate
-adapter. Both adapters are injected through the `DocumentScanner` interface so the
-Compose UI (`CaptureSpikeScreen`) is independent of the active implementation.
-
-## Adaptive Compose harness
-
-`CaptureSpikeScreen` reads `LocalConfiguration.current.screenWidthDp`:
-
-| Width | Layout | Notes |
-|-------|--------|-------|
-| < 600 dp | Phone — stacked | Capture button above thumbnail grid |
-| ≥ 600 dp | Tablet — side-by-side | Controls fixed-width left pane; thumbnails fill right |
-
-`ThumbnailGrid` uses a `LazyVerticalGrid` with `GridCells.Adaptive(100.dp)` to fill
-available width on both form factors.
-
-Coil `AsyncImage` loads temporary JPEG URIs from app-private storage. Disk cache is
-disabled for all vault-origin content in production (ADR-0011). The same policy is
-applied in the spike for consistency.
-
-## Result types
-
+```text
+launch(config)
+  -> reject concurrent request with Busy
+  -> validate page limit (1..50)
+  -> request ML Kit intent sender
+  -> launch provider activity
+  -> cancellation: Cancelled
+  -> provider unavailable/init failure: invoke Toolly fallback router
+  -> successful provider result: validate and copy each JPEG
+  -> return Toolly temporary asset IDs
 ```
+
+`FallbackDocumentScanner` invokes CameraX only for `ServiceUnavailable`. Storage,
+invalid-result, lifecycle, and busy failures are not hidden by a fallback retry.
+The CameraX adapter remains a stub and therefore brings no CameraX runtime dependency
+or `CAMERA` permission into this spike.
+
+ML Kit documents a minimum device total-RAM requirement of 1.7 GB. Toolly relies on the
+provider's support result and does not use an invented memory-class threshold.
+
+## Temporary asset ownership
+
+`TemporaryScanStore` is the sole owner of spike plaintext files:
+
+1. Open the provider URI inside the Android adapter.
+2. Accept only JPEG/unknown MIME followed by JPEG SOI/EOI signature validation.
+3. Enforce a 25 MiB per-page limit.
+4. Copy into app-private cache as a `.part` file and sync it.
+5. Rename on the same filesystem to a random 128-bit Toolly asset ID.
+6. Return only `TemporaryAssetId` to the domain/UI.
+7. Delete on explicit replacement/release, failed import, cancellation cleanup, or
+   Activity destruction.
+
+The spike never uploads these files or promotes them into a persistent vault.
+
+## Adaptive and accessible UI
+
+| Available width | Layout |
+|-----------------|--------|
+| `< 600 dp` | Stacked capture controls and adaptive thumbnail grid |
+| `>= 600 dp` | Fixed controls pane and flexible thumbnail pane |
+
+Coil receives app-private `File` objects resolved at the UI adapter boundary. Disk and
+memory caching are explicitly disabled for spike document pixels. Page descriptions
+contain only ordinal numbers, and status changes use a polite accessibility live region.
+
+## Result contract
+
+```text
 ScanResult
-    Success(pages: List<ScannedPage>)
-    Cancelled
-    Failure(error: ScanError)
-        ScanError.ServiceUnavailable
-        ScanError.PermissionDenied
-        ScanError.PartialCapture(capturedPages, cause)
-        ScanError.Unknown(cause)
+  Success(pages)
+  Cancelled
+  Failure
+    ServiceUnavailable | PermissionDenied | Busy | InvalidResult
+    StorageFailure | LifecycleEnded
+    PartialCapture(pages, allowlisted reason)
 ```
 
-Cancellation is never converted to a generic failure. Partial results are preserved in
-`PartialCapture` so the caller can offer to continue with captured pages.
+No free-form SDK exception message, file identifier, or document data can enter the
+result contract.
 
-## Unit tests
+## Verification
 
-| Test class | Coverage |
-|------------|----------|
-| `MlKitResultMapperTest` | Success mapping, cancellation, empty-page implicit cancel, unknown code, ServiceUnavailable, PartialCapture, no-page partial |
-| `DocumentScannerContractTest` | Cancelled, Success, ServiceUnavailable, PartialCapture, PermissionDenied, Unknown; config pass-through |
-| `CameraXDocumentScannerAdapterTest` | Stub consistency across configurations and repeated calls |
+| Layer | Evidence |
+|-------|----------|
+| Domain and mapper | JVM tests for bounds, provider-neutral IDs, mapping, and fallback |
+| Android manifest | Instrumented test requires zero permissions in this spike |
+| Temporary storage | Instrumented JPEG copy, validation, resolution, and cleanup tests |
+| Build | Android CI assembles app/test APKs, runs lint, and executes JVM tests |
+| Supply chain | Gradle distribution checksum, dependency verification metadata, and locks |
+| Acceptance | Physical phone and tablet capture/rotation/cancellation benchmark evidence |
 
-All tests run on the JVM without Android, ML Kit or CameraX dependencies.
+The KMP suitability decision remains proposed until Android CI and required physical
+device evidence pass. iOS/AVFoundation and future web adapters remain separate work.
 
-## Privacy controls
-
-- No document pixels, OCR text, filenames, paths, PII, tokens or key material are
-  logged at any level.
-- `ScanError` cause strings contain only non-sensitive diagnostic context.
-- Temporary JPEG files written by ML Kit to `cacheDir` are owned by the caller of
-  `DocumentScanner.launch`; deletion is the caller's responsibility before the spike
-  session ends.
-- No `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE` or `MANAGE_EXTERNAL_STORAGE`
-  permissions are requested.
-- No network upload, no Firebase, no cloud sync.
-
-## Benchmark evidence
-
-Cold/warm launch, capture return time, memory observations and phone/tablet evidence
-are pending physical-device execution. A run.json and measurements.jsonl must be
-produced using the protocol template at `benchmarks/templates/run.template.json` and
-stored in `benchmarks/evidence/camera-boundary/` before TLY-006B is accepted.
-
-## Dependency scope
-
-All 15 new dependencies are conditionally approved for TLY-006B (see
-`config/dependencies/registry.json`). Transitive enumeration, verified artifact
-checksums (`gradle/verification-metadata.xml`) and per-configuration lockfiles
-(`spike-capture/gradle.lockfile`) are pending the first local build.
-
-Candidate versions must be revalidated before any dependency is promoted to
-`"approval_status": "approved"` for production use.
-
-## ADR-0001 decision update
-
-The KMP/native camera boundary is confirmed on the Android side: the domain port
-(`DocumentScanner`) has no Android imports and is suitable for inclusion in a shared
-KMP contracts module. Native Android handles Activity lifecycle, ActivityResult API and
-SDK initialization; the shared contract carries only Toolly-owned result types.
-
-iOS/AVFoundation boundary evaluation remains pending and is not blocked by this spike.
+See `docs/security/ANDROID_PERMISSION_POLICY.md` for the canonical capture, import,
+export, upload/download, and notification permission rules.
