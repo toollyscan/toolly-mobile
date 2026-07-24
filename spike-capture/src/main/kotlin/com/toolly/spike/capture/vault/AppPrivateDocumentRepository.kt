@@ -107,7 +107,7 @@ class AppPrivateDocumentRepository(
             }
 
             try {
-                command.pages.forEach { page ->
+                for (page in command.pages) {
                     val source = resolveTemporaryAsset(page.temporaryAssetId.value)
                         ?: throw IOException("Temporary source unavailable")
                     val target = File(transaction, assetFileName(page.assetId))
@@ -148,7 +148,9 @@ class AppPrivateDocumentRepository(
 
     private fun recoverInterruptedWrites() {
         synchronized(lock) {
-            staging.listFiles().orEmpty().forEach { it.deleteRecursivelySafely() }
+            for (candidate in staging.listFiles().orEmpty()) {
+                candidate.deleteRecursivelySafely()
+            }
         }
     }
 
@@ -159,7 +161,7 @@ class AppPrivateDocumentRepository(
         command: SaveCapturedDocumentCommand,
     ) {
         val pages = JSONArray()
-        command.pages.sortedBy { it.ordinal }.forEach { page ->
+        for (page in command.pages.sortedBy { it.ordinal }) {
             pages.put(
                 JSONObject()
                     .put(KEY_PAGE_ID, page.pageId.value)
