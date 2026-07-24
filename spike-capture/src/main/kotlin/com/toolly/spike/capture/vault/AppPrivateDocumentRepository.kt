@@ -29,7 +29,7 @@ import org.json.JSONObject
  * This adapter deliberately sits behind [DocumentRepository]. It proves staging, atomic
  * publication, process recreation and library behavior without coupling product code to files.
  * It is not the final encrypted-vault adapter: document bytes remain restricted to the app
- * sandbox, and TLY-006F replaces this implementation after SQLCipher/key-envelope evidence.
+ * sandbox, and TLY-006F replaces this implementation after ADR-0012 platform-vault evidence.
  */
 class AppPrivateDocumentRepository(
     context: Context,

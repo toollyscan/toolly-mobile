@@ -40,17 +40,19 @@ Each item below represents an area where a design assumption has been made but e
 
 ---
 
-### DA-003 — SQLCipher vs. SQLite with platform encryption
+### DA-003 — Platform-only local vault cryptography
 
-**Status:** Open.
+**Status:** Architecture selected by ADR-0012; implementation evidence remains open.
 
-**Questions:**
+**Decision:**
 
-- What is the binary-size cost of SQLCipher on Android and iOS?
-- Does SQLCipher integrate cleanly with SQLDelight or Room?
-- Is platform-native encryption (Android Keystore + iOS Secure Enclave) sufficient without SQLCipher?
+- SQLCipher and similar third-party encrypted-database libraries are prohibited.
+- Android uses Keystore/JCA AES-GCM; Apple uses Keychain/CryptoKit AES-GCM.
+- Sensitive metadata is encrypted before SQLite persistence.
+- Assets use unique per-asset keys and authenticated encrypted chunks.
 
-**Evidence required:** Security review decision and benchmark of encrypted read/write throughput on representative devices.
+**Evidence required:** Qualified security review plus encrypted read/write, tamper, key-loss, migration,
+recovery, memory and storage benchmarks on representative Android and Apple devices.
 
 ---
 

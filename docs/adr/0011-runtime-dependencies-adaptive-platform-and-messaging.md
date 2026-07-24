@@ -1,6 +1,6 @@
 # ADR-0011: Runtime dependencies, adaptive platforms and messaging
 
-- **Status:** Accepted
+- **Status:** Accepted; encrypted-storage and image-loading sections superseded by ADR-0012
 - **Date:** 2026-07-24
 - **Owner:** shivayogih
 - **Decision scope:** First Android walking slice and future platform expansion
@@ -34,27 +34,19 @@ Document results returned by the scanner are copied into Toolly-controlled proce
 encrypted storage immediately. Temporary plaintext artifacts have bounded ownership and deletion
 tests.
 
-### Image loading
+### Image loading — superseded by ADR-0012
 
-Coil 3 is the initial Compose image loader. Glide is not added at the same time.
+Android and Apple platform image APIs replace Coil, Glide and other third-party image loaders for
+document pixels. Vault images are decrypted through a Toolly-owned stream into bounded memory.
+Decrypted document pages and thumbnails are never written to a persistent image cache.
 
-Vault images use a Toolly-owned Coil fetcher that reads through the vault port and decrypts into
-memory. Plaintext vault paths are never exposed to UI code. Disk caching is disabled for decrypted
-document pages and thumbnails. Memory caching is bounded and cleared when the vault locks or the
-session ends.
+### Encrypted local storage — superseded by ADR-0012
 
-### Encrypted local storage
-
-Room provides the metadata and query model. The current `sqlcipher-android` package provides
-database encryption; the deprecated `android-database-sqlcipher` package is prohibited.
-
-A random high-entropy SQLCipher passphrase is protected by Android Keystore. It is not hardcoded,
-derived directly from a short PIN, stored in DataStore or sent to Firebase. Page images,
-thumbnails, PDFs and other large assets are separately encrypted using the accepted Toolly
-envelope after ADR-0007 evidence and qualified review.
-
-SQLCipher protects database contents but does not replace file encryption, key lifecycle,
-integrity, corruption, backup, migration or recovery tests.
+SQLCipher and other third-party encrypted-database libraries are prohibited by product-owner
+decision. Android uses platform JCA AES-GCM plus Android Keystore; Apple uses CryptoKit AES-GCM plus
+Keychain. Sensitive metadata is encrypted before it reaches Room/platform SQLite, and binary assets
+use unique per-asset keys and authenticated encrypted chunks. See
+[ADR-0012](0012-platform-only-local-vault-cryptography.md).
 
 ### Firebase services
 
@@ -105,8 +97,8 @@ Platform SDKs stay in adapters:
 
 | Platform | Initial adapters |
 |----------|------------------|
-| Android phone/tablet | ML Kit, CameraX fallback, SQLCipher, Keystore, Coil and Firebase Android |
-| iPhone/iPad | Native camera/scanner, Keychain/Secure Enclave, native encrypted storage and Firebase Apple |
+| Android phone/tablet | ML Kit, CameraX fallback, Android Keystore/JCA, platform image decoding and Firebase Android |
+| iPhone/iPad | Native camera/scanner, Keychain/CryptoKit, platform image decoding and Firebase Apple |
 | Web, future | Browser capture/import, Web Crypto, browser storage and provider adapters |
 
 The web UI framework is intentionally undecided. Compose Multiplatform Web, a TypeScript framework
@@ -121,12 +113,9 @@ themselves:
 | Capability | Candidate |
 |------------|-----------|
 | Scanner | `com.google.android.gms:play-services-mlkit-document-scanner:16.0.0` |
-| Compose image loading | `io.coil-kt.coil3:coil-compose:3.5.0` |
-| Encrypted SQLite | `net.zetetic:sqlcipher-android:4.15.0@aar` |
 | Firebase compatibility | `com.google.firebase:firebase-bom:34.16.0` |
 
-Exact versions, transitives, licences, privacy behavior, binary size, 16 KB page compatibility,
-CVE status and removal plans must be revalidated and added to the dependency registry in the same
+Exact versions, transitives, licences, privacy behavior, binary size, CVE status and removal plans must be revalidated and added to the dependency registry in the same
 pull request that introduces implementation code.
 
 ## Data flow
@@ -137,7 +126,7 @@ flowchart LR
     Import --> Process["On-device processing"]
     Process --> Encrypt["Vault encryption"]
     Encrypt --> Files["Encrypted assets"]
-    Encrypt --> Database["Room plus SQLCipher"]
+    Encrypt --> Database["Encrypted payloads in Room/platform SQLite"]
     Database --> Library["Adaptive Compose library"]
     Files --> Library
     Library --> Export["Local PDF or JPEG export"]
@@ -148,8 +137,8 @@ flowchart LR
 
 - The first Android slice can use a mature scanner while retaining a fallback and replacement
   boundary.
-- SQLCipher and file-level encryption provide separate database and asset protection.
-- Coil simplifies adaptive Compose rendering without allowing plaintext disk caching.
+- Platform AES-GCM protects sensitive metadata and assets behind separate Toolly ports.
+- Platform image decoding avoids a document-data dependency and persistent plaintext image caching.
 - Firebase capabilities are available without making Firebase the product architecture.
 - Vendor metrics and processing disclosures must remain accurate; on-device processing does not
   mean that every SDK emits zero operational metadata.
@@ -164,8 +153,8 @@ Before production approval:
 1. Complete TLY-006 scanner, geometry, vault, PDF and representative-device evidence.
 2. Verify ML Kit first-use, offline-after-install, unsupported-device and low-memory behavior.
 3. Verify CameraX/manual fallback behavior.
-4. Verify SQLCipher migration, corruption, key invalidation, 16 KB pages and recovery.
-5. Verify Coil never writes decrypted vault content to disk cache.
+4. Verify platform-key invalidation, encrypted metadata/asset migration, corruption and recovery.
+5. Verify platform image decoding never writes decrypted vault content to persistent cache.
 6. Verify Firebase rules, App Check, deletion, consent withdrawal and encrypted-backup boundaries.
 7. Verify notification payload and marketing-consent tests.
 8. Verify compact, medium and expanded layouts on physical phones and tablets.
@@ -176,8 +165,8 @@ Before production approval:
 
 - [ML Kit Document Scanner](https://developers.google.com/ml-kit/vision/doc-scanner/android)
 - [ML Kit terms and privacy](https://developers.google.com/ml-kit/terms)
-- [Coil documentation](https://coil-kt.github.io/coil/)
-- [SQLCipher for Android](https://github.com/sqlcipher/sqlcipher-android)
+- [ADR-0012 — Platform-only Local Vault Cryptography](0012-platform-only-local-vault-cryptography.md)
+- [Android cryptography](https://developer.android.com/privacy-and-security/cryptography)
 - [Firebase Android setup](https://firebase.google.com/docs/android/setup)
 - [Android adaptive apps](https://developer.android.com/develop/adaptive-apps)
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)

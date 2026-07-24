@@ -105,3 +105,5 @@ outcomes must satisfy the same shared contract.
 - [ADR-0009 — Firebase control plane/environment isolation](../adr/0009-firebase-control-plane-and-environment-isolation.md)
 - [ADR-0010 — First-party CI trust boundary](../adr/0010-first-party-ci-trust-boundary.md)
 - [ADR-0011 — Runtime dependencies, adaptive platforms and messaging](../adr/0011-runtime-dependencies-adaptive-platform-and-messaging.md)
+
+- [ADR-0012 — Platform-only local vault cryptography](../adr/0012-platform-only-local-vault-cryptography.md)
