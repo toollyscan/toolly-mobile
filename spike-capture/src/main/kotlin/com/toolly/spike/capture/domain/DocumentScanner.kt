@@ -8,13 +8,14 @@ package com.toolly.spike.capture.domain
  * to a shared KMP contracts module without changes.
  *
  * The initial Android adapter uses Google ML Kit Document Scanner. A CameraX/manual fallback
- * is provided as a stub and selected when Play Services or ML Kit are unavailable.
+ * remains behind the same port and is selected when Play Services or ML Kit are unavailable.
  */
 interface DocumentScanner {
     /**
      * Launch a capture session and suspend until the user completes, cancels, or an error
-     * occurs. Implementations must delete any temporary plaintext artifacts when the
-     * [ScanResult] is delivered, including on cancellation and failure.
+     * occurs. On success, ownership of every returned temporary asset transfers to the
+     * caller until it is explicitly released. Implementations must clean up assets created
+     * by failed, cancelled, or interrupted sessions.
      */
     suspend fun launch(config: ScanConfig): ScanResult
 }
