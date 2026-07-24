@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "policy_id": "toolly-platform-parity",
+  "platforms": [
+    "android",
+    "ios"
+  ],
+  "form_factors": {
+    "android": [
+      "phone",
+      "tablet"
+    ],
+    "ios": [
+      "iphone",
+      "ipad"
+    ]
+  },
+  "shared_ui": {
+    "framework": "compose-multiplatform",
+    "scope": "toolly-owned-non-system-screens",
+    "locales": [
+      "en-IN",
+      "hi-IN",
+      "kn-IN"
+    ]
+  },
+  "allowed_platform_differences": [
+    {
+      "id": "capture-engine",
+      "android_adapter": "ml-kit-or-camerax",
+      "ios_adapter": "visionkit-or-avfoundation",
+      "shared_contract": "DocumentScanner"
+    },
+    {
+      "id": "key-protection",
+      "android_adapter": "android-keystore",
+      "ios_adapter": "apple-keychain",
+      "shared_contract": "KeyProtector"
+    },
+    {
+      "id": "system-surfaces",
+      "android_adapter": "android-system-ui",
+      "ios_adapter": "apple-system-ui",
+      "shared_contract": "PlatformAction"
+    },
+    {
+      "id": "notifications",
+      "android_adapter": "fcm-android",
+      "ios_adapter": "apns-via-fcm",
+      "shared_contract": "NotificationGateway"
+    },
+    {
+      "id": "store-purchases",
+      "android_adapter": "google-play-billing",
+      "ios_adapter": "storekit",
+      "shared_contract": "EntitlementProvider"
+    }
+  ],
+  "features": [
+    {
+      "id": "document-library",
+      "android": "candidate",
+      "ios": "pending",
+      "gap_reason": "The merged walking slice currently has an Android composition root.",
+      "tracking_issue": 38
+    },
+    {
+      "id": "capture-review",
+      "android": "candidate",
+      "ios": "pending",
+      "gap_reason": "The iOS capture adapter and application target are part of TLY-012.",
+      "tracking_issue": 38
+    },
+    {
+      "id": "document-viewer",
+      "android": "candidate",
+      "ios": "pending",
+      "gap_reason": "Shared Compose UI extraction is part of TLY-012.",
+      "tracking_issue": 38
+    },
+    {
+      "id": "encrypted-local-vault",
+      "android": "pending",
+      "ios": "pending",
+      "gap_reason": null,
+      "tracking_issue": 26
+    },
+    {
+      "id": "pdf-jpeg-export",
+      "android": "pending",
+      "ios": "pending",
+      "gap_reason": null,
+      "tracking_issue": 24
+    },
+    {
+      "id": "authentication",
+      "android": "pending",
+      "ios": "pending",
+      "gap_reason": null,
+      "tracking_issue": 38
+    },
+    {
+      "id": "notifications",
+      "android": "pending",
+      "ios": "pending",
+      "gap_reason": null,
+      "tracking_issue": 38
+    },
+    {
+      "id": "subscriptions",
+      "android": "pending",
+      "ios": "pending",
+      "gap_reason": null,
+      "tracking_issue": 38
+    },
+    {
+      "id": "localization",
+      "android": "in-progress",
+      "ios": "pending",
+      "gap_reason": "Android resource extraction begins in TLY-012; shared resources remain pending.",
+      "tracking_issue": 38
+    },
+    {
+      "id": "accessibility",
+      "android": "in-progress",
+      "ios": "pending",
+      "gap_reason": "TalkBack candidates exist; shared semantics and VoiceOver evidence remain pending.",
+      "tracking_issue": 38
+    }
+  ]
+}

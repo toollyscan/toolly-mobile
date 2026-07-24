@@ -1,5 +1,6 @@
 package com.toolly.spike.capture.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
@@ -36,7 +39,9 @@ import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentSummary
+import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
+import com.toolly.spike.capture.R
 import com.toolly.spike.capture.domain.ScanConfig
 import com.toolly.spike.capture.domain.ScanError
 import com.toolly.spike.capture.domain.ScanResult
@@ -63,7 +68,7 @@ fun ToollyDocumentApp(
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Library) }
     var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
     var isWorking by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf<String?>(null) }
+    var message by remember { mutableStateOf<UiMessage?>(null) }
 
     fun refreshLibrary() {
         isWorking = true
@@ -74,7 +79,7 @@ fun ToollyDocumentApp(
                     documents = result.value
                     message = null
                 }
-                is ToollyResult.Failure -> message = result.error.safeMessage
+                is ToollyResult.Failure -> message = UiMessage(toollyErrorMessage(result.error.code))
             }
         }
     }
@@ -99,9 +104,11 @@ fun ToollyDocumentApp(
                                 is ScanResult.Success -> {
                                     screen = AppScreen.CapturePreview(result.pages)
                                 }
-                                ScanResult.Cancelled -> message = "Capture cancelled"
+                                ScanResult.Cancelled -> {
+                                    message = UiMessage(R.string.capture_cancelled)
+                                }
                                 is ScanResult.Failure -> {
-                                    message = safeCaptureMessage(result.error)
+                                    message = UiMessage(captureErrorMessage(result.error))
                                     if (result.error is ScanError.PartialCapture) {
                                         screen = AppScreen.CapturePreview(
                                             result.error.capturedPages,
@@ -118,7 +125,9 @@ fun ToollyDocumentApp(
                         isWorking = false
                         when (result) {
                             is ToollyResult.Success -> screen = AppScreen.Document(result.value)
-                            is ToollyResult.Failure -> message = result.error.safeMessage
+                            is ToollyResult.Failure -> {
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                            }
                         }
                     }
                 },
@@ -142,11 +151,13 @@ fun ToollyDocumentApp(
                         when (result) {
                             is ToollyResult.Success -> {
                                 onReleaseAssets(current.pages.map { it.assetId })
-                                message = "Document saved"
+                                message = UiMessage(R.string.document_saved)
                                 screen = AppScreen.Library
                                 refreshLibrary()
                             }
-                            is ToollyResult.Failure -> message = result.error.safeMessage
+                            is ToollyResult.Failure -> {
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                            }
                         }
                     }
                 },
@@ -168,7 +179,7 @@ fun ToollyDocumentApp(
 private fun LibraryScreen(
     documents: List<DocumentSummary>,
     isWorking: Boolean,
-    message: String?,
+    message: UiMessage?,
     onScan: () -> Unit,
     onOpen: (DocumentId) -> Unit,
 ) {
@@ -181,9 +192,9 @@ private fun LibraryScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Toolly", style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
             Text(
-                "Your documents stay available offline.",
+                stringResource(R.string.library_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -193,21 +204,22 @@ private fun LibraryScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (isWorking) {
+                    val workingDescription = stringResource(R.string.working)
                     CircularProgressIndicator(
                         modifier = Modifier.semantics {
-                            contentDescription = "Working"
+                            contentDescription = workingDescription
                         },
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Scan document")
+                    Text(stringResource(R.string.scan_document))
                 }
             }
             StatusMessage(message)
             if (documents.isEmpty() && !isWorking) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        "No documents yet",
+                        stringResource(R.string.no_documents),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -224,11 +236,15 @@ private fun LibraryScreen(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Text(
-                                    "Scanned document",
+                                    stringResource(R.string.scanned_document),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                                 Text(
-                                    "${document.pageCount} page(s)",
+                                    pluralStringResource(
+                                        R.plurals.page_count,
+                                        document.pageCount,
+                                        document.pageCount,
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -245,7 +261,7 @@ private fun LibraryScreen(
 private fun CapturePreviewScreen(
     pages: List<ScannedPage>,
     isSaving: Boolean,
-    message: String?,
+    message: UiMessage?,
     resolveAsset: (TemporaryAssetId) -> File?,
     onDiscard: () -> Unit,
     onSave: () -> Unit,
@@ -256,8 +272,11 @@ private fun CapturePreviewScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Review scan", style = MaterialTheme.typography.headlineSmall)
-        Text("${pages.size} page(s)", style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(R.string.review_scan), style = MaterialTheme.typography.headlineSmall)
+        Text(
+            pluralStringResource(R.plurals.page_count, pages.size, pages.size),
+            style = MaterialTheme.typography.bodyMedium,
+        )
         ThumbnailGrid(
             pages = pages,
             resolveAsset = resolveAsset,
@@ -273,14 +292,14 @@ private fun CapturePreviewScreen(
                 enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
-                Text("Discard")
+                Text(stringResource(R.string.discard))
             }
             Button(
                 onClick = onSave,
                 enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(if (isSaving) "Saving…" else "Save")
+                Text(stringResource(if (isSaving) R.string.saving else R.string.save))
             }
         }
     }
@@ -304,12 +323,19 @@ private fun DocumentScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(onClick = onBack) {
-                Text("Back")
+                Text(stringResource(R.string.back))
             }
-            Text("Scanned document", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                stringResource(R.string.scanned_document),
+                style = MaterialTheme.typography.headlineSmall,
+            )
         }
         Text(
-            "${document.summary.pageCount} page(s)",
+            pluralStringResource(
+                R.plurals.page_count,
+                document.summary.pageCount,
+                document.summary.pageCount,
+            ),
             style = MaterialTheme.typography.bodyMedium,
         )
         DocumentPageGrid(
@@ -321,10 +347,10 @@ private fun DocumentScreen(
 }
 
 @Composable
-private fun StatusMessage(message: String?) {
+private fun StatusMessage(message: UiMessage?) {
     message?.let {
         Text(
-            text = it,
+            text = stringResource(it.resourceId),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.semantics {
@@ -334,16 +360,34 @@ private fun StatusMessage(message: String?) {
     }
 }
 
-private fun safeCaptureMessage(error: ScanError): String = when (error) {
-    is ScanError.ServiceUnavailable -> "Scanner unavailable on this device"
-    is ScanError.PermissionDenied -> "Camera permission is required"
-    is ScanError.PartialCapture -> "Some captured pages are available"
-    is ScanError.Busy -> "A capture is already in progress"
-    is ScanError.InvalidResult -> "The scanner returned an invalid result"
-    is ScanError.StorageFailure -> "Captured pages could not be stored safely"
-    is ScanError.LifecycleEnded -> "Capture stopped because this screen closed"
-    else -> "Capture failed"
+@StringRes
+private fun captureErrorMessage(error: ScanError): Int = when (error) {
+    is ScanError.ServiceUnavailable -> R.string.scanner_unavailable
+    is ScanError.PermissionDenied -> R.string.camera_permission_required
+    is ScanError.PartialCapture -> R.string.partial_capture_available
+    is ScanError.Busy -> R.string.capture_busy
+    is ScanError.InvalidResult -> R.string.invalid_scanner_result
+    is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
+    is ScanError.LifecycleEnded -> R.string.capture_screen_closed
+    else -> R.string.capture_failed
 }
+
+@StringRes
+private fun toollyErrorMessage(code: ToollyErrorCode): Int = when (code) {
+    ToollyErrorCode.VALIDATION -> R.string.validation_failed
+    ToollyErrorCode.UNAVAILABLE -> R.string.content_unavailable
+    ToollyErrorCode.UNAUTHORIZED -> R.string.authorization_required
+    ToollyErrorCode.CONFLICT -> R.string.operation_conflict
+    ToollyErrorCode.QUOTA -> R.string.quota_reached
+    ToollyErrorCode.CORRUPT -> R.string.document_corrupt
+    ToollyErrorCode.RETRYABLE -> R.string.operation_retryable
+    ToollyErrorCode.PERMANENT,
+    ToollyErrorCode.UNKNOWN -> R.string.operation_failed
+}
+
+private data class UiMessage(
+    @StringRes val resourceId: Int,
+)
 
 private sealed interface AppScreen {
     data object Library : AppScreen

@@ -53,54 +53,58 @@ material are available.
 
 ---
 
-## Phase 1 — Architecture prototype
+## Phase 1 — Cross-platform architecture prototype
 
-**Goal:** Validate the KMP boundary and encrypted vault before production implementation.
+**Goal:** Establish shared Android/iOS product foundations and validate the encrypted vault.
 
-- [ ] KMP module structure (domain, data interfaces)
-- [ ] Room, current SQLCipher Android, Keystore and encrypted-asset vault prototype against ADR-0007, including migration, nonce, rotation, key-invalidation and failure tests
-- [ ] ML Kit scanner adapter spike covering first use, dynamic delivery, offline-after-install, cancellation and unsupported devices
-- [ ] CameraX and manual-crop fallback boundary prototype
-- [ ] Coil encrypted-vault fetcher proving no decrypted disk cache
-- [ ] Adaptive Android phone/tablet shell covering compact, medium and expanded layouts
-- [ ] Local and FCM notification prototype covering safe payloads, channels, consent and token lifecycle
-- [ ] Compose Multiplatform rendering benchmark on representative devices (DA-001)
-- [ ] OCR engine evaluation on Indian documents (DA-004)
+- [ ] KMP module structure for domain, use cases, ports and presentation state
+- [ ] Compose Multiplatform application shell for Android phone/tablet and iPhone/iPad
+- [ ] Shared English, Hindi and Kannada resources with native-language review
+- [ ] Shared accessibility semantics with TalkBack and VoiceOver evidence
+- [ ] Android and iOS composition roots with provider-neutral platform adapters
+- [ ] Room/current SQLCipher Android and Apple encrypted-vault prototypes against ADR-0007,
+  including migration, nonce, rotation, key-invalidation and failure tests
+- [ ] ML Kit Android scanner adapter and Apple VisionKit/AVFoundation adapter
+- [ ] Manual capture/crop fallback boundary on both platforms
+- [ ] Image loading proving no decrypted disk cache on either platform
+- [ ] Local and push notification prototype covering safe payloads, consent and token lifecycle
+- [ ] Common, Android and iOS CI build/test gates
 - [ ] Production Gate review
 
 ---
 
-## Phase 2 — Core document capture (Android)
+## Phase 2 — Core document product (Android and iOS)
 
-**Goal:** End-to-end document capture, storage and export on Android.
+**Goal:** Deliver the same capture, local vault, library, viewer and export outcomes on Android
+phones/tablets and iPhone/iPad.
 
-*Blocked until Production Gate is approved.*
+*Blocked until Production Gate is approved. Temporary platform gaps must be tracked in the parity
+matrix and block beta/release approval.*
 
-- [ ] ML Kit document capture behind the Toolly scanner port, with CameraX/manual fallback
-- [ ] Page cropping and enhancement with versioned Toolly processing recipes
-- [ ] Encrypted vault persistence
-- [ ] Local PDF/JPEG export
+- [ ] Native capture adapters behind the shared Toolly scanner port
+- [ ] Shared page review, ordering, cropping and enhancement behavior
+- [ ] Encrypted vault persistence and recovery on both platforms
+- [ ] Shared document library and viewer UI
+- [ ] Local PDF/JPEG export through platform adapters
 - [ ] English, Hindi and Kannada UI strings
-- [ ] Accessibility (TalkBack, minimum WCAG 2.1 AA)
-- [ ] Adaptive phone/tablet layouts, landscape and multi-window behavior
-- [ ] Security, processing, backup, billing and consented marketing notification channels
-- [ ] Benchmark on representative Android phones and tablets
+- [ ] TalkBack and VoiceOver accessibility evidence
+- [ ] Compact, medium and expanded layouts; landscape and multi-window behavior
+- [ ] Security, processing, backup, billing and consented marketing notification categories
+- [ ] Representative Android phone/tablet and iPhone/iPad benchmarks
+- [ ] Platform parity matrix fully verified
 
 ---
 
-## Phase 3 — Core document capture (iOS)
+## Phase 3 — Product hardening and parity verification
 
-**Goal:** Feature parity on iPhone and iPad.
+**Goal:** Remove temporary platform gaps and prove release-quality behavior.
 
-*Blocked until Phase 2 is complete.*
-
-- [ ] Camera capture (no commercial SDK)
-- [ ] Page cropping and enhancement
-- [ ] Encrypted vault persistence
-- [ ] Local PDF/JPEG export
-- [ ] English, Hindi and Kannada UI strings
-- [ ] Accessibility (VoiceOver, minimum WCAG 2.1 AA)
-- [ ] Benchmark on representative iPhone and iPad devices
+- [ ] Shared feature acceptance suite passes on Android and iOS
+- [ ] Capture, vault, export and recovery failure paths pass on representative physical devices
+- [ ] Accessibility, localization and adaptive-layout audits pass
+- [ ] Privacy, permission and data-retention behavior passes platform review
+- [ ] Performance, memory, battery and startup targets pass
+- [ ] No unexplained Android-only or iOS-only features remain
 
 ---
 

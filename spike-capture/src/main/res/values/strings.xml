@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Toolly</string>
+    <string name="library_subtitle">Your documents stay available offline.</string>
+    <string name="working">Working</string>
+    <string name="scan_document">Scan document</string>
+    <string name="no_documents">No documents yet</string>
+    <string name="scanned_document">Scanned document</string>
+    <plurals name="page_count">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+    <string name="review_scan">Review scan</string>
+    <string name="discard">Discard</string>
+    <string name="saving">Saving…</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="capture_cancelled">Capture cancelled</string>
+    <string name="document_saved">Document saved</string>
+    <string name="scanner_unavailable">Scanner unavailable on this device</string>
+    <string name="camera_permission_required">Camera permission is required</string>
+    <string name="partial_capture_available">Some captured pages are available</string>
+    <string name="capture_busy">A capture is already in progress</string>
+    <string name="invalid_scanner_result">The scanner returned an invalid result</string>
+    <string name="captured_pages_storage_failed">Captured pages could not be stored safely</string>
+    <string name="capture_screen_closed">Capture stopped because this screen closed</string>
+    <string name="capture_failed">Capture failed</string>
+    <string name="validation_failed">Please check the information and try again</string>
+    <string name="content_unavailable">The requested content is unavailable</string>
+    <string name="authorization_required">Authorization is required</string>
+    <string name="operation_conflict">This item changed; refresh and try again</string>
+    <string name="quota_reached">The storage limit has been reached</string>
+    <string name="document_corrupt">This document cannot be opened safely</string>
+    <string name="operation_retryable">The operation could not be completed; try again</string>
+    <string name="operation_failed">The operation could not be completed</string>
+    <string name="document_page_description">Document page %1$d</string>
+    <string name="scanned_page_description">Scanned page %1$d</string>
+</resources>
