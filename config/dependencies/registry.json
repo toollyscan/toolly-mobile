@@ -56,7 +56,7 @@
       "ecosystem": "gradle-plugin",
       "coordinate": "com.android.application",
       "requested_version": "8.7.3",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Android Gradle Plugin — compiles and packages the TLY-006B capture spike APK. Spike scope only; not approved for production feature modules.",
       "owner": "shivayogih",
@@ -78,7 +78,7 @@
         ]
       },
       "transitives": {
-        "status": "not_enumerated_build_only",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -100,7 +100,7 @@
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.android",
       "requested_version": "2.1.21",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Android compiler plugin — enables Kotlin compilation for the spike module.",
       "owner": "shivayogih",
@@ -122,7 +122,7 @@
         ]
       },
       "transitives": {
-        "status": "not_enumerated_build_only",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -144,7 +144,7 @@
       "ecosystem": "gradle-plugin",
       "coordinate": "org.jetbrains.kotlin.plugin.compose",
       "requested_version": "2.1.21",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "build",
       "purpose": "Kotlin Compose compiler plugin (Kotlin 2.0+) — enables @Composable annotation processing for the adaptive spike UI. Same version as the Kotlin toolchain.",
       "owner": "shivayogih",
@@ -166,7 +166,7 @@
         ]
       },
       "transitives": {
-        "status": "not_enumerated_build_only",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -188,7 +188,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "com.google.android.gms:play-services-mlkit-document-scanner",
       "requested_version": "16.0.0",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Google ML Kit Document Scanner — capture UI, boundary detection, crop and JPEG export behind Toolly's DocumentScanner port. ML Kit owns camera capture UI and requires no Toolly CAMERA permission. Synthetic test documents only in this spike.",
       "owner": "shivayogih",
@@ -210,7 +210,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -233,7 +233,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "androidx.compose.ui:ui",
       "requested_version": "1.7.8",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Jetpack Compose UI runtime — foundational Compose library for the adaptive capture harness.",
       "owner": "shivayogih",
@@ -254,7 +254,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -276,7 +276,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "androidx.compose.material3:material3",
       "requested_version": "1.3.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Compose Material 3 — Material Design 3 components for the capture spike harness (Button, Surface, Text, CircularProgressIndicator).",
       "owner": "shivayogih",
@@ -297,7 +297,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -320,7 +320,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "androidx.activity:activity-compose",
       "requested_version": "1.9.3",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Activity Compose extensions — setContent() integration for launching Compose from ComponentActivity.",
       "owner": "shivayogih",
@@ -341,7 +341,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -363,7 +363,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "io.coil-kt.coil3:coil-compose",
       "requested_version": "3.1.0",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Coil 3.1 Compose integration — loads temporary JPEG thumbnails from Toolly-owned app-private files. Disk and memory caches are explicitly disabled for spike document pixels. Version 3.1 matches the reviewed Kotlin 2.1, Compose 1.7 and API 35 toolchain.",
       "owner": "shivayogih",
@@ -385,7 +385,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -409,7 +409,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
       "requested_version": "1.9.0",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Kotlin Coroutines Android — provides Main dispatcher and Android-specific coroutine integration for the capture spike lifecycle.",
       "owner": "shivayogih",
@@ -431,7 +431,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -454,7 +454,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "junit:junit",
       "requested_version": "4.13.2",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "test",
       "purpose": "JUnit 4 — test runner for spike unit tests (result mapper, contract tests, CameraX stub tests). JVM-only; no Robolectric required.",
       "owner": "shivayogih",
@@ -476,7 +476,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -499,7 +499,7 @@
       "ecosystem": "gradle-library",
       "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-test",
       "requested_version": "1.9.0",
-      "immutable_ref": "artifact-checksums-pending-physical-device-benchmark-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "test",
       "purpose": "Kotlin Coroutines Test — runTest and TestCoroutineScheduler for suspend-function unit tests in the spike.",
       "owner": "shivayogih",
@@ -521,7 +521,7 @@
         ]
       },
       "transitives": {
-        "status": "not_fully_enumerated_spike",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -541,7 +541,7 @@
     {
       "id": "gradle-test-androidx-junit",
       "ecosystem": "gradle-library",
-      "immutable_ref": "artifact-checksums-pending-ci-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "androidTest",
       "owner": "shivayogih",
       "upstream": "https://developer.android.com/jetpack/androidx/releases/test",
@@ -561,7 +561,7 @@
         ]
       },
       "transitives": {
-        "status": "resolved_by_gradle_verification_and_lock",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
@@ -584,7 +584,7 @@
     {
       "id": "gradle-test-androidx-runner",
       "ecosystem": "gradle-library",
-      "immutable_ref": "artifact-checksums-pending-ci-verification",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "androidTest",
       "owner": "shivayogih",
       "upstream": "https://developer.android.com/jetpack/androidx/releases/test",
@@ -604,7 +604,7 @@
         ]
       },
       "transitives": {
-        "status": "resolved_by_gradle_verification_and_lock",
+        "status": "locked_and_checksum_verified",
         "count": null
       },
       "size": {
