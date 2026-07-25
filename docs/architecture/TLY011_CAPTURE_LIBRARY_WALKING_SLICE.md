@@ -21,7 +21,7 @@ flowchart LR
     UseCases --> Model[domain-model]
     Contracts --> Model
     Contracts --> Foundation[foundation]
-    AndroidRepository[Android app-private repository candidate] --> Contracts
+    AndroidRepository[Android encrypted repository adapter] --> Contracts
     MLKit[ML Kit adapter] --> Scanner
     Composition[Android composition root] --> AndroidRepository
     Composition --> MLKit
@@ -32,32 +32,30 @@ provider types. TLY-011 initially keeps them in the reviewed Android Gradle modu
 a build plugin solely for scaffolding. The later physical KMP-module extraction changes build
 targets without changing these dependency rules or public APIs.
 
-## Local transaction candidate
+## Encrypted local transaction
 
 The TLY-011 adapter publishes a document with a same-filesystem staged directory:
 
 1. resolve Toolly-owned temporary asset IDs inside the Android adapter;
-2. validate and bounded-copy each complete JPEG into a transaction directory;
-3. write and fsync the versioned manifest;
+2. validate each complete JPEG and encrypt it into independently authenticated chunks;
+3. encrypt and fsync the versioned manifest;
 4. write and fsync the commit marker;
 5. atomically rename the transaction directory into the visible document directory;
 6. delete incomplete staging directories when the repository reopens.
 
-Readers only expose directories containing a valid commit marker, manifest and complete assets.
-Retries with the same document ID are idempotent.
+Readers only expose directories containing a valid commit marker and fully authenticated metadata
+and assets. Retries with the same document ID are idempotent.
 
 ## Security status
 
-This adapter is a development-only candidate and is not the final encrypted vault. Android app
-sandboxing, backup disabled, zero requested permission, bounded copies, atomic visibility and
-content-safe error handling are enforced. Document assets are not uploaded and their paths,
-filenames, titles or bytes are not logged.
+TLY-006F replaces the development-only plaintext adapter with the ADR-0012 Android
+Keystore/JCA implementation. Sensitive metadata is encrypted before persistence, each immutable
+asset has a unique key and authenticated chunk sequence, and viewer plaintext remains in bounded
+memory only.
 
-The current candidate still stores committed JPEG bytes as app-private plaintext. It must not ship
-to beta or production. TLY-006F must replace it with the ADR-0012 platform-key/encrypted-metadata and encrypted-asset
-adapters, prove tamper/recovery/migration behavior and provide qualified
-cryptographic review evidence. The `DocumentRepository` contract prevents that replacement from
-changing product UI and use cases.
+The former version-one plaintext format is migration input only and is removed after its encrypted
+replacement reopens successfully. Qualified cryptographic review, representative-device evidence,
+Apple interoperability and recovery approval remain production gates.
 
 ## Focused acceptance
 
@@ -65,7 +63,7 @@ changing product UI and use cases.
 - invalid or duplicate captured pages fail before persistence;
 - incomplete writes are never listed;
 - committed documents reopen through a new repository instance;
-- platform image decoding creates no persistent plaintext cache;
+- no persistent plaintext image cache is created for document pixels;
 - the manifest requests no Android permission;
 - build, lint, unit tests and instrumented-test APK compilation pass;
 - debug APKs remain downloadable from first-party GitHub Actions.
