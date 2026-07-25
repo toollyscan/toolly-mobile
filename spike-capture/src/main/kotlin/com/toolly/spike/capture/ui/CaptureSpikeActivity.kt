@@ -26,6 +26,7 @@ import com.toolly.foundation.ToollyClock
 import com.toolly.foundation.ToollyError
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
+import com.toolly.spike.capture.R
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.spike.capture.domain.DocumentScanner
 import com.toolly.spike.capture.domain.FallbackDocumentScanner
