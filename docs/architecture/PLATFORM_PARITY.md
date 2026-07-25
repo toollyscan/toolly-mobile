@@ -53,8 +53,9 @@ An unexplained Android-only or iOS-only feature is a CI failure.
 
 ## Current implementation status
 
-The Android capture-to-library walking slice is an implementation candidate. Its iOS counterpart
-is pending under TLY-012. The temporary Android plaintext repository remains prohibited for beta
-and production; TLY-006F replaces it behind shared vault contracts.
+The Android capture-to-library walking slice and platform-only encrypted repository are
+implementation candidates. Secure PDF/JPEG export is an Android executable candidate. Their Apple
+counterparts and cross-platform evidence remain pending under the linked TLY-006D, TLY-006F and
+TLY-012 work.
 
-The current gap is visible and tracked. It is not accepted as product parity.
+Every current gap is explicit in the parity matrix and blocks beta/release parity approval.
