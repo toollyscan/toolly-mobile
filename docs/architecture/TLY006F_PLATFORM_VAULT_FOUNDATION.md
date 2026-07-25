@@ -15,17 +15,22 @@
 - fail-closed invalid-envelope, tamper, AAD-substitution and missing-key behavior;
 - Android platform image decoding without a third-party loader or persistent plaintext cache.
 
-## Not included
+## Follow-on implementation
 
-- persistent Room/SQLite metadata adapter;
-- encrypted page/PDF/thumbnail asset chunks;
-- scanner-to-encrypted-vault replacement;
+The encrypted Android document repository is defined in
+[TLY006F_ENCRYPTED_DOCUMENT_REPOSITORY.md](TLY006F_ENCRYPTED_DOCUMENT_REPOSITORY.md). It integrates
+this candidate with persistent encrypted manifests, per-asset authenticated chunks, atomic
+publication, bounded legacy migration and memory-only rendering.
+
+## Still not included
+
 - key rotation, backup or multi-device recovery;
 - Apple Keychain/CryptoKit adapter;
 - production cryptographic approval.
 
-The existing `AppPrivateDocumentRepository` remains a development-only plaintext candidate and must
-not ship to beta or production.
+PDF and thumbnail asset kinds remain separate product slices. The previous
+`AppPrivateDocumentRepository` is removed from production source after its version-one migration
+reader is covered.
 
 ## Boundary
 

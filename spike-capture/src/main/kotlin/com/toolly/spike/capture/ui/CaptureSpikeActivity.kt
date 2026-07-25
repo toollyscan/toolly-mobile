@@ -21,7 +21,7 @@ import com.toolly.spike.capture.domain.FallbackDocumentScanner
 import com.toolly.spike.capture.domain.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
-import com.toolly.spike.capture.vault.AppPrivateDocumentRepository
+import com.toolly.spike.capture.vault.EncryptedDocumentRepository
 import java.util.UUID
 import kotlinx.coroutines.launch
 
@@ -40,14 +40,17 @@ class CaptureSpikeActivity : ComponentActivity() {
 
     private lateinit var scanner: DocumentScanner
     private lateinit var temporaryStore: TemporaryScanStore
-    private lateinit var documentRepository: AppPrivateDocumentRepository
+    private lateinit var documentRepository: EncryptedDocumentRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         temporaryStore = TemporaryScanStore(applicationContext)
-        documentRepository = AppPrivateDocumentRepository(applicationContext) { rawId ->
-            temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
-        }
+        documentRepository = EncryptedDocumentRepository(
+            context = applicationContext,
+            resolveTemporaryAsset = { rawId ->
+                temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
+            },
+        )
 
         scanner = if (isPlayServicesAvailable()) {
             val primary = MlKitDocumentScannerAdapter(
@@ -107,7 +110,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                         }
                     },
                     resolveTemporaryAsset = temporaryStore::resolve,
-                    resolveDocumentAsset = documentRepository::resolveAsset,
+                    loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
                     onReleaseAssets = temporaryStore::release,
                 )
             }

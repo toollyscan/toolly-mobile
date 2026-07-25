@@ -1,5 +1,7 @@
 package com.toolly.spike.capture.ui
 
+import android.graphics.Bitmap
+
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +64,7 @@ fun ToollyDocumentApp(
     onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
-    resolveDocumentAsset: (AssetId) -> File?,
+    loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
     onReleaseAssets: (Collection<TemporaryAssetId>) -> Unit,
 ) {
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Library) }
@@ -165,7 +167,7 @@ fun ToollyDocumentApp(
 
             is AppScreen.Document -> DocumentScreen(
                 document = current.details,
-                resolveAsset = resolveDocumentAsset,
+                loadAssetBitmap = loadDocumentAssetBitmap,
                 onBack = {
                     message = null
                     screen = AppScreen.Library
@@ -308,7 +310,7 @@ private fun CapturePreviewScreen(
 @Composable
 private fun DocumentScreen(
     document: DocumentDetails,
-    resolveAsset: (AssetId) -> File?,
+    loadAssetBitmap: suspend (AssetId) -> Bitmap?,
     onBack: () -> Unit,
 ) {
     Column(
@@ -340,7 +342,7 @@ private fun DocumentScreen(
         )
         DocumentPageGrid(
             pages = document.pages,
-            resolveAsset = resolveAsset,
+            loadAssetBitmap = loadAssetBitmap,
             modifier = Modifier.weight(1f),
         )
     }
