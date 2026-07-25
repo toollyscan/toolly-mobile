@@ -63,6 +63,21 @@ An external document provider owns a destination after user selection. Toolly ca
 that every provider honors truncation or deletion; partial-output behavior remains a provider and
 device acceptance test.
 
+## Share delivery
+
+“Export and share” first writes to a destination the user selects through the Storage Access
+Framework. Toolly then opens the Android system chooser with:
+
+- a read-only temporary URI grant;
+- `ACTION_SEND` for one PDF;
+- `ACTION_SEND_MULTIPLE` for JPEG pages;
+- `ClipData` containing every shared content URI.
+
+Only `content://` URIs are accepted. Toolly never shares encrypted-vault paths, app-private files or
+`file://` URIs. The receiving app becomes a separate explicit user-consent boundary and receives
+the plaintext document; users must choose a trusted destination. If no compatible receiver exists,
+the exported user-selected files remain available and Toolly reports an unavailable action.
+
 ## Platform parity
 
 `DocumentExportFormat` and `DocumentExportOutcome` are provider-neutral. Android uses
