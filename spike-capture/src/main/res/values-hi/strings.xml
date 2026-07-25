@@ -35,4 +35,9 @@
     <string name="operation_failed">कार्य पूरा नहीं किया जा सका</string>
     <string name="document_page_description">दस्तावेज़ पृष्ठ %1$d</string>
     <string name="scanned_page_description">स्कैन किया गया पृष्ठ %1$d</string>
+
+    <string name="export_pdf">PDF निर्यात करें</string>
+    <string name="export_jpeg">JPEG निर्यात करें</string>
+    <string name="document_exported">दस्तावेज़ निर्यात किया गया</string>
+    <string name="export_cancelled">निर्यात रद्द किया गया</string>
 </resources>
