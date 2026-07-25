@@ -29,7 +29,7 @@ jobs:
             :shared-ui:testDebugUnitTest
 
   shared-ios:
-    name: Shared UI iOS simulator tests and frameworks
+    name: Shared UI iOS host build and simulator launch
     runs-on: macos-15
     timeout-minutes: 45
     steps:
@@ -41,10 +41,15 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
           xcodebuild -version
 
-      - name: Test simulator and build simulator/device frameworks
+      - name: Test shared code and build simulator/device frameworks
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace \
             :shared-ui:iosSimulatorArm64Test \
             :shared-ui:linkDebugFrameworkIosSimulatorArm64 \
             :shared-ui:linkReleaseFrameworkIosArm64
+
+      - name: Build, install and launch first-party iOS host
+        run: |
+          chmod +x ./scripts/ios_simulator_smoke.sh
+          ./scripts/ios_simulator_smoke.sh

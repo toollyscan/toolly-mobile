@@ -60,22 +60,22 @@
     {
       "id": "document-library",
       "android": "candidate",
-      "ios": "in-progress",
-      "gap_reason": "The merged walking slice currently has an Android composition root.",
+      "ios": "candidate",
+      "gap_reason": "The first-party iOS host launches the shared library surface in iPhone and iPad simulators; physical-device evidence remains pending.",
       "tracking_issue": 38
     },
     {
       "id": "capture-review",
       "android": "candidate",
       "ios": "in-progress",
-      "gap_reason": "The iOS capture adapter and application target are part of TLY-012.",
+      "gap_reason": "The first-party iOS host exists, but the Apple capture adapter and physical-device evidence remain pending.",
       "tracking_issue": 38
     },
     {
       "id": "document-viewer",
       "android": "candidate",
-      "ios": "in-progress",
-      "gap_reason": "Shared Compose UI extraction is part of TLY-012.",
+      "ios": "candidate",
+      "gap_reason": "The first-party iOS host launches the shared viewer surface in iPhone and iPad simulators; physical-device evidence remains pending.",
       "tracking_issue": 38
     },
     {
@@ -116,8 +116,8 @@
     {
       "id": "localization",
       "android": "implemented",
-      "ios": "in-progress",
-      "gap_reason": "Shared Compose resources exist; iOS framework and native-language review evidence remain pending.",
+      "ios": "candidate",
+      "gap_reason": "The shared localized resources compile into the launched iOS host; native-language and physical-device review evidence remain pending.",
       "tracking_issue": 38
     },
     {

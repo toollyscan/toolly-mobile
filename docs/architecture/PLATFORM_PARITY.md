@@ -53,9 +53,13 @@ An unexplained Android-only or iOS-only feature is a CI failure.
 
 ## Current implementation status
 
-The Android capture-to-library walking slice and platform-only encrypted repository are
-implementation candidates. Secure PDF/JPEG export is an Android executable candidate. Their Apple
-counterparts and cross-platform evidence remain pending under the linked TLY-006D, TLY-006F and
-TLY-012 work.
+Android capture-to-library and platform-only encrypted repository implementations are candidates.
+Secure PDF/JPEG export is an Android executable candidate.
+
+The first-party SwiftUI host now embeds the shared Compose framework for iPhone and iPad targets.
+Multiplatform CI builds, installs and launches that host on iPhone and iPad simulators without app
+permissions, network access, cloud configuration, distribution signing or a new dependency. This
+is build-and-launch evidence only; it does not substitute for physical-device, VoiceOver, Apple
+capture, vault or export validation.
 
 Every current gap is explicit in the parity matrix and blocks beta/release parity approval.
