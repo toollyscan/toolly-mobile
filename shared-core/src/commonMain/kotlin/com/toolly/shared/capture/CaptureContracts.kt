@@ -19,6 +19,29 @@ interface DocumentScanner {
 }
 
 /**
+ * Retries a fallback only when the primary provider is unavailable.
+ *
+ * Permission, validation, storage and lifecycle failures are terminal and must not silently switch
+ * capture implementations.
+ */
+class FallbackDocumentScanner(
+    private val primary: DocumentScanner,
+    private val fallback: DocumentScanner,
+) : DocumentScanner {
+    override suspend fun launch(config: ScanConfig): ScanResult {
+        val primaryResult = primary.launch(config)
+        return if (
+            primaryResult is ScanResult.Failure &&
+            primaryResult.error is ScanError.ServiceUnavailable
+        ) {
+            fallback.launch(config)
+        } else {
+            primaryResult
+        }
+    }
+}
+
+/**
  * Configuration for a single capture session.
  *
  * This value contains no user data, paths, tokens or credentials.
