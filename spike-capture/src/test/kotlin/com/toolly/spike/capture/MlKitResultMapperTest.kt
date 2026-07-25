@@ -1,9 +1,9 @@
 package com.toolly.spike.capture
 
-import com.toolly.spike.capture.domain.PartialCaptureReason
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.PartialCaptureReason
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
+import com.toolly.shared.capture.TemporaryAssetId
 import com.toolly.spike.capture.mlkit.MlKitResultMapper
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
