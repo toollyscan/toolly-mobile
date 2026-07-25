@@ -8,6 +8,12 @@ enum class DocumentExportFormat {
     JPEG,
 }
 
+/** Delivery mode selected explicitly by the user. */
+enum class DocumentExportDelivery {
+    SAVE,
+    SHARE,
+}
+
 /** User-visible completion state without Android URI, filesystem or provider types. */
 sealed interface DocumentExportOutcome {
     data object Success : DocumentExportOutcome
