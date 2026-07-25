@@ -1,9 +1,9 @@
 package com.toolly.spike.capture.camerax
 
-import com.toolly.spike.capture.domain.DocumentScanner
-import com.toolly.spike.capture.domain.ScanConfig
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
+import com.toolly.shared.capture.DocumentScanner
+import com.toolly.shared.capture.ScanConfig
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
 
 /**
  * Stub [DocumentScanner] adapter representing the CameraX/manual-capture fallback path.

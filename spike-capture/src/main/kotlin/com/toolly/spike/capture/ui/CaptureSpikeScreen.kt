@@ -47,11 +47,11 @@ import com.toolly.domain.model.DocumentSummary
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.R
-import com.toolly.spike.capture.domain.ScanConfig
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
-import com.toolly.spike.capture.domain.ScannedPage
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.ScanConfig
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
+import com.toolly.shared.capture.ScannedPage
+import com.toolly.shared.capture.TemporaryAssetId
 import java.io.File
 
 /**
@@ -119,11 +119,10 @@ fun ToollyDocumentApp(
                                     message = UiMessage(R.string.capture_cancelled)
                                 }
                                 is ScanResult.Failure -> {
-                                    message = UiMessage(captureErrorMessage(result.error))
-                                    if (result.error is ScanError.PartialCapture) {
-                                        screen = AppScreen.CapturePreview(
-                                            result.error.capturedPages,
-                                        )
+                                    val error = result.error
+                                    message = UiMessage(captureErrorMessage(error))
+                                    if (error is ScanError.PartialCapture) {
+                                        screen = AppScreen.CapturePreview(error.capturedPages)
                                     }
                                 }
                             }

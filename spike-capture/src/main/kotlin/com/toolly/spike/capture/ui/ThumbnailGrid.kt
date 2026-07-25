@@ -12,8 +12,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.toolly.spike.capture.R
-import com.toolly.spike.capture.domain.ScannedPage
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.ScannedPage
+import com.toolly.shared.capture.TemporaryAssetId
 import java.io.File
 
 /** Displays temporary pages with Android's decoder and no persistent plaintext image cache. */

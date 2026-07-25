@@ -1,9 +1,9 @@
 package com.toolly.spike.capture
 
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
-import com.toolly.spike.capture.domain.ScanConfig
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
+import com.toolly.shared.capture.ScanConfig
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Test

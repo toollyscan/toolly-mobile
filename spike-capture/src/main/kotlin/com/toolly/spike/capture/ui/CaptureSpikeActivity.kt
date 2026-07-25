@@ -30,9 +30,9 @@ import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.R
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
-import com.toolly.spike.capture.domain.DocumentScanner
-import com.toolly.spike.capture.domain.FallbackDocumentScanner
-import com.toolly.spike.capture.domain.TemporaryAssetId as CaptureTemporaryAssetId
+import com.toolly.shared.capture.DocumentScanner
+import com.toolly.shared.capture.FallbackDocumentScanner
+import com.toolly.shared.capture.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.export.AndroidDocumentExporter
 import com.toolly.spike.capture.export.AndroidShareIntentFactory
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter

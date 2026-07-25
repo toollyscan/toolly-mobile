@@ -27,6 +27,10 @@ Only operating-system-controlled integrations may differ:
 Platform adapters must return Toolly-owned results. Provider types, paths, tokens and exceptions
 must not enter shared domain or presentation APIs.
 
+The canonical provider-neutral capture boundary is now the dependency-free `shared-core` module.
+Android adapters import that canonical package directly while the Apple adapter is implemented. See
+[Shared Capture Contract](SHARED_CAPTURE_CONTRACT.md).
+
 ## Parity gate
 
 The machine-readable source of truth is
@@ -61,5 +65,8 @@ Multiplatform CI builds, installs and launches that host on iPhone and iPad simu
 permissions, network access, cloud configuration, distribution signing or a new dependency. This
 is build-and-launch evidence only; it does not substitute for physical-device, VoiceOver, Apple
 capture, vault or export validation.
+
+The capture contract itself compiles and is tested for Android and iOS. TLY-012A owns the
+first-party Apple adapter; TLY-012B owns physical-device and accessibility evidence.
 
 Every current gap is explicit in the parity matrix and blocks beta/release parity approval.

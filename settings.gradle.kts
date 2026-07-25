@@ -15,5 +15,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "toolly-mobile"
+include(":shared-core")
 include(":shared-ui")
 include(":spike-capture")

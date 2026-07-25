@@ -3,7 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // Build script for the TLY-006B capture spike module.
 //
 // Coordinates use version-catalog aliases only; no direct version literals appear here.
-// Every coordinate below has a corresponding approved entry in config/dependencies/registry.json.
+// Every external coordinate below has a corresponding approved entry in
+// config/dependencies/registry.json.
 
 plugins {
     alias(libs.plugins.android.application)
@@ -49,6 +50,9 @@ dependencyLocking {
 }
 
 dependencies {
+    // Toolly-owned provider-neutral capture contract.
+    implementation(project(":shared-core"))
+
     // ML Kit Document Scanner (primary capture path)
     implementation(libs.mlkit.document.scanner)
 
