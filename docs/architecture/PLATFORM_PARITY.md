@@ -28,7 +28,7 @@ Platform adapters must return Toolly-owned results. Provider types, paths, token
 must not enter shared domain or presentation APIs.
 
 The canonical provider-neutral capture boundary is now the dependency-free `shared-core` module.
-Android uses temporary package aliases while the Apple adapter is implemented. See
+Android adapters import that canonical package directly while the Apple adapter is implemented. See
 [Shared Capture Contract](SHARED_CAPTURE_CONTRACT.md).
 
 ## Parity gate
