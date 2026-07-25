@@ -14,22 +14,24 @@ permissions:
 
 jobs:
   shared-android:
-    name: Shared UI Android build and tests
+    name: Shared core and UI Android build and tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Build and test shared Android UI
+      - name: Build and test shared Android code
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace \
+            :shared-core:assembleDebug \
+            :shared-core:testDebugUnitTest \
             :shared-ui:assembleDebug \
             :shared-ui:testDebugUnitTest
 
   shared-ios:
-    name: Shared UI iOS host build and simulator launch
+    name: Shared core and UI iOS host build and simulator launch
     runs-on: macos-15
     timeout-minutes: 45
     steps:
@@ -41,10 +43,12 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
           xcodebuild -version
 
-      - name: Test shared code and build simulator/device frameworks
+      - name: Test shared code and build simulator/device targets
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace \
+            :shared-core:iosSimulatorArm64Test \
+            :shared-core:compileKotlinIosArm64 \
             :shared-ui:iosSimulatorArm64Test \
             :shared-ui:linkDebugFrameworkIosSimulatorArm64 \
             :shared-ui:linkReleaseFrameworkIosArm64
