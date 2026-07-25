@@ -1,5 +1,7 @@
 package com.toolly.shared.capture
 
+import kotlin.jvm.JvmInline
+
 /**
  * Provider-neutral port for one document-capture session.
  *
