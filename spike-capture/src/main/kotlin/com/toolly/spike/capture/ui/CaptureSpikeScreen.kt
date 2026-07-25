@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentDetails
+import com.toolly.domain.model.DocumentExportDelivery
 import com.toolly.domain.model.DocumentExportFormat
 import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.DocumentId
@@ -68,6 +69,7 @@ fun ToollyDocumentApp(
     onExportDocument: (
         DocumentDetails,
         DocumentExportFormat,
+        DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
@@ -177,11 +179,11 @@ fun ToollyDocumentApp(
                 isExporting = isWorking,
                 message = message,
                 loadAssetBitmap = loadDocumentAssetBitmap,
-                onExport = { format ->
+                onExport = { format, delivery ->
                     if (!isWorking) {
                         isWorking = true
                         message = null
-                        onExportDocument(current.details, format) { outcome ->
+                        onExportDocument(current.details, format, delivery) { outcome ->
                             isWorking = false
                             message = UiMessage(exportOutcomeMessage(outcome))
                         }
@@ -332,7 +334,7 @@ private fun DocumentScreen(
     isExporting: Boolean,
     message: UiMessage?,
     loadAssetBitmap: suspend (AssetId) -> Bitmap?,
-    onExport: (DocumentExportFormat) -> Unit,
+    onExport: (DocumentExportFormat, DocumentExportDelivery) -> Unit,
     onBack: () -> Unit,
 ) {
     Column(
@@ -373,18 +375,45 @@ private fun DocumentScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             OutlinedButton(
-                onClick = { onExport(DocumentExportFormat.PDF) },
+                onClick = {
+                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SAVE)
+                },
                 enabled = !isExporting,
                 modifier = Modifier.weight(1f),
             ) {
                 Text(stringResource(R.string.export_pdf))
             }
             OutlinedButton(
-                onClick = { onExport(DocumentExportFormat.JPEG) },
+                onClick = {
+                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SAVE)
+                },
                 enabled = !isExporting,
                 modifier = Modifier.weight(1f),
             ) {
                 Text(stringResource(R.string.export_jpeg))
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedButton(
+                onClick = {
+                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SHARE)
+                },
+                enabled = !isExporting,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.export_share_pdf))
+            }
+            OutlinedButton(
+                onClick = {
+                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SHARE)
+                },
+                enabled = !isExporting,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.export_share_jpeg))
             }
         }
     }
