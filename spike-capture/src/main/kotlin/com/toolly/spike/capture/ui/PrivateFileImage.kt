@@ -5,8 +5,11 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -22,14 +25,15 @@ internal fun PrivateFileImage(
     contentScale: ContentScale,
     modifier: Modifier = Modifier,
 ) {
-    val bitmap by produceState<Bitmap?>(initialValue = null, key1 = file?.absolutePath) {
-        val decodedBitmap = withContext(Dispatchers.IO) {
+    var bitmap by remember(file?.absolutePath) { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(file?.absolutePath) {
+        bitmap = withContext(Dispatchers.IO) {
             file?.takeIf(File::isFile)?.let(::decodeBoundedBitmap)
         }
-        value = decodedBitmap
     }
     DisposableEffect(bitmap) {
-        onDispose { bitmap?.recycle() }
+        val bitmapToRecycle = bitmap
+        onDispose { bitmapToRecycle?.recycle() }
     }
     bitmap?.let {
         Image(
