@@ -17,19 +17,18 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Decodes an app-private image without a third-party loader or persistent plaintext cache. */
+/** Renders a bounded bitmap and releases its native pixels when the source changes or leaves UI. */
 @Composable
-internal fun PrivateFileImage(
-    file: File?,
+internal fun PrivateBitmapImage(
+    sourceKey: String?,
+    loadBitmap: suspend () -> Bitmap?,
     contentDescription: String,
     contentScale: ContentScale,
     modifier: Modifier = Modifier,
 ) {
-    var bitmap by remember(file?.absolutePath) { mutableStateOf<Bitmap?>(null) }
-    LaunchedEffect(file?.absolutePath) {
-        bitmap = withContext(Dispatchers.IO) {
-            file?.takeIf(File::isFile)?.let(::decodeBoundedBitmap)
-        }
+    var bitmap by remember(sourceKey) { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(sourceKey) {
+        bitmap = loadBitmap()
     }
     DisposableEffect(bitmap) {
         val bitmapToRecycle = bitmap
@@ -43,6 +42,27 @@ internal fun PrivateFileImage(
             modifier = modifier,
         )
     }
+}
+
+/** Decodes a scanner-owned temporary file without a third-party loader or disk cache. */
+@Composable
+internal fun PrivateFileImage(
+    file: File?,
+    contentDescription: String,
+    contentScale: ContentScale,
+    modifier: Modifier = Modifier,
+) {
+    PrivateBitmapImage(
+        sourceKey = file?.absolutePath,
+        loadBitmap = {
+            withContext(Dispatchers.IO) {
+                file?.takeIf(File::isFile)?.let(::decodeBoundedBitmap)
+            }
+        },
+        contentDescription = contentDescription,
+        contentScale = contentScale,
+        modifier = modifier,
+    )
 }
 
 private fun decodeBoundedBitmap(file: File): Bitmap? {
