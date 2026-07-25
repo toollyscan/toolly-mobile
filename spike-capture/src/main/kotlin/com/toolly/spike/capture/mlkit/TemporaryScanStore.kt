@@ -2,8 +2,8 @@ package com.toolly.spike.capture.mlkit
 
 import android.content.Context
 import android.net.Uri
-import com.toolly.spike.capture.domain.PartialCaptureReason
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.PartialCaptureReason
+import com.toolly.shared.capture.TemporaryAssetId
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
