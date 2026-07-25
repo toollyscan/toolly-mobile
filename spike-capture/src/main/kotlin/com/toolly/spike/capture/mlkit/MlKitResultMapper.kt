@@ -1,10 +1,10 @@
 package com.toolly.spike.capture.mlkit
 
-import com.toolly.spike.capture.domain.PartialCaptureReason
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
-import com.toolly.spike.capture.domain.ScannedPage
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.PartialCaptureReason
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
+import com.toolly.shared.capture.ScannedPage
+import com.toolly.shared.capture.TemporaryAssetId
 
 /** Pure mapping from validated Toolly temporary assets to the domain result contract. */
 internal object MlKitResultMapper {
