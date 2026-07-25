@@ -23,9 +23,10 @@ internal fun PrivateFileImage(
     modifier: Modifier = Modifier,
 ) {
     val bitmap by produceState<Bitmap?>(initialValue = null, key1 = file?.absolutePath) {
-        value = withContext(Dispatchers.IO) {
+        val decodedBitmap = withContext(Dispatchers.IO) {
             file?.takeIf(File::isFile)?.let(::decodeBoundedBitmap)
         }
+        value = decodedBitmap
     }
     DisposableEffect(bitmap) {
         onDispose { bitmap?.recycle() }
