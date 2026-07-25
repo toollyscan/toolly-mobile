@@ -119,11 +119,10 @@ fun ToollyDocumentApp(
                                     message = UiMessage(R.string.capture_cancelled)
                                 }
                                 is ScanResult.Failure -> {
-                                    message = UiMessage(captureErrorMessage(result.error))
-                                    if (result.error is ScanError.PartialCapture) {
-                                        screen = AppScreen.CapturePreview(
-                                            result.error.capturedPages,
-                                        )
+                                    val error = result.error
+                                    message = UiMessage(captureErrorMessage(error))
+                                    if (error is ScanError.PartialCapture) {
+                                        screen = AppScreen.CapturePreview(error.capturedPages)
                                     }
                                 }
                             }
