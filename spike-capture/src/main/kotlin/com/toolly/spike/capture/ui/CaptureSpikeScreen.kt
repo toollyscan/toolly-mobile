@@ -47,11 +47,11 @@ import com.toolly.domain.model.DocumentSummary
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.R
-import com.toolly.spike.capture.domain.ScanConfig
-import com.toolly.spike.capture.domain.ScanError
-import com.toolly.spike.capture.domain.ScanResult
-import com.toolly.spike.capture.domain.ScannedPage
-import com.toolly.spike.capture.domain.TemporaryAssetId
+import com.toolly.shared.capture.ScanConfig
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
+import com.toolly.shared.capture.ScannedPage
+import com.toolly.shared.capture.TemporaryAssetId
 import java.io.File
 
 /**
