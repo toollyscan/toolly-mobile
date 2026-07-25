@@ -228,7 +228,10 @@ class CaptureSpikeActivity : ComponentActivity() {
                     contentResolver,
                     parent,
                     JPEG_MIME_TYPE,
-                    getString(R.string.export_jpeg_page_file_name, page.ordinal + 1),
+                    getString(
+                        R.string.export_jpeg_page_file_name,
+                        (page.ordinal + 1).toString(),
+                    ),
                 ) ?: return cleanupFailedJpegExport(
                     createdDocuments,
                     ToollyErrorCode.RETRYABLE,
