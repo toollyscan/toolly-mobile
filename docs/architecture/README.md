@@ -91,6 +91,7 @@ outcomes must satisfy the same shared contract.
 | [Firebase service boundaries](FIREBASE_SERVICE_BOUNDARIES.md) | Auth, data, storage, functions, messaging, policy and observability boundaries |
 | [Schema evolution](SCHEMA_EVOLUTION.md) | Compatibility, migration and rollout |
 | [Fitness functions](ARCHITECTURE_FITNESS_FUNCTIONS.md) | CI enforcement contracts |
+| [Secure PDF/JPEG export](TLY006D_SECURE_PDF_JPEG_EXPORT.md) | Consent, platform APIs, plaintext boundary and cleanup |
 
 ## ADR index
 
