@@ -39,6 +39,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentDetails
+import com.toolly.domain.model.DocumentExportFormat
+import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentSummary
 import com.toolly.foundation.ToollyErrorCode
@@ -63,6 +65,11 @@ fun ToollyDocumentApp(
     onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
     onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onExportDocument: (
+        DocumentDetails,
+        DocumentExportFormat,
+        onResult: (DocumentExportOutcome) -> Unit,
+    ) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
     onReleaseAssets: (Collection<TemporaryAssetId>) -> Unit,
@@ -167,7 +174,19 @@ fun ToollyDocumentApp(
 
             is AppScreen.Document -> DocumentScreen(
                 document = current.details,
+                isExporting = isWorking,
+                message = message,
                 loadAssetBitmap = loadDocumentAssetBitmap,
+                onExport = { format ->
+                    if (!isWorking) {
+                        isWorking = true
+                        message = null
+                        onExportDocument(current.details, format) { outcome ->
+                            isWorking = false
+                            message = UiMessage(exportOutcomeMessage(outcome))
+                        }
+                    }
+                },
                 onBack = {
                     message = null
                     screen = AppScreen.Library
@@ -310,7 +329,10 @@ private fun CapturePreviewScreen(
 @Composable
 private fun DocumentScreen(
     document: DocumentDetails,
+    isExporting: Boolean,
+    message: UiMessage?,
     loadAssetBitmap: suspend (AssetId) -> Bitmap?,
+    onExport: (DocumentExportFormat) -> Unit,
     onBack: () -> Unit,
 ) {
     Column(
@@ -345,6 +367,26 @@ private fun DocumentScreen(
             loadAssetBitmap = loadAssetBitmap,
             modifier = Modifier.weight(1f),
         )
+        StatusMessage(message)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedButton(
+                onClick = { onExport(DocumentExportFormat.PDF) },
+                enabled = !isExporting,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.export_pdf))
+            }
+            OutlinedButton(
+                onClick = { onExport(DocumentExportFormat.JPEG) },
+                enabled = !isExporting,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.export_jpeg))
+            }
+        }
     }
 }
 
@@ -360,6 +402,13 @@ private fun StatusMessage(message: UiMessage?) {
             },
         )
     }
+}
+
+@StringRes
+private fun exportOutcomeMessage(outcome: DocumentExportOutcome): Int = when (outcome) {
+    DocumentExportOutcome.Success -> R.string.document_exported
+    DocumentExportOutcome.Cancelled -> R.string.export_cancelled
+    is DocumentExportOutcome.Failure -> toollyErrorMessage(outcome.code)
 }
 
 @StringRes
