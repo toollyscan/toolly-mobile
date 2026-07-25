@@ -1,5 +1,6 @@
 package com.toolly.spike.capture.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -15,6 +16,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.toolly.domain.model.CapturedPageDraft
 import com.toolly.domain.model.DocumentDetails
+import com.toolly.domain.model.DocumentExportDelivery
 import com.toolly.domain.model.DocumentExportFormat
 import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
@@ -32,6 +34,7 @@ import com.toolly.spike.capture.domain.DocumentScanner
 import com.toolly.spike.capture.domain.FallbackDocumentScanner
 import com.toolly.spike.capture.domain.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.export.AndroidDocumentExporter
+import com.toolly.spike.capture.export.AndroidShareIntentFactory
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
@@ -158,13 +161,14 @@ class CaptureSpikeActivity : ComponentActivity() {
     private fun launchExport(
         document: DocumentDetails,
         format: DocumentExportFormat,
+        delivery: DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) {
         if (pendingExport != null) {
             onResult(DocumentExportOutcome.Failure(ToollyErrorCode.CONFLICT))
             return
         }
-        pendingExport = PendingExport(document, onResult)
+        pendingExport = PendingExport(document, delivery, onResult)
         when (format) {
             DocumentExportFormat.PDF -> {
                 pdfExportLauncher.launch(getString(R.string.export_pdf_file_name))
@@ -197,7 +201,17 @@ class CaptureSpikeActivity : ComponentActivity() {
                 retryableToollyFailure()
             }
             if (result is ToollyResult.Failure) deleteDocumentQuietly(destination)
-            request.onResult(result.toExportOutcome())
+            val outcome = result.toExportOutcome()
+            request.onResult(
+                if (
+                    outcome == DocumentExportOutcome.Success &&
+                    request.delivery == DocumentExportDelivery.SHARE
+                ) {
+                    shareDocuments(listOf(destination), PDF_MIME_TYPE)
+                } else {
+                    outcome
+                },
+            )
         }
     }
 
@@ -209,14 +223,24 @@ class CaptureSpikeActivity : ComponentActivity() {
             return
         }
         lifecycleScope.launch {
-            request.onResult(exportJpegPages(request.document, destinationTree))
+            val exported = exportJpegPages(request.document, destinationTree)
+            request.onResult(
+                if (
+                    exported.outcome == DocumentExportOutcome.Success &&
+                    request.delivery == DocumentExportDelivery.SHARE
+                ) {
+                    shareDocuments(exported.documentUris, JPEG_MIME_TYPE)
+                } else {
+                    exported.outcome
+                },
+            )
         }
     }
 
     private suspend fun exportJpegPages(
         document: DocumentDetails,
         destinationTree: Uri,
-    ): DocumentExportOutcome {
+    ): JpegExportResult {
         val createdDocuments = mutableListOf<Uri>()
         return try {
             val parent = DocumentsContract.buildDocumentUriUsingTree(
@@ -249,7 +273,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                     return cleanupFailedJpegExport(createdDocuments, result.error.code)
                 }
             }
-            DocumentExportOutcome.Success
+            JpegExportResult(DocumentExportOutcome.Success, createdDocuments.toList())
         } catch (cancelled: CancellationException) {
             createdDocuments.asReversed().forEach(::deleteDocumentQuietly)
             throw cancelled
@@ -261,9 +285,20 @@ class CaptureSpikeActivity : ComponentActivity() {
     private fun cleanupFailedJpegExport(
         createdDocuments: List<Uri>,
         code: ToollyErrorCode,
-    ): DocumentExportOutcome.Failure {
+    ): JpegExportResult {
         createdDocuments.asReversed().forEach(::deleteDocumentQuietly)
-        return DocumentExportOutcome.Failure(code)
+        return JpegExportResult(DocumentExportOutcome.Failure(code))
+    }
+
+    private fun shareDocuments(
+        documentUris: List<Uri>,
+        mimeType: String,
+    ): DocumentExportOutcome = try {
+        val shareIntent = AndroidShareIntentFactory.create(documentUris, mimeType)
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_document)))
+        DocumentExportOutcome.Success
+    } catch (_: Exception) {
+        DocumentExportOutcome.Failure(ToollyErrorCode.UNAVAILABLE)
     }
 
     private fun deleteDocumentQuietly(uri: Uri) {
@@ -281,7 +316,13 @@ class CaptureSpikeActivity : ComponentActivity() {
 
     private data class PendingExport(
         val document: DocumentDetails,
+        val delivery: DocumentExportDelivery,
         val onResult: (DocumentExportOutcome) -> Unit,
+    )
+
+    private data class JpegExportResult(
+        val outcome: DocumentExportOutcome,
+        val documentUris: List<Uri> = emptyList(),
     )
 
     private companion object {
