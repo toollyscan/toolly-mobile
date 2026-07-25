@@ -1,5 +1,7 @@
 package com.toolly.spike.capture.ui
 
+import android.graphics.Bitmap
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,12 +16,11 @@ import androidx.compose.ui.unit.dp
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentPage
 import com.toolly.spike.capture.R
-import java.io.File
 
 @Composable
 fun DocumentPageGrid(
     pages: List<DocumentPage>,
-    resolveAsset: (AssetId) -> File?,
+    loadAssetBitmap: suspend (AssetId) -> Bitmap?,
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
@@ -29,8 +30,9 @@ fun DocumentPageGrid(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(pages, key = { it.id.value }) { page ->
-            PrivateFileImage(
-                file = resolveAsset(page.sourceAssetId),
+            PrivateBitmapImage(
+                sourceKey = page.sourceAssetId.value,
+                loadBitmap = { loadAssetBitmap(page.sourceAssetId) },
                 contentDescription = stringResource(
                     R.string.document_page_description,
                     page.ordinal + 1,
