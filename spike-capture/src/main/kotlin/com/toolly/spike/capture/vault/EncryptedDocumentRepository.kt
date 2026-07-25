@@ -28,6 +28,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.RandomAccessFile
 import java.util.UUID
+import java.util.concurrent.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -136,6 +137,9 @@ internal class EncryptedDocumentRepository(
                         cryptoOrCorruptFailure(failure)
                     },
                 )
+            } catch (cancelled: CancellationException) {
+                transaction.deleteRecursivelySafely()
+                throw cancelled
             } catch (failure: Exception) {
                 transaction.deleteRecursivelySafely()
                 failure.toToollyFailure()
@@ -146,9 +150,28 @@ internal class EncryptedDocumentRepository(
     suspend fun loadAssetBitmap(assetId: AssetId): Bitmap? = withContext(Dispatchers.IO) {
         synchronized(lock) {
             val encryptedFile = findAssetFile(assetId) ?: return@withContext null
-            decodeBoundedBitmap(encryptedFile, assetAssociatedData(assetId))
+            decodeBoundedBitmap(
+                encryptedFile,
+                assetAssociatedData(assetId),
+                MAX_VIEW_DECODE_DIMENSION,
+            )
         }
     }
+
+    suspend fun loadAssetBitmapForExport(assetId: AssetId): ToollyResult<Bitmap> =
+        withContext(Dispatchers.IO) {
+            synchronized(lock) {
+                val encryptedFile = findAssetFile(assetId)
+                    ?: return@withContext unavailableFailure()
+                runSafely {
+                    decodeBoundedBitmap(
+                        encryptedFile,
+                        assetAssociatedData(assetId),
+                        MAX_EXPORT_DECODE_DIMENSION,
+                    ) ?: throw IOException()
+                }
+            }
+        }
 
     private fun recoverInterruptedWrites() {
         synchronized(lock) {
@@ -376,6 +399,7 @@ internal class EncryptedDocumentRepository(
     private fun decodeBoundedBitmap(
         encryptedFile: File,
         associatedData: AssetAssociatedData,
+        maximumDimension: Int,
     ): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         assetCipher.openDecrypted(encryptedFile, associatedData).use { input ->
@@ -385,8 +409,8 @@ internal class EncryptedDocumentRepository(
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
         var sampleSize = 1
         while (
-            bounds.outWidth / sampleSize > MAX_DECODE_DIMENSION ||
-            bounds.outHeight / sampleSize > MAX_DECODE_DIMENSION
+            bounds.outWidth / sampleSize > maximumDimension ||
+            bounds.outHeight / sampleSize > maximumDimension
         ) {
             sampleSize *= 2
         }
@@ -482,6 +506,8 @@ internal class EncryptedDocumentRepository(
 
     private fun <T> runSafely(block: () -> T): ToollyResult<T> = try {
         ToollyResult.Success(block())
+    } catch (cancelled: CancellationException) {
+        throw cancelled
     } catch (failure: Exception) {
         failure.toToollyFailure()
     }
@@ -570,7 +596,8 @@ internal class EncryptedDocumentRepository(
         const val JPEG_MARKER = 0xFF
         const val JPEG_SOI = 0xD8
         const val JPEG_EOI = 0xD9
-        const val MAX_DECODE_DIMENSION = 2048
+        const val MAX_VIEW_DECODE_DIMENSION = 2048
+        const val MAX_EXPORT_DECODE_DIMENSION = 3508
         const val DECODE_DRAIN_BUFFER_BYTES = 64 * 1024
         val MARKER_BYTES = byteArrayOf(1)
         const val KEY_SCHEMA_VERSION = "schemaVersion"

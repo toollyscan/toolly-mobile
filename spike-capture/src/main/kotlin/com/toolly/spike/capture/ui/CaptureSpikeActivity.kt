@@ -1,28 +1,42 @@
 package com.toolly.spike.capture.ui
 
+import android.net.Uri
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
+import androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.toolly.domain.model.CapturedPageDraft
+import com.toolly.domain.model.DocumentDetails
+import com.toolly.domain.model.DocumentExportFormat
+import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
 import com.toolly.domain.usecases.ListDocumentsUseCase
 import com.toolly.domain.usecases.OpenDocumentUseCase
 import com.toolly.domain.usecases.SaveCapturedDocumentUseCase
 import com.toolly.foundation.OpaqueIdGenerator
 import com.toolly.foundation.ToollyClock
+import com.toolly.foundation.ToollyError
+import com.toolly.foundation.ToollyErrorCode
+import com.toolly.foundation.ToollyResult
+import com.toolly.spike.capture.R
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.spike.capture.domain.DocumentScanner
 import com.toolly.spike.capture.domain.FallbackDocumentScanner
 import com.toolly.spike.capture.domain.TemporaryAssetId as CaptureTemporaryAssetId
+import com.toolly.spike.capture.export.AndroidDocumentExporter
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
 import java.util.UUID
+import java.util.concurrent.CancellationException
 import kotlinx.coroutines.launch
 
 /**
@@ -38,9 +52,19 @@ class CaptureSpikeActivity : ComponentActivity() {
         mlKitAdapter?.onActivityResult(result.resultCode, result.data)
     }
 
+    private val pdfExportLauncher = registerForActivityResult(CreateDocument(PDF_MIME_TYPE)) { uri ->
+        completePdfExport(uri)
+    }
+
+    private val jpegExportLauncher = registerForActivityResult(OpenDocumentTree()) { uri ->
+        completeJpegExport(uri)
+    }
+
     private lateinit var scanner: DocumentScanner
     private lateinit var temporaryStore: TemporaryScanStore
     private lateinit var documentRepository: EncryptedDocumentRepository
+    private lateinit var documentExporter: AndroidDocumentExporter
+    private var pendingExport: PendingExport? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +74,9 @@ class CaptureSpikeActivity : ComponentActivity() {
             resolveTemporaryAsset = { rawId ->
                 temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
             },
+        )
+        documentExporter = AndroidDocumentExporter(
+            loadBitmap = documentRepository::loadAssetBitmapForExport,
         )
 
         scanner = if (isPlayServicesAvailable()) {
@@ -109,6 +136,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                             onResult(openDocument(documentId))
                         }
                     },
+                    onExportDocument = ::launchExport,
                     resolveTemporaryAsset = temporaryStore::resolve,
                     loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
                     onReleaseAssets = temporaryStore::release,
@@ -126,4 +154,139 @@ class CaptureSpikeActivity : ComponentActivity() {
     private fun isPlayServicesAvailable(): Boolean =
         GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS
+
+    private fun launchExport(
+        document: DocumentDetails,
+        format: DocumentExportFormat,
+        onResult: (DocumentExportOutcome) -> Unit,
+    ) {
+        if (pendingExport != null) {
+            onResult(DocumentExportOutcome.Failure(ToollyErrorCode.CONFLICT))
+            return
+        }
+        pendingExport = PendingExport(document, onResult)
+        when (format) {
+            DocumentExportFormat.PDF -> {
+                pdfExportLauncher.launch(getString(R.string.export_pdf_file_name))
+            }
+            DocumentExportFormat.JPEG -> jpegExportLauncher.launch(null)
+        }
+    }
+
+    private fun completePdfExport(destination: Uri?) {
+        val request = pendingExport ?: return
+        pendingExport = null
+        if (destination == null) {
+            request.onResult(DocumentExportOutcome.Cancelled)
+            return
+        }
+        lifecycleScope.launch {
+            val result = try {
+                val descriptor = contentResolver.openFileDescriptor(destination, WRITE_TRUNCATE_MODE)
+                if (descriptor == null) {
+                    retryableToollyFailure()
+                } else {
+                    ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
+                        documentExporter.writePdf(request.document, output)
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                deleteDocumentQuietly(destination)
+                throw cancelled
+            } catch (_: Exception) {
+                retryableToollyFailure()
+            }
+            if (result is ToollyResult.Failure) deleteDocumentQuietly(destination)
+            request.onResult(result.toExportOutcome())
+        }
+    }
+
+    private fun completeJpegExport(destinationTree: Uri?) {
+        val request = pendingExport ?: return
+        pendingExport = null
+        if (destinationTree == null) {
+            request.onResult(DocumentExportOutcome.Cancelled)
+            return
+        }
+        lifecycleScope.launch {
+            request.onResult(exportJpegPages(request.document, destinationTree))
+        }
+    }
+
+    private suspend fun exportJpegPages(
+        document: DocumentDetails,
+        destinationTree: Uri,
+    ): DocumentExportOutcome {
+        val createdDocuments = mutableListOf<Uri>()
+        return try {
+            val parent = DocumentsContract.buildDocumentUriUsingTree(
+                destinationTree,
+                DocumentsContract.getTreeDocumentId(destinationTree),
+            )
+            for (page in document.pages.sortedBy { it.ordinal }) {
+                val child = DocumentsContract.createDocument(
+                    contentResolver,
+                    parent,
+                    JPEG_MIME_TYPE,
+                    getString(
+                        R.string.export_jpeg_page_file_name,
+                        (page.ordinal + 1).toString(),
+                    ),
+                ) ?: return cleanupFailedJpegExport(
+                    createdDocuments,
+                    ToollyErrorCode.RETRYABLE,
+                )
+                createdDocuments += child
+                val descriptor = contentResolver.openFileDescriptor(child, WRITE_TRUNCATE_MODE)
+                    ?: return cleanupFailedJpegExport(
+                        createdDocuments,
+                        ToollyErrorCode.RETRYABLE,
+                    )
+                val result = ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
+                    documentExporter.writeJpeg(page, output)
+                }
+                if (result is ToollyResult.Failure) {
+                    return cleanupFailedJpegExport(createdDocuments, result.error.code)
+                }
+            }
+            DocumentExportOutcome.Success
+        } catch (cancelled: CancellationException) {
+            createdDocuments.asReversed().forEach(::deleteDocumentQuietly)
+            throw cancelled
+        } catch (_: Exception) {
+            cleanupFailedJpegExport(createdDocuments, ToollyErrorCode.RETRYABLE)
+        }
+    }
+
+    private fun cleanupFailedJpegExport(
+        createdDocuments: List<Uri>,
+        code: ToollyErrorCode,
+    ): DocumentExportOutcome.Failure {
+        createdDocuments.asReversed().forEach(::deleteDocumentQuietly)
+        return DocumentExportOutcome.Failure(code)
+    }
+
+    private fun deleteDocumentQuietly(uri: Uri) {
+        runCatching { DocumentsContract.deleteDocument(contentResolver, uri) }
+    }
+
+    private fun retryableToollyFailure(): ToollyResult.Failure = ToollyResult.Failure(
+        ToollyError(ToollyErrorCode.RETRYABLE, ToollyErrorCode.RETRYABLE.name),
+    )
+
+    private fun ToollyResult<Unit>.toExportOutcome(): DocumentExportOutcome = when (this) {
+        is ToollyResult.Success -> DocumentExportOutcome.Success
+        is ToollyResult.Failure -> DocumentExportOutcome.Failure(error.code)
+    }
+
+    private data class PendingExport(
+        val document: DocumentDetails,
+        val onResult: (DocumentExportOutcome) -> Unit,
+    )
+
+    private companion object {
+        const val PDF_MIME_TYPE = "application/pdf"
+        const val JPEG_MIME_TYPE = "image/jpeg"
+        const val WRITE_TRUNCATE_MODE = "rwt"
+    }
 }

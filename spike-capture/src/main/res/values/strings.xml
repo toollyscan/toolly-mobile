@@ -35,4 +35,11 @@
     <string name="operation_failed">The operation could not be completed</string>
     <string name="document_page_description">Document page %1$d</string>
     <string name="scanned_page_description">Scanned page %1$d</string>
+
+    <string name="export_pdf">Export PDF</string>
+    <string name="export_jpeg">Export JPEG</string>
+    <string name="document_exported">Document exported</string>
+    <string name="export_cancelled">Export cancelled</string>
+    <string name="export_pdf_file_name" translatable="false">Toolly-document.pdf</string>
+    <string name="export_jpeg_page_file_name" translatable="false">Toolly-page-%1$s.jpg</string>
 </resources>

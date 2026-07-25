@@ -35,4 +35,9 @@
     <string name="operation_failed">ಕಾರ್ಯವನ್ನು ಪೂರ್ಣಗೊಳಿಸಲಾಗಲಿಲ್ಲ</string>
     <string name="document_page_description">ದಾಖಲೆ ಪುಟ %1$d</string>
     <string name="scanned_page_description">ಸ್ಕ್ಯಾನ್ ಮಾಡಿದ ಪುಟ %1$d</string>
+
+    <string name="export_pdf">PDF ರಫ್ತು ಮಾಡಿ</string>
+    <string name="export_jpeg">JPEG ರಫ್ತು ಮಾಡಿ</string>
+    <string name="document_exported">ದಾಖಲೆಯನ್ನು ರಫ್ತು ಮಾಡಲಾಗಿದೆ</string>
+    <string name="export_cancelled">ರಫ್ತು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ</string>
 </resources>
