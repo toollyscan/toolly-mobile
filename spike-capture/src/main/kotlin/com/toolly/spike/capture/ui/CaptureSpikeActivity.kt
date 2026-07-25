@@ -45,9 +45,12 @@ class CaptureSpikeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         temporaryStore = TemporaryScanStore(applicationContext)
-        documentRepository = EncryptedDocumentRepository(applicationContext) { rawId ->
-            temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
-        }
+        documentRepository = EncryptedDocumentRepository(
+            context = applicationContext,
+            resolveTemporaryAsset = { rawId ->
+                temporaryStore.resolve(CaptureTemporaryAssetId(rawId))
+            },
+        )
 
         scanner = if (isPlayServicesAvailable()) {
             val primary = MlKitDocumentScannerAdapter(
