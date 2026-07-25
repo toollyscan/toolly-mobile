@@ -41,5 +41,5 @@
     <string name="document_exported">Document exported</string>
     <string name="export_cancelled">Export cancelled</string>
     <string name="export_pdf_file_name" translatable="false">Toolly-document.pdf</string>
-    <string name="export_jpeg_page_file_name" translatable="false">Toolly-page-%1$d.jpg</string>
+    <string name="export_jpeg_page_file_name" translatable="false">Toolly-page-%1$s.jpg</string>
 </resources>
