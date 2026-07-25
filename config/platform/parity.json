@@ -80,16 +80,16 @@
     },
     {
       "id": "encrypted-local-vault",
-      "android": "pending",
+      "android": "candidate",
       "ios": "pending",
-      "gap_reason": null,
+      "gap_reason": "Android platform-only encrypted repository is merged; Apple adapter and interoperability evidence remain pending.",
       "tracking_issue": 26
     },
     {
       "id": "pdf-jpeg-export",
-      "android": "pending",
+      "android": "candidate",
       "ios": "pending",
-      "gap_reason": null,
+      "gap_reason": "Android platform export is an executable candidate; Apple adapter and cross-platform output evidence remain pending.",
       "tracking_issue": 24
     },
     {
