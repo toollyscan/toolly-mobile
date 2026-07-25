@@ -6,8 +6,8 @@ Toolly capture is defined in the dependency-free `shared-core` Kotlin Multiplatf
 Android and Apple capture engines are replaceable platform adapters behind the same
 `DocumentScanner` port.
 
-This extraction changes ownership, not Android behavior. The existing Android package keeps
-temporary type aliases while callers migrate to `com.toolly.shared.capture`.
+This extraction changes ownership, not Android behavior. Android adapters and tests import the
+canonical `com.toolly.shared.capture` package directly.
 
 ## Dependency direction
 
@@ -32,8 +32,8 @@ identifier, credential, path, URI or arbitrary exception message.
 
 ## Compatibility boundary
 
-The Android `com.toolly.spike.capture.domain` names are migration aliases. New shared code must
-import `com.toolly.shared.capture` directly. Provider adapters remain outside `shared-core`.
+The obsolete Android-local contract declarations have been removed. All adapters import the
+canonical shared package directly, while provider implementations remain outside `shared-core`.
 
 ## Verification
 
