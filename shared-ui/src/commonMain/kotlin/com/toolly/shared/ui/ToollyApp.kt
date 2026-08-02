@@ -88,6 +88,7 @@ import org.jetbrains.compose.resources.stringResource
 fun ToollyApp(
     state: ToollyUiState,
     actions: ToollyUiActions,
+    documentsContent: (@Composable () -> Unit)? = null,
 ) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -100,7 +101,7 @@ fun ToollyApp(
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,
                 ToollyDestination.TOOLS,
-                ToollyDestination.PROFILE -> MainShell(state, actions)
+                ToollyDestination.PROFILE -> MainShell(state, actions, documentsContent)
                 ToollyDestination.CAPTURE_REVIEW -> ReviewScreen(state, actions)
                 ToollyDestination.DOCUMENT_VIEWER -> ViewerScreen(state, actions)
             }
@@ -267,12 +268,19 @@ private fun DevelopmentAccess(state: ToollyUiState, actions: ToollyUiActions) {
 }
 
 @Composable
-private fun MainShell(state: ToollyUiState, actions: ToollyUiActions) {
+private fun MainShell(
+    state: ToollyUiState,
+    actions: ToollyUiActions,
+    documentsContent: (@Composable () -> Unit)?,
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             when (state.destination) {
                 ToollyDestination.HOME -> HomeScreen(state, actions)
-                ToollyDestination.LIBRARY -> LibraryScreen(state, actions)
+                ToollyDestination.LIBRARY -> {
+                    if (documentsContent == null) LibraryScreen(state, actions)
+                    else documentsContent()
+                }
                 ToollyDestination.TOOLS -> ToolsScreen()
                 ToollyDestination.PROFILE -> ProfileScreen(state, actions)
                 else -> Unit

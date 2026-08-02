@@ -110,40 +110,42 @@ class CaptureSpikeActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                ToollyDocumentApp(
-                    onLaunchCapture = { config, onResult ->
-                        lifecycleScope.launch {
-                            onResult(scanner.launch(config))
-                        }
-                    },
-                    onLoadDocuments = { onResult ->
-                        lifecycleScope.launch {
-                            onResult(listDocuments())
-                        }
-                    },
-                    onSavePages = { pages, onResult ->
-                        lifecycleScope.launch {
-                            val drafts = pages.sortedBy { it.index }.mapIndexed { index, page ->
-                                CapturedPageDraft(
-                                    temporaryAssetId = DomainTemporaryAssetId(page.assetId.value),
-                                    ordinal = index,
-                                    widthPixels = null,
-                                    heightPixels = null,
-                                )
+                AndroidToollyApp {
+                    ToollyDocumentApp(
+                        onLaunchCapture = { config, onResult ->
+                            lifecycleScope.launch {
+                                onResult(scanner.launch(config))
                             }
-                            onResult(saveDocument(drafts))
-                        }
-                    },
-                    onOpenDocument = { documentId, onResult ->
-                        lifecycleScope.launch {
-                            onResult(openDocument(documentId))
-                        }
-                    },
-                    onExportDocument = ::launchExport,
-                    resolveTemporaryAsset = temporaryStore::resolve,
-                    loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
-                    onReleaseAssets = temporaryStore::release,
-                )
+                        },
+                        onLoadDocuments = { onResult ->
+                            lifecycleScope.launch {
+                                onResult(listDocuments())
+                            }
+                        },
+                        onSavePages = { pages, onResult ->
+                            lifecycleScope.launch {
+                                val drafts = pages.sortedBy { it.index }.mapIndexed { index, page ->
+                                    CapturedPageDraft(
+                                        temporaryAssetId = DomainTemporaryAssetId(page.assetId.value),
+                                        ordinal = index,
+                                        widthPixels = null,
+                                        heightPixels = null,
+                                    )
+                                }
+                                onResult(saveDocument(drafts))
+                            }
+                        },
+                        onOpenDocument = { documentId, onResult ->
+                            lifecycleScope.launch {
+                                onResult(openDocument(documentId))
+                            }
+                        },
+                        onExportDocument = ::launchExport,
+                        resolveTemporaryAsset = temporaryStore::resolve,
+                        loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
+                            onReleaseAssets = temporaryStore::release,
+                        )
+                    }
             }
         }
     }
