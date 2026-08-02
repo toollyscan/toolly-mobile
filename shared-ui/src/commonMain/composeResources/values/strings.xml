@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Toolly</string>
+    <string name="splash_description">Private document scanning</string>
+    <string name="tutorial_title">Your documents, protected</string>
+    <string name="local_private">Private by default</string>
+    <string name="local_private_description">Scans stay in Toolly’s protected local vault unless you choose to export or back them up.</string>
+    <string name="offline_ready">Ready offline</string>
+    <string name="offline_ready_description">Scan, organize, view and export without an internet connection.</string>
+    <string name="secure_by_design">Secure by design</string>
+    <string name="secure_by_design_description">Toolly fails safely when a document cannot be verified.</string>
+    <string name="get_started">Get started</string>
+    <string name="welcome_title">Welcome to Toolly</string>
+    <string name="welcome_description">Sign in or create a profile before your first scan.</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_in_description">Choose how you want to sign in.</string>
+    <string name="create_profile">Create profile</string>
+    <string name="create_profile_description">Choose a secure method to create your Toolly profile.</string>
+    <string name="phone_sign_in">Continue with phone</string>
+    <string name="email_sign_in">Continue with email</string>
+    <string name="google_sign_in">Continue with Google</string>
+    <string name="apple_sign_in">Continue with Apple</string>
+    <string name="development_access">Use development access</string>
+    <string name="development_access_description">Development access is local, temporary and unavailable in release builds.</string>
+    <string name="home">Home</string>
+    <string name="home_description">Scan a document or continue with a document stored on this device.</string>
+    <string name="documents">Documents</string>
+    <string name="tools">Tools</string>
+    <string name="tools_description">Document tools will appear here when their secure offline implementations are ready.</string>
+    <string name="profile">Profile</string>
+    <string name="profile_description">Manage your profile, privacy and security preferences.</string>
+    <string name="sign_out">Sign out</string>
     <string name="library_subtitle">Your documents stay available offline.</string>
     <string name="working">Working</string>
     <string name="scan_document">Scan document</string>
