@@ -33,6 +33,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -52,6 +53,7 @@ dependencyLocking {
 dependencies {
     // Toolly-owned provider-neutral capture contract.
     implementation(project(":shared-core"))
+    implementation(project(":shared-ui"))
 
     // ML Kit Document Scanner (primary capture path)
     implementation(libs.mlkit.document.scanner)

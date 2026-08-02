@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Toolly</string>
+    <string name="splash_description">निजी दस्तावेज़ स्कैनिंग</string>
+    <string name="tutorial_title">आपके दस्तावेज़, सुरक्षित</string>
+    <string name="local_private">डिफ़ॉल्ट रूप से निजी</string>
+    <string name="local_private_description">स्कैन Toolly की सुरक्षित स्थानीय वॉल्ट में रहते हैं, जब तक आप उन्हें निर्यात या बैकअप करना न चुनें।</string>
+    <string name="offline_ready">ऑफ़लाइन तैयार</string>
+    <string name="offline_ready_description">इंटरनेट कनेक्शन के बिना स्कैन करें, व्यवस्थित करें, देखें और निर्यात करें।</string>
+    <string name="secure_by_design">सुरक्षा के लिए बनाया गया</string>
+    <string name="secure_by_design_description">जब किसी दस्तावेज़ का सत्यापन नहीं हो पाता, Toolly उसे सुरक्षित रूप से रोक देता है।</string>
+    <string name="get_started">शुरू करें</string>
+    <string name="welcome_title">Toolly में आपका स्वागत है</string>
+    <string name="welcome_description">अपने पहले स्कैन से पहले साइन इन करें या प्रोफ़ाइल बनाएँ।</string>
+    <string name="sign_in">साइन इन करें</string>
+    <string name="sign_in_description">साइन इन करने का तरीका चुनें।</string>
+    <string name="create_profile">प्रोफ़ाइल बनाएँ</string>
+    <string name="create_profile_description">अपनी Toolly प्रोफ़ाइल बनाने के लिए सुरक्षित तरीका चुनें।</string>
+    <string name="phone_sign_in">फ़ोन से जारी रखें</string>
+    <string name="email_sign_in">ईमेल से जारी रखें</string>
+    <string name="google_sign_in">Google से जारी रखें</string>
+    <string name="apple_sign_in">Apple से जारी रखें</string>
+    <string name="development_access">डेवलपमेंट एक्सेस का उपयोग करें</string>
+    <string name="development_access_description">डेवलपमेंट एक्सेस स्थानीय और अस्थायी है तथा रिलीज़ बिल्ड में उपलब्ध नहीं है।</string>
+    <string name="home">होम</string>
+    <string name="home_description">दस्तावेज़ स्कैन करें या इस डिवाइस पर सुरक्षित दस्तावेज़ के साथ जारी रखें।</string>
+    <string name="documents">दस्तावेज़</string>
+    <string name="tools">टूल्स</string>
+    <string name="tools_description">सुरक्षित ऑफ़लाइन कार्यान्वयन तैयार होने पर दस्तावेज़ टूल यहाँ दिखाई देंगे।</string>
+    <string name="profile">प्रोफ़ाइल</string>
+    <string name="profile_description">अपनी प्रोफ़ाइल, गोपनीयता और सुरक्षा प्राथमिकताएँ प्रबंधित करें।</string>
+    <string name="sign_out">साइन आउट करें</string>
     <string name="library_subtitle">आपके दस्तावेज़ ऑफ़लाइन उपलब्ध रहते हैं।</string>
     <string name="working">काम जारी है</string>
     <string name="scan_document">दस्तावेज़ स्कैन करें</string>

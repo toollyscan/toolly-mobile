@@ -59,6 +59,8 @@ material are available.
 
 - [ ] KMP module structure for domain, use cases, ports and presentation state
 - [ ] Compose Multiplatform application shell for Android phone/tablet and iPhone/iPad
+- [ ] Release-shaped splash, tutorial, welcome/auth and authenticated home navigation shared across platforms (TLY-013)
+- [ ] Debug-only local authentication adapter that fails closed in release configuration (TLY-013)
 - [ ] Shared English, Hindi and Kannada resources with native-language review
 - [ ] Shared accessibility semantics with TalkBack and VoiceOver evidence
 - [ ] Android and iOS composition roots with provider-neutral platform adapters
@@ -178,5 +180,8 @@ If a provider migration is ever approved, see [FIREBASE_TO_AWS_RUNBOOK.md](../op
 ---
 
 ## Release blockers
+
+- [ ] P0: Android physical-device encrypted Save fails closed with `ToollyErrorCode.CORRUPT` (TLY-011A / #51)
+- [ ] Release application shell and platform-host integration incomplete (TLY-013 / #52)
 
 See [PRODUCTION_GATE.md](PRODUCTION_GATE.md) and [docs/security/SECURITY_BASELINE.md](../security/SECURITY_BASELINE.md).

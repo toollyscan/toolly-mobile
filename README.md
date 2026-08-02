@@ -54,6 +54,7 @@ Privacy-first, offline-first document scanning for Android and iOS.
 | ADR — Dependency and supply-chain governance | [docs/adr/0008-dependency-and-supply-chain-governance.md](docs/adr/0008-dependency-and-supply-chain-governance.md) |
 | ADR — Firebase control plane and environment isolation | [docs/adr/0009-firebase-control-plane-and-environment-isolation.md](docs/adr/0009-firebase-control-plane-and-environment-isolation.md) |
 | Decision register | [docs/product/DECISION_REGISTER.md](docs/product/DECISION_REGISTER.md) |
+| Release application flow | [docs/product/RELEASE_APPLICATION_FLOW.md](docs/product/RELEASE_APPLICATION_FLOW.md) |
 | Product scope | [docs/product/PRODUCT_SCOPE.md](docs/product/PRODUCT_SCOPE.md) |
 | Entitlements | [docs/product/ENTITLEMENTS.md](docs/product/ENTITLEMENTS.md) |
 | Monetization | [docs/product/MONETIZATION.md](docs/product/MONETIZATION.md) |

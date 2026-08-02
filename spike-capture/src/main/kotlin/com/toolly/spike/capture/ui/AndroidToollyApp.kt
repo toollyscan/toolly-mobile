@@ -1,6 +1,6 @@
-package com.toolly.shared.ui
+package com.toolly.spike.capture.ui
 
-import androidx.compose.ui.window.ComposeUIViewController
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,24 +12,24 @@ import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiEvent
 import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.model.reduceToollyUiState
+import com.toolly.shared.ui.ToollyApp
+import com.toolly.spike.capture.BuildConfig
 
-@Suppress("FunctionName")
-fun MainViewController() = MainViewController(developmentAccessAvailable = false)
-
-@Suppress("FunctionName")
-fun MainViewController(
-    developmentAccessAvailable: Boolean,
-) = ComposeUIViewController {
+@Composable
+internal fun AndroidToollyApp(
+    documentsContent: @Composable () -> Unit,
+) {
     var state by remember {
         mutableStateOf(
             ToollyUiState.firstLaunch(
-                developmentAccessAvailable = developmentAccessAvailable,
+                developmentAccessAvailable = BuildConfig.DEBUG,
             ),
         )
     }
     fun dispatch(event: ToollyUiEvent) {
         state = reduceToollyUiState(state, event)
     }
+
     ToollyApp(
         state = state,
         actions = object : ToollyUiActions {
@@ -45,7 +45,7 @@ fun MainViewController(
             override fun openTools() = select(ToollyDestination.TOOLS)
             override fun openProfile() = select(ToollyDestination.PROFILE)
             override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
-            override fun scanDocument() = Unit
+            override fun scanDocument() = select(ToollyDestination.LIBRARY)
             override fun openDocument(id: DocumentUiId) = Unit
             override fun discardCapture() = Unit
             override fun saveCapture() = Unit
@@ -55,5 +55,6 @@ fun MainViewController(
                 dispatch(ToollyUiEvent.MainDestinationSelected(destination))
             }
         },
+        documentsContent = documentsContent,
     )
 }

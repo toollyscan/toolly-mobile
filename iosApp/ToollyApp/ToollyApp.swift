@@ -14,7 +14,11 @@ struct ToollyIOSApplication: App {
 
 private struct ToollyRootView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        #if DEBUG
+        return MainViewControllerKt.MainViewController(developmentAccessAvailable: true)
+        #else
+        return MainViewControllerKt.MainViewController()
+        #endif
     }
 
     func updateUIViewController(
