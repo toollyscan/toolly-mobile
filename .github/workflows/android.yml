@@ -38,6 +38,7 @@ jobs:
           path: |
             spike-capture/build/outputs/apk/debug/spike-capture-debug.apk
             spike-capture/build/outputs/apk/androidTest/debug/spike-capture-debug-androidTest.apk
+            spike-capture/gradle.lockfile
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
