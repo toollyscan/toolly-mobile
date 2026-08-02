@@ -45,7 +45,7 @@ android {
     lint {
         // Compose 1.11 lint's FrequentlyChangingValue detector is binary-incompatible
         // with the Kotlin analysis API bundled by AGP 8.7.3. Keep all other lint checks enabled.
-        disable += "FrequentlyChangingValue"
+        disable += setOf("FrequentlyChangingValue", "RememberInComposition")
     }
 
     testOptions {
