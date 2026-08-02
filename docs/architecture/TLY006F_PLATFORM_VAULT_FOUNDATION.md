@@ -60,6 +60,10 @@ Content encryption uses a random per-record or per-asset data key outside Androi
 continues to use unique cryptographically random nonces that are persisted with each authenticated
 ciphertext.
 
+Save failures expose only an allowlisted `VaultSaveStage` through the provider-neutral safe error
+field. The diagnostic contains no path, filename, document identifier, metadata, pixel content, key
+material or exception message, and the customer UI continues to show localized generic errors.
+
 ## Evidence
 
 JVM tests cover canonical purpose separation and strict envelope framing. Android instrumented tests
@@ -72,7 +76,8 @@ cover:
 - missing wrapping-key failure without reset;
 - distinct envelopes for repeated encryption;
 - provider-generated wrapping IV round trips on Android Keystore;
-- authenticated repository save and reopen with a generated JPEG larger than 256 KiB.
+- authenticated repository save and reopen with a generated JPEG larger than 256 KiB;
+- invalid input reports an allowlisted save stage and publishes no committed document.
 
 Android CI compiles the instrumentation APK but does not claim that device-only Android Keystore
 tests executed. Physical-device or managed-emulator evidence is required before closing a
