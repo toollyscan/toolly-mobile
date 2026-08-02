@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.multiplatform)
 }
 
 kotlin {
@@ -59,8 +60,9 @@ dependencies {
     implementation(libs.mlkit.document.scanner)
 
     // Compose UI
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
+    implementation(compose.runtime)
+    implementation(compose.ui)
+    implementation(compose.material3)
     implementation(libs.activity.compose)
 
     // Coroutines
