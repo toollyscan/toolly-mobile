@@ -25,7 +25,7 @@ jobs:
         run: |
           python3 scripts/validate_android_permissions.py
           chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace --write-locks \
+          ./gradlew --no-daemon --stacktrace --write-locks --write-verification-metadata sha256 \
             :spike-capture:assembleDebug \
             :spike-capture:assembleDebugAndroidTest \
             :spike-capture:lintDebug \
@@ -39,6 +39,7 @@ jobs:
             spike-capture/build/outputs/apk/debug/spike-capture-debug.apk
             spike-capture/build/outputs/apk/androidTest/debug/spike-capture-debug-androidTest.apk
             spike-capture/gradle.lockfile
+            gradle/verification-metadata.xml
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
