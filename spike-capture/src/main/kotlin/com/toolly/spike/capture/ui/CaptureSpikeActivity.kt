@@ -143,9 +143,9 @@ class CaptureSpikeActivity : ComponentActivity() {
                         onExportDocument = ::launchExport,
                         resolveTemporaryAsset = temporaryStore::resolve,
                         loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
-                            onReleaseAssets = temporaryStore::release,
-                        )
-                    }
+                        onReleaseAssets = temporaryStore::release,
+                    )
+                }
             }
         }
     }
