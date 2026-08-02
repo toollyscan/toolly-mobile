@@ -1,5 +1,7 @@
 package com.toolly.spike.capture
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.toolly.domain.contracts.SaveCapturedDocumentCommand
@@ -13,6 +15,7 @@ import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
 import com.toolly.spike.capture.vault.crypto.AndroidAssetCipher
 import com.toolly.spike.capture.vault.crypto.AndroidMetadataCipher
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.UUID
@@ -38,7 +41,8 @@ class EncryptedDocumentRepositoryInstrumentedTest {
         val assetAlias = "com.toolly.test.asset.$suffix"
         val metadataCipher = AndroidMetadataCipher(metadataAlias)
         val assetCipher = AndroidAssetCipher(assetAlias)
-        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(testJpeg()) }
+        val jpeg = testJpeg()
+        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(jpeg) }
         val command = testCommand()
         val resolver = { rawId: String ->
             source.takeIf { rawId == command.pages.single().temporaryAssetId.value }
@@ -60,7 +64,12 @@ class EncryptedDocumentRepositoryInstrumentedTest {
                 .filter(File::isFile)
                 .flatMap { it.readBytes().asSequence() }
                 .toList()
-            assertFalse(persistentBytes.windowed(testJpeg().size).any { it == testJpeg().toList() })
+            val plaintextProbe = jpeg.copyOfRange(jpeg.size / 2, jpeg.size / 2 + 512)
+            assertFalse(
+                persistentBytes.windowed(plaintextProbe.size).any {
+                    it == plaintextProbe.toList()
+                },
+            )
 
             val reopened = EncryptedDocumentRepository(
                 context = context,
@@ -217,12 +226,28 @@ class EncryptedDocumentRepositoryInstrumentedTest {
             .toString()
     }
 
-    private fun testJpeg(): ByteArray = byteArrayOf(
-        0xFF.toByte(),
-        0xD8.toByte(),
-        0x01,
-        0x02,
-        0xFF.toByte(),
-        0xD9.toByte(),
-    )
+    private fun testJpeg(): ByteArray {
+        val width = 1024
+        val height = 1536
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        return try {
+            val pixels = IntArray(width * height) { index ->
+                val value = index * 1103515245 + 12345
+                Color.rgb(
+                    value ushr 16 and 0xFF,
+                    value ushr 8 and 0xFF,
+                    value and 0xFF,
+                )
+            }
+            bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+            ByteArrayOutputStream().use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.JPEG, 90, output))
+                output.toByteArray().also { encoded ->
+                    check(encoded.size > 256 * 1024)
+                }
+            }
+        } finally {
+            bitmap.recycle()
+        }
+    }
 }
