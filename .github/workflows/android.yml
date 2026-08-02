@@ -32,6 +32,7 @@ jobs:
             :spike-capture:testDebugUnitTest
 
       - name: Publish phone and tablet test APKs
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: toolly-capture-spike-${{ github.sha }}
@@ -40,6 +41,6 @@ jobs:
             spike-capture/build/outputs/apk/androidTest/debug/spike-capture-debug-androidTest.apk
             spike-capture/gradle.lockfile
             gradle/verification-metadata.xml
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
           compression-level: 0
