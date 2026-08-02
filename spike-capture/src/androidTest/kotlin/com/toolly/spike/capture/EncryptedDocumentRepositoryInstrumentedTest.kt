@@ -11,8 +11,10 @@ import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.OperationId
 import com.toolly.domain.model.PageId
 import com.toolly.domain.model.TemporaryAssetId
+import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
+import com.toolly.spike.capture.vault.VaultSaveStage
 import com.toolly.spike.capture.vault.crypto.AndroidAssetCipher
 import com.toolly.spike.capture.vault.crypto.AndroidMetadataCipher
 import java.io.ByteArrayOutputStream
@@ -139,6 +141,48 @@ class EncryptedDocumentRepositoryInstrumentedTest {
             assetCipher.deleteWrappingKeyForTesting()
             File(context.noBackupFilesDir, rootName).deleteRecursively()
             File(context.filesDir, legacyName).deleteRecursively()
+        }
+    }
+
+    @Test
+    fun invalidJpeg_reportsAllowlistedStageAndPublishesNothing() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val suffix = UUID.randomUUID().toString()
+        val rootName = "toolly-test-vault-$suffix"
+        val legacyName = "toolly-test-legacy-$suffix"
+        val metadataCipher = AndroidMetadataCipher("com.toolly.test.metadata.$suffix")
+        val assetCipher = AndroidAssetCipher("com.toolly.test.asset.$suffix")
+        val source = File(context.cacheDir, "$suffix.jpg").apply {
+            writeBytes(byteArrayOf(1, 2, 3, 4))
+        }
+        val command = testCommand()
+
+        try {
+            val repository = EncryptedDocumentRepository(
+                context = context,
+                resolveTemporaryAsset = { source },
+                metadataCipher = metadataCipher,
+                assetCipher = assetCipher,
+                rootDirectoryName = rootName,
+                legacyRootDirectoryName = legacyName,
+            )
+            val result = repository.saveCapturedDocument(command)
+
+            assertTrue(result is ToollyResult.Failure)
+            val failure = result as ToollyResult.Failure
+            assertEquals(ToollyErrorCode.RETRYABLE, failure.error.code)
+            assertEquals(VaultSaveStage.VALIDATE_SOURCE.name, failure.error.safeMessage)
+            assertFalse(
+                File(context.noBackupFilesDir, "$rootName/documents")
+                    .walkTopDown()
+                    .any { it.name == "COMMITTED" },
+            )
+        } finally {
+            metadataCipher.deleteWrappingKeyForTesting()
+            assetCipher.deleteWrappingKeyForTesting()
+            File(context.noBackupFilesDir, rootName).deleteRecursively()
+            File(context.filesDir, legacyName).deleteRecursively()
+            source.delete()
         }
     }
 
