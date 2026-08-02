@@ -60,16 +60,14 @@ class EncryptedDocumentRepositoryInstrumentedTest {
             assertTrue(first.saveCapturedDocument(command) is ToollyResult.Success)
 
             val encryptedRoot = File(context.noBackupFilesDir, rootName)
-            val persistentBytes = encryptedRoot.walkTopDown()
-                .filter(File::isFile)
-                .flatMap { it.readBytes().asSequence() }
-                .toList()
+            val persistentBytes = ByteArrayOutputStream().use { output ->
+                encryptedRoot.walkTopDown()
+                    .filter(File::isFile)
+                    .forEach { output.write(it.readBytes()) }
+                output.toByteArray()
+            }
             val plaintextProbe = jpeg.copyOfRange(jpeg.size / 2, jpeg.size / 2 + 512)
-            assertFalse(
-                persistentBytes.windowed(plaintextProbe.size).any {
-                    it == plaintextProbe.toList()
-                },
-            )
+            assertFalse(persistentBytes.containsSubsequence(plaintextProbe))
 
             val reopened = EncryptedDocumentRepository(
                 context = context,
@@ -224,6 +222,22 @@ class EncryptedDocumentRepositoryInstrumentedTest {
                 ),
             )
             .toString()
+    }
+
+    private fun ByteArray.containsSubsequence(candidate: ByteArray): Boolean {
+        if (candidate.isEmpty()) return true
+        if (candidate.size > size) return false
+        for (start in 0..size - candidate.size) {
+            var matches = true
+            for (offset in candidate.indices) {
+                if (this[start + offset] != candidate[offset]) {
+                    matches = false
+                    break
+                }
+            }
+            if (matches) return true
+        }
+        return false
     }
 
     private fun testJpeg(): ByteArray {
