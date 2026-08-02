@@ -35,6 +35,19 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
+/** Allowlisted, content-free save diagnostics for device validation. */
+internal enum class VaultSaveStage {
+    PREPARE_TRANSACTION,
+    RESOLVE_SOURCE,
+    VALIDATE_SOURCE,
+    ENCRYPT_ASSET,
+    VERIFY_ASSET,
+    WRITE_MANIFEST,
+    WRITE_COMMIT_MARKER,
+    PROMOTE_TRANSACTION,
+    VERIFY_COMMITTED_DOCUMENT,
+}
+
 /**
  * Android encrypted repository candidate behind Toolly's platform-neutral document contract.
  *
@@ -108,33 +121,44 @@ internal class EncryptedDocumentRepository(
             if (destination.isDirectory && File(destination, COMMITTED_MARKER).isFile) {
                 return@withContext readDocument(destination).fold(
                     onSuccess = { ToollyResult.Success(it) },
-                    onFailure = { failure -> cryptoOrCorruptFailure(failure) },
+                    onFailure = { failure ->
+                        failure.toToollyFailure(VaultSaveStage.VERIFY_COMMITTED_DOCUMENT)
+                    },
                 )
             }
 
+            var saveStage = VaultSaveStage.PREPARE_TRANSACTION
             val transaction = File(staging, command.operationId.value)
             transaction.deleteRecursivelySafely()
-            if (!transaction.mkdirs()) return@withContext storageFailure()
+            if (!transaction.mkdirs()) return@withContext storageFailure(saveStage)
 
             try {
                 for (page in command.pages.sortedBy { it.ordinal }) {
+                    saveStage = VaultSaveStage.RESOLVE_SOURCE
                     val source = resolveTemporaryAsset(page.temporaryAssetId.value)
                         ?: throw IOException()
+                    saveStage = VaultSaveStage.VALIDATE_SOURCE
                     requireCompleteJpeg(source)
                     val target = File(transaction, assetFileName(page.assetId))
                     val associatedData = assetAssociatedData(page.assetId)
+                    saveStage = VaultSaveStage.ENCRYPT_ASSET
                     assetCipher.encrypt(source, target, associatedData)
+                    saveStage = VaultSaveStage.VERIFY_ASSET
                     assetCipher.verify(target, associatedData)
                 }
+                saveStage = VaultSaveStage.WRITE_MANIFEST
                 writeManifest(transaction, manifestFrom(command))
+                saveStage = VaultSaveStage.WRITE_COMMIT_MARKER
                 writeAndSync(File(transaction, COMMITTED_MARKER), MARKER_BYTES)
 
+                saveStage = VaultSaveStage.PROMOTE_TRANSACTION
                 if (!transaction.renameTo(destination)) throw IOException()
+                saveStage = VaultSaveStage.VERIFY_COMMITTED_DOCUMENT
                 readDocument(destination).fold(
                     onSuccess = { ToollyResult.Success(it) },
                     onFailure = { failure ->
                         destination.deleteRecursivelySafely()
-                        cryptoOrCorruptFailure(failure)
+                        failure.toToollyFailure(saveStage)
                     },
                 )
             } catch (cancelled: CancellationException) {
@@ -142,7 +166,7 @@ internal class EncryptedDocumentRepository(
                 throw cancelled
             } catch (failure: Exception) {
                 transaction.deleteRecursivelySafely()
-                failure.toToollyFailure()
+                failure.toToollyFailure(saveStage)
             }
         }
     }
@@ -512,23 +536,31 @@ internal class EncryptedDocumentRepository(
         failure.toToollyFailure()
     }
 
-    private fun <T> Throwable.toToollyFailure(): ToollyResult<T> = when (this) {
-        is VaultCryptoException.KeyUnavailable -> ToollyResult.Failure(
-            ToollyError(ToollyErrorCode.UNAUTHORIZED, ToollyErrorCode.UNAUTHORIZED.name),
+    private fun <T> Throwable.toToollyFailure(
+        saveStage: VaultSaveStage? = null,
+    ): ToollyResult<T> {
+        val code = when (this) {
+            is VaultCryptoException.KeyUnavailable -> ToollyErrorCode.UNAUTHORIZED
+            is VaultCryptoException,
+            is JSONException,
+            is IllegalArgumentException -> ToollyErrorCode.CORRUPT
+            else -> ToollyErrorCode.RETRYABLE
+        }
+        return ToollyResult.Failure(
+            ToollyError(code, saveStage?.name ?: code.name),
         )
-        is VaultCryptoException,
-        is JSONException,
-        is IllegalArgumentException -> ToollyResult.Failure(
-            ToollyError(ToollyErrorCode.CORRUPT, ToollyErrorCode.CORRUPT.name),
-        )
-        else -> storageFailure()
     }
 
     private fun <T> cryptoOrCorruptFailure(failure: Throwable): ToollyResult<T> =
         failure.toToollyFailure()
 
-    private fun <T> storageFailure(): ToollyResult<T> = ToollyResult.Failure(
-        ToollyError(ToollyErrorCode.RETRYABLE, ToollyErrorCode.RETRYABLE.name),
+    private fun <T> storageFailure(
+        saveStage: VaultSaveStage? = null,
+    ): ToollyResult<T> = ToollyResult.Failure(
+        ToollyError(
+            ToollyErrorCode.RETRYABLE,
+            saveStage?.name ?: ToollyErrorCode.RETRYABLE.name,
+        ),
     )
 
     private fun <T> migrationFailure(): ToollyResult<T> = ToollyResult.Failure(
