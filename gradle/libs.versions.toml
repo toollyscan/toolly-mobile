@@ -3,7 +3,7 @@
 # Versions are immutable; dynamic patterns (+, SNAPSHOT, RELEASE, ranges) are prohibited.
 
 [versions]
-agp = "8.7.3"
+agp = "8.13.2"
 kotlin = "2.3.20"
 compose-multiplatform = "1.11.1"
 mlkit-document-scanner = "16.0.0"
