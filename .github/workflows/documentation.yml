@@ -1,96 +1,38 @@
 name: Documentation CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  markdown-lint:
-    name: Markdown lint
+  governance:
+    name: Consolidated documentation, security and governance gate
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Self-test and lint all Markdown files
-        run: |
-          python3 scripts/validate_markdown.py --self-test
-          python3 scripts/validate_markdown.py
-
-  platform-parity:
-    name: Platform parity and localized strings
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Validate parity policy and production strings
-        run: python3 scripts/validate_platform_parity.py --self-test
-
-  benchmark-contracts:
-    name: Benchmark evidence contracts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Validate contracts and evidence
-        run: python3 scripts/validate_benchmark_evidence.py --self-test
-
-  dependency-policy:
-    name: Dependency and supply-chain policy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Validate dependency policy
-        run: python3 scripts/validate_dependency_policy.py --self-test
-
-      - name: Generate governance SBOM preview
-        run: |
-          python3 scripts/validate_dependency_policy.py \
-            --emit-sbom /tmp/toolly-governance.cdx.json
-          python3 -m json.tool /tmp/toolly-governance.cdx.json >/dev/null
-
-  firebase-governance:
-    name: Firebase environment and cost governance
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Validate Firebase governance
-        run: python3 scripts/validate_firebase_governance.py --self-test
-
-  ci-trust-policy:
-    name: CI trust-policy enforcement
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Self-test and validate CI trust policy
-        run: |
-          python3 scripts/validate_ci_trust_policy.py --self-test
-          python3 scripts/validate_ci_trust_policy.py
-
-  secret-scan:
-    name: Secret scan
-    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout complete repository history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Self-test secret scanner
-        run: python3 scripts/scan_secrets.py --self-test
-
-      - name: Scan tracked files and history
-        run: python3 scripts/scan_secrets.py
+      - name: Validate documentation and governance
+        run: |
+          python3 scripts/validate_markdown.py --self-test
+          python3 scripts/validate_markdown.py
+          python3 scripts/validate_platform_parity.py --self-test
+          python3 scripts/validate_benchmark_evidence.py --self-test
+          python3 scripts/validate_dependency_policy.py --self-test
+          python3 scripts/validate_dependency_policy.py \
+            --emit-sbom /tmp/toolly-governance.cdx.json
+          python3 -m json.tool /tmp/toolly-governance.cdx.json >/dev/null
+          python3 scripts/validate_firebase_governance.py --self-test
+          python3 scripts/validate_ci_trust_policy.py --self-test
+          python3 scripts/validate_ci_trust_policy.py
+          python3 scripts/scan_secrets.py --self-test
+          python3 scripts/scan_secrets.py
