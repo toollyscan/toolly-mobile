@@ -12,6 +12,7 @@ data class DocumentListItem(
 
 enum class ToollySessionState {
     SIGNED_OUT,
+    LOCAL,
     DEVELOPMENT,
     AUTHENTICATED,
 }
@@ -31,7 +32,7 @@ enum class ToollyDestination {
     CREATE_PROFILE,
     HOME,
     LIBRARY,
-    TOOLS,
+    SEARCH,
     PROFILE,
     CAPTURE_REVIEW,
     DOCUMENT_VIEWER,
@@ -39,10 +40,13 @@ enum class ToollyDestination {
 
 sealed interface ToollyUiEvent {
     data object SplashFinished : ToollyUiEvent
+    data object TutorialAdvanced : ToollyUiEvent
+    data object TutorialSkipped : ToollyUiEvent
     data object TutorialCompleted : ToollyUiEvent
     data object SignInSelected : ToollyUiEvent
     data object CreateProfileSelected : ToollyUiEvent
     data object BackToWelcome : ToollyUiEvent
+    data class LocalSessionStarted(val destination: ToollyDestination) : ToollyUiEvent
     data object AuthenticationSucceeded : ToollyUiEvent
     data object DevelopmentAccessGranted : ToollyUiEvent
     data class MainDestinationSelected(val destination: ToollyDestination) : ToollyUiEvent
@@ -52,37 +56,48 @@ sealed interface ToollyUiEvent {
 data class ToollyUiState(
     val destination: ToollyDestination,
     val tutorialCompleted: Boolean,
+    val tutorialPageIndex: Int,
     val sessionState: ToollySessionState,
     val developmentAccessAvailable: Boolean,
+    val appleSignInAvailable: Boolean,
     val documents: List<DocumentListItem>,
     val selectedDocumentId: DocumentUiId?,
     val reviewPageCount: Int,
     val busy: Boolean,
 ) {
     init {
+        require(tutorialPageIndex in 0 until TUTORIAL_PAGE_COUNT)
         require(reviewPageCount >= 0)
         require(documents.all { it.pageCount > 0 })
         require(
             sessionState != ToollySessionState.SIGNED_OUT ||
-                destination !in authenticatedDestinations,
+                destination !in productDestinations,
         )
     }
 
     companion object {
-        private val authenticatedDestinations = setOf(
+        const val TUTORIAL_PAGE_COUNT = 3
+
+        private val productDestinations = setOf(
             ToollyDestination.HOME,
             ToollyDestination.LIBRARY,
-            ToollyDestination.TOOLS,
+            ToollyDestination.SEARCH,
             ToollyDestination.PROFILE,
             ToollyDestination.CAPTURE_REVIEW,
             ToollyDestination.DOCUMENT_VIEWER,
         )
 
-        fun firstLaunch(developmentAccessAvailable: Boolean = false): ToollyUiState = ToollyUiState(
+        fun firstLaunch(
+            tutorialCompleted: Boolean = false,
+            developmentAccessAvailable: Boolean = false,
+            appleSignInAvailable: Boolean = false,
+        ): ToollyUiState = ToollyUiState(
             destination = ToollyDestination.SPLASH,
-            tutorialCompleted = false,
+            tutorialCompleted = tutorialCompleted,
+            tutorialPageIndex = 0,
             sessionState = ToollySessionState.SIGNED_OUT,
             developmentAccessAvailable = developmentAccessAvailable,
+            appleSignInAvailable = appleSignInAvailable,
             documents = emptyList(),
             selectedDocumentId = null,
             reviewPageCount = 0,
@@ -91,8 +106,11 @@ data class ToollyUiState(
 
         fun returningSignedOut(
             developmentAccessAvailable: Boolean = false,
-        ): ToollyUiState = firstLaunch(developmentAccessAvailable).copy(
+            appleSignInAvailable: Boolean = false,
+        ): ToollyUiState = firstLaunch(
             tutorialCompleted = true,
+            developmentAccessAvailable = developmentAccessAvailable,
+            appleSignInAvailable = appleSignInAvailable,
         )
 
         fun empty(): ToollyUiState = firstLaunch()
@@ -104,43 +122,96 @@ fun reduceToollyUiState(
     event: ToollyUiEvent,
 ): ToollyUiState = when (event) {
     ToollyUiEvent.SplashFinished -> {
-        if (state.destination != ToollyDestination.SPLASH) state
-        else state.copy(
-            destination = if (state.tutorialCompleted) {
-                ToollyDestination.WELCOME
-            } else {
-                ToollyDestination.TUTORIAL
-            },
-        )
+        if (state.destination != ToollyDestination.SPLASH) {
+            state
+        } else {
+            state.copy(
+                destination = when {
+                    state.sessionState != ToollySessionState.SIGNED_OUT -> ToollyDestination.HOME
+                    state.tutorialCompleted -> ToollyDestination.WELCOME
+                    else -> ToollyDestination.TUTORIAL
+                },
+            )
+        }
     }
 
+    ToollyUiEvent.TutorialAdvanced -> {
+        if (
+            state.destination != ToollyDestination.TUTORIAL ||
+            state.tutorialPageIndex >= ToollyUiState.TUTORIAL_PAGE_COUNT - 1
+        ) {
+            state
+        } else {
+            state.copy(tutorialPageIndex = state.tutorialPageIndex + 1)
+        }
+    }
+
+    ToollyUiEvent.TutorialSkipped,
     ToollyUiEvent.TutorialCompleted -> {
-        if (state.destination != ToollyDestination.TUTORIAL) state
-        else state.copy(
-            destination = ToollyDestination.WELCOME,
-            tutorialCompleted = true,
-        )
+        if (state.destination != ToollyDestination.TUTORIAL) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.WELCOME,
+                tutorialCompleted = true,
+            )
+        }
     }
 
     ToollyUiEvent.SignInSelected -> {
-        if (state.destination != ToollyDestination.WELCOME) state
+        if (
+            state.destination !in setOf(ToollyDestination.WELCOME, ToollyDestination.PROFILE) ||
+            state.sessionState in setOf(
+                ToollySessionState.AUTHENTICATED,
+                ToollySessionState.DEVELOPMENT,
+            )
+        ) state
         else state.copy(destination = ToollyDestination.SIGN_IN)
     }
 
     ToollyUiEvent.CreateProfileSelected -> {
-        if (state.destination != ToollyDestination.WELCOME) state
+        if (
+            state.destination !in setOf(
+                ToollyDestination.WELCOME,
+                ToollyDestination.SIGN_IN,
+                ToollyDestination.PROFILE,
+            ) ||
+            state.sessionState in setOf(
+                ToollySessionState.AUTHENTICATED,
+                ToollySessionState.DEVELOPMENT,
+            )
+        ) state
         else state.copy(destination = ToollyDestination.CREATE_PROFILE)
     }
 
     ToollyUiEvent.BackToWelcome -> {
         if (
-            state.sessionState != ToollySessionState.SIGNED_OUT ||
             state.destination !in setOf(
                 ToollyDestination.SIGN_IN,
                 ToollyDestination.CREATE_PROFILE,
             )
         ) state
-        else state.copy(destination = ToollyDestination.WELCOME)
+        else state.copy(
+            destination = if (state.sessionState == ToollySessionState.LOCAL) {
+                ToollyDestination.PROFILE
+            } else {
+                ToollyDestination.WELCOME
+            },
+        )
+    }
+
+    is ToollyUiEvent.LocalSessionStarted -> {
+        if (
+            state.destination != ToollyDestination.WELCOME ||
+            event.destination !in setOf(ToollyDestination.HOME, ToollyDestination.LIBRARY)
+        ) {
+            state
+        } else {
+            state.copy(
+                destination = event.destination,
+                sessionState = ToollySessionState.LOCAL,
+            )
+        }
     }
 
     ToollyUiEvent.AuthenticationSucceeded -> {
@@ -177,7 +248,7 @@ fun reduceToollyUiState(
             event.destination !in setOf(
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,
-                ToollyDestination.TOOLS,
+                ToollyDestination.SEARCH,
                 ToollyDestination.PROFILE,
             )
         ) {
@@ -187,26 +258,35 @@ fun reduceToollyUiState(
         }
     }
 
-    ToollyUiEvent.SignedOut -> state.copy(
-        destination = ToollyDestination.WELCOME,
-        sessionState = ToollySessionState.SIGNED_OUT,
-        selectedDocumentId = null,
-        reviewPageCount = 0,
-        busy = false,
-    )
+    ToollyUiEvent.SignedOut -> {
+        if (state.sessionState == ToollySessionState.LOCAL) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.WELCOME,
+                sessionState = ToollySessionState.SIGNED_OUT,
+                selectedDocumentId = null,
+                reviewPageCount = 0,
+                busy = false,
+            )
+        }
+    }
 }
 
 interface ToollyUiActions {
     fun finishSplash()
+    fun nextTutorial()
+    fun skipTutorial()
     fun completeTutorial()
     fun showSignIn()
     fun showCreateProfile()
     fun backToWelcome()
+    fun continueLocally(destination: ToollyDestination)
     fun authenticate(method: ToollyAuthenticationMethod)
     fun useDevelopmentAccess()
     fun openHome()
     fun openLibrary()
-    fun openTools()
+    fun openSearch()
     fun openProfile()
     fun signOut()
     fun scanDocument()

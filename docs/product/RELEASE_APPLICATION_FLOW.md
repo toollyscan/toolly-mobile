@@ -7,44 +7,49 @@ iPhone/iPad. It is the canonical navigation contract for product implementation.
 camera, permission, share and file-picker surfaces may look native, but Toolly screens, states,
 decisions and outcomes remain equivalent.
 
-## Launch and account journey
+## Launch and local-first journey
 
 ```mermaid
 flowchart TD
     A[App launch] --> B[Splash]
     B --> C{Tutorial completed?}
-    C -- No --> D[Tutorial]
+    C -- No --> D[Three-page tutorial]
     C -- Yes --> E[Welcome]
     D --> E
-    E --> F[Sign in]
-    E --> G[Create profile]
-    F --> H{Session established?}
-    G --> H
-    H -- Yes --> I[Home]
-    H -- No --> E
+    E --> F[Scan first document]
+    E --> G[Explore local library]
+    E --> H[Optional account]
+    F --> I[Local product shell]
+    G --> I
+    H --> J[Sign in or create account]
+    J --> I
 ```
 
-The splash screen performs no artificial wait. It exists only while local startup state is loaded.
-Tutorial completion is local, non-sensitive preference data. Authentication is required before the
-first scan under decision D-021.
+The Figma splash sequence may animate for up to 700 milliseconds while startup state is resolved;
+it must not request permission or perform a network call. Tutorial completion is local,
+non-sensitive preference data and is persisted by each platform host. Local scanning, encrypted
+save, library access, viewing and local export do not require an account. Account setup is deferred
+until the user chooses backup, sync, recovery or another account-owned feature.
 
-## Authenticated product shell
+## Product shell
 
-| Destination | Primary outcome | Required states |
+| Action or destination | Primary outcome | Required states |
 |---|---|---|
 | Home | Start a scan or continue recent local work | Empty, content, busy, offline, recoverable error |
-| Documents | Browse and reopen encrypted local documents | Loading, empty, content, corrupt, key unavailable |
-| Tools | Enter approved offline document tools | Unavailable, eligible, processing, success, failure |
-| Profile | Manage account, privacy, security and preferences | Authenticated, development session, signed out |
+| Library | Browse and reopen encrypted local documents | Loading, empty, content, corrupt, key unavailable |
+| Scan | Start platform capture from an explicit user action | Ready, busy, cancelled, partial, failure |
+| Search | Search local titles, tags and recognized text | Empty query, results, no results, unavailable index |
+| You | Manage local privacy, optional account and preferences | Local, authenticated, development session |
 
-Compact layouts use bottom navigation. Medium and expanded layouts may use a rail or persistent
-navigation region without changing destination names, order or outcomes.
+Compact layouts use the Figma-ordered bottom navigation: **Home, Library, Scan, Search, You**.
+Medium and expanded layouts may use a rail or persistent navigation region without changing the
+names, order or product outcomes. Scan remains an action rather than a durable destination.
 
 ## Capture-to-document journey
 
 ```mermaid
 flowchart TD
-    A[Home or Documents] --> B[Start scan]
+    A[Welcome, Home or Library] --> B[Start scan]
     B --> C{Capture result}
     C -- Cancelled --> A
     C -- Pages available --> D[Review pages]
@@ -54,28 +59,24 @@ flowchart TD
     F -- Yes --> G[Document details]
     F -- No --> H[Save failed]
     H --> D
-    G --> I[Documents]
+    G --> I[Library]
 ```
 
 Save is successful only after encrypted assets and metadata are committed and authenticated
 read-back succeeds. A vault error must remain visible and retryable. The application must never
 display fake success, write plaintext as a fallback or hide a corrupt result to continue a demo.
 
-## Development authentication adapter
+## Optional account journey
 
-Development access may temporarily unblock navigation while Firebase Authentication is not
-configured. It is permitted only when the platform host explicitly enables it for a debug build.
+Account entry offers phone, email and Google on Android, with Apple added on iOS. Provider SDKs and
+network behavior remain behind Toolly-owned ports and the Phase 4 gate. A verified phone and
+completed profile are required before account-owned backup or sync, but never before local document
+work.
 
-The adapter:
-
-- is local and temporary;
-- performs no network request;
-- stores no credential, OTP, token, profile or fake production account;
-- is visibly identified as development access;
-- is unavailable by default and cannot be selected by release builds;
-- does not bypass permissions, vault encryption, authenticated read-back, validation or errors.
-
-Release configuration without an approved authentication provider fails closed at Welcome/Sign in.
+Development access may temporarily exercise authenticated presentation states while Firebase
+Authentication is not configured. It is permitted only when the platform host explicitly enables
+it for a debug build. It performs no network request, stores no credential or fake account, is
+visibly identified, is unavailable in release builds and never bypasses vault or permission checks.
 
 ## State ownership
 
@@ -83,33 +84,38 @@ Release configuration without an approved authentication provider fails closed a
 |---|---|---|
 | Tutorial completed | Toolly local preferences adapter | Local; non-sensitive |
 | Current navigation | Shared presentation state | Memory/saved UI state only |
+| Local-use session | Shared presentation state | Memory only; no identity |
 | Authentication session | Toolly authentication port | Provider/platform adapter |
 | Development access | Debug platform host | Memory only |
 | Documents and pages | Encrypted local vault | Encrypted source of truth |
 | Capture temporary assets | Platform capture adapter | App-private, short-lived, explicit cleanup |
 
-Firebase and future cloud providers do not own navigation, canonical account IDs, document IDs or
-local document availability.
+Firebase and future cloud providers do not own navigation, canonical document IDs or local document
+availability.
 
 ## Permission timing
 
 No camera, files, photos, documents, notifications, contacts, microphone or location permission is
-requested at splash, tutorial, welcome, sign-in, create-profile or home launch. Camera access occurs
-only after **Scan document**. Export/import uses system pickers and scoped access after the related
-user action. Notification permission is requested separately from account and marketing consent.
+requested at splash, tutorial, welcome, account entry or home launch. Camera access occurs only
+after **Scan**. Export/import uses system pickers and scoped access after the related user action.
+Notification permission is separate from account creation and marketing consent.
 
-## Cross-platform parity gates
+## Visual and cross-platform parity gates
 
+- Figma Foundations, Onboarding & Auth and Product Flows define hierarchy, branding and action
+  priority.
 - Android phone/tablet and iPhone/iPad use the same destination and transition model.
-- Toolly-owned user-facing strings come from reviewed English, Hindi and Kannada resources.
-- Loading, empty, offline, error, retry and signed-out outcomes are explicit.
+- Shared tokens use primary `#2961F2`, primary container `#E5ECFF`, surface `#F5F7FA`, outline
+  `#C7CFD9`, secondary text `#616B78` and primary text `#1C2129`.
+- Interactive targets are at least 48dp and primary actions are at least 52dp high.
+- Toolly-owned user-facing strings exist in English, Hindi and Kannada resources.
 - TalkBack and VoiceOver announce screen titles, actions, progress and failures.
-- OS-controlled surfaces are recorded in the platform parity matrix.
 - No production sample user, document, identifier or test string is packaged.
 
-## Current blockers
+## Current blockers and staged limitations
 
-- Android physical-device encrypted Save fails closed with `ToollyErrorCode.CORRUPT`; tracked by
-  [TLY-011A](https://github.com/toollyscan/toolly-mobile/issues/51).
-- Real Firebase Authentication remains Phase 4 and is not required for the debug navigation slice.
+- Android physical-device encrypted Save remains blocked until PR #54 is physically verified.
+- The first Figma slice routes **Scan my first document** into the existing Android Library walking
+  slice; direct capture hand-off remains a focused follow-up.
+- Real phone/email/provider authentication remains Phase 4.
 - Apple capture and physical iPhone/iPad parity remain tracked by TLY-012A/TLY-012B.
