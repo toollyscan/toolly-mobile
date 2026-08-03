@@ -516,9 +516,9 @@ private fun AccountScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(ToollySpacing.Small))
-        PrimaryButton(Res.string.phone_sign_in) {
+        PrimaryButton(label = Res.string.phone_sign_in, onClick = {
             actions.authenticate(ToollyAuthenticationMethod.PHONE)
-        }
+        })
         SecondaryButton(Res.string.email_sign_in) {
             actions.authenticate(ToollyAuthenticationMethod.EMAIL)
         }
