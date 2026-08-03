@@ -2,6 +2,9 @@ name: Documentation CI
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +16,7 @@ permissions:
 jobs:
   governance:
     name: Consolidated documentation, security and governance gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
       - name: Checkout complete repository history
