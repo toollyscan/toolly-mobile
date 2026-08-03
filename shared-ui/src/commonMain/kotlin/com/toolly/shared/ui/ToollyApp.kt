@@ -814,7 +814,25 @@ private fun RowScope.MainNavigationItem(
                     color = MaterialTheme.colorScheme.primary,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text("+", color = MaterialTheme.colorScheme.onPrimary)
+                        val plusColor = MaterialTheme.colorScheme.onPrimary
+                        Canvas(modifier = Modifier.size(12.dp)) {
+                            val center = Offset(size.width / 2f, size.height / 2f)
+                            val strokeWidth = 2.dp.toPx()
+                            drawLine(
+                                color = plusColor,
+                                start = Offset(center.x, 0f),
+                                end = Offset(center.x, size.height),
+                                strokeWidth = strokeWidth,
+                                cap = StrokeCap.Round,
+                            )
+                            drawLine(
+                                color = plusColor,
+                                start = Offset(0f, center.y),
+                                end = Offset(size.width, center.y),
+                                strokeWidth = strokeWidth,
+                                cap = StrokeCap.Round,
+                            )
+                        }
                     }
                 }
             } else {
