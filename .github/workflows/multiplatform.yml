@@ -2,18 +2,27 @@ name: Multiplatform CI
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+    inputs:
+      target:
+        description: Validation target
+        required: true
+        default: android
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   shared-android:
+    if: ${{ inputs.target == 'android' || inputs.target == 'all' }}
     name: Shared core and UI Android build and tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -31,6 +40,7 @@ jobs:
             :shared-ui:testDebugUnitTest
 
   shared-ios:
+    if: ${{ inputs.target == 'ios' || inputs.target == 'all' }}
     name: Shared core and UI iOS host build and simulator launch
     runs-on: macos-15
     timeout-minutes: 45
