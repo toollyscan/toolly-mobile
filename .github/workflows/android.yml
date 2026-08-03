@@ -24,6 +24,7 @@ jobs:
       - name: Build, lint and test
         run: |
           python3 scripts/validate_android_permissions.py
+          python3 scripts/validate_compose_runtime_alignment.py
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace \
             :spike-capture:assembleDebug \
