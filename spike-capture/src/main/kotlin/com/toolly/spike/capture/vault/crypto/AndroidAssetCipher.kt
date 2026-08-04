@@ -40,10 +40,8 @@ internal class AndroidAssetCipher(
         val chunkCount = AssetEnvelopeCodec.chunkCount(totalBytes)
         val dataKeyBytes = ByteArray(AssetEnvelopeCodec.DATA_KEY_BYTES).also(random::nextBytes)
         try {
-            val wrappingNonce = randomNonce()
             val wrappedDataKey = wrapDataKey(
                 dataKeyBytes = dataKeyBytes,
-                nonce = wrappingNonce,
                 associatedData = associatedData,
                 chunkCount = chunkCount,
                 totalBytes = totalBytes,
@@ -57,8 +55,8 @@ internal class AndroidAssetCipher(
                                 chunkPlaintextBytes = AssetEnvelopeCodec.DEFAULT_CHUNK_BYTES,
                                 totalPlaintextBytes = totalBytes,
                                 chunkCount = chunkCount,
-                                wrappingNonce = wrappingNonce,
-                                wrappedDataKey = wrappedDataKey,
+                                wrappingNonce = wrappedDataKey.nonce,
+                                wrappedDataKey = wrappedDataKey.ciphertext,
                             ),
                         )
                         val buffer = ByteArray(AssetEnvelopeCodec.DEFAULT_CHUNK_BYTES)
@@ -156,17 +154,20 @@ internal class AndroidAssetCipher(
 
     private fun wrapDataKey(
         dataKeyBytes: ByteArray,
-        nonce: ByteArray,
         associatedData: AssetAssociatedData,
         chunkCount: Int,
         totalBytes: Long,
-    ): ByteArray {
+    ): WrappedDataKey {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(
-            Cipher.ENCRYPT_MODE,
-            getOrCreateWrappingKey(),
-            GCMParameterSpec(GCM_TAG_BITS, nonce),
-        )
+        // Android Keystore rejects caller-provided IVs for encryption when the wrapping key
+        // requires randomized encryption. Let the provider generate the nonce, then persist it.
+        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateWrappingKey())
+        val nonce = cipher.iv?.copyOf()
+            ?: throw VaultCryptoException.PlatformFailure()
+        if (nonce.size != AssetEnvelopeCodec.GCM_NONCE_BYTES) {
+            nonce.fill(0)
+            throw VaultCryptoException.PlatformFailure()
+        }
         cipher.updateAAD(
             associatedData.encode(
                 purpose = AssetAadPurpose.WRAPPED_KEY,
@@ -175,7 +176,10 @@ internal class AndroidAssetCipher(
                 totalPlaintextBytes = totalBytes,
             ),
         )
-        return cipher.doFinal(dataKeyBytes)
+        return WrappedDataKey(
+            nonce = nonce,
+            ciphertext = cipher.doFinal(dataKeyBytes),
+        )
     }
 
     private fun unwrapDataKey(
@@ -357,6 +361,11 @@ internal class AndroidAssetCipher(
             }
         }
     }
+
+    private data class WrappedDataKey(
+        val nonce: ByteArray,
+        val ciphertext: ByteArray,
+    )
 
     private companion object {
         val KEYSTORE_LOCK = Any()
