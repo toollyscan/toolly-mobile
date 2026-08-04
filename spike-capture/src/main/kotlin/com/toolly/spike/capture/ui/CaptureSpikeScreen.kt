@@ -80,6 +80,7 @@ fun ToollyDocumentApp(
     var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
     var isWorking by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<UiMessage?>(null) }
+    val captureLaunchRequest = LocalCaptureLaunchRequest.current
 
     fun refreshLibrary() {
         isWorking = true
@@ -95,8 +96,43 @@ fun ToollyDocumentApp(
         }
     }
 
+    fun launchCapture() {
+        if (!isWorking && screen == AppScreen.Library) {
+            isWorking = true
+            message = null
+            onLaunchCapture(ScanConfig()) { result ->
+                isWorking = false
+                when (result) {
+                    is ScanResult.Success -> {
+                        screen = AppScreen.CapturePreview(result.pages)
+                    }
+                    ScanResult.Cancelled -> {
+                        message = UiMessage(R.string.capture_cancelled)
+                    }
+                    is ScanResult.Failure -> {
+                        val error = result.error
+                        message = UiMessage(captureErrorMessage(error))
+                        if (error is ScanError.PartialCapture) {
+                            screen = AppScreen.CapturePreview(error.capturedPages)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         refreshLibrary()
+    }
+    LaunchedEffect(captureLaunchRequest.requested, isWorking, screen) {
+        if (
+            captureLaunchRequest.requested &&
+            !isWorking &&
+            screen == AppScreen.Library
+        ) {
+            captureLaunchRequest.consume()
+            launchCapture()
+        }
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -105,30 +141,7 @@ fun ToollyDocumentApp(
                 documents = documents,
                 isWorking = isWorking,
                 message = message,
-                onScan = {
-                    if (!isWorking) {
-                        isWorking = true
-                        message = null
-                        onLaunchCapture(ScanConfig()) { result ->
-                            isWorking = false
-                            when (result) {
-                                is ScanResult.Success -> {
-                                    screen = AppScreen.CapturePreview(result.pages)
-                                }
-                                ScanResult.Cancelled -> {
-                                    message = UiMessage(R.string.capture_cancelled)
-                                }
-                                is ScanResult.Failure -> {
-                                    val error = result.error
-                                    message = UiMessage(captureErrorMessage(error))
-                                    if (error is ScanError.PartialCapture) {
-                                        screen = AppScreen.CapturePreview(error.capturedPages)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
+                onScan = ::launchCapture,
                 onOpen = { documentId ->
                     isWorking = true
                     onOpenDocument(documentId) { result ->
@@ -365,7 +378,7 @@ private fun DocumentScreen(
         )
         DocumentPageGrid(
             pages = document.pages,
-            loadAssetBitmap = loadAssetBitmap,
+            loadAssetBitmap = loadDocumentAssetBitmap,
             modifier = Modifier.weight(1f),
         )
         StatusMessage(message)
