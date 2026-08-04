@@ -2,6 +2,7 @@ package com.toolly.spike.capture.ui
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +36,8 @@ internal fun AndroidToollyApp(
             ),
         )
     }
+    var captureRequested by remember { mutableStateOf(false) }
+
     fun dispatch(event: ToollyUiEvent) {
         state = reduceToollyUiState(state, event)
     }
@@ -43,44 +46,52 @@ internal fun AndroidToollyApp(
         dispatch(event)
     }
 
-    ToollyApp(
-        state = state,
-        actions = object : ToollyUiActions {
-            override fun finishSplash() = dispatch(ToollyUiEvent.SplashFinished)
-            override fun nextTutorial() = dispatch(ToollyUiEvent.TutorialAdvanced)
-            override fun skipTutorial() = persistTutorialCompletion(ToollyUiEvent.TutorialSkipped)
-            override fun completeTutorial() = persistTutorialCompletion(ToollyUiEvent.TutorialCompleted)
-            override fun showSignIn() = dispatch(ToollyUiEvent.SignInSelected)
-            override fun showCreateProfile() = dispatch(ToollyUiEvent.CreateProfileSelected)
-            override fun backToWelcome() = dispatch(ToollyUiEvent.BackToWelcome)
-            override fun continueLocally(destination: ToollyDestination) {
-                dispatch(ToollyUiEvent.LocalSessionStarted(destination))
-            }
-            override fun authenticate(method: ToollyAuthenticationMethod) = Unit
-            override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
-            override fun openHome() = select(ToollyDestination.HOME)
-            override fun openLibrary() = select(ToollyDestination.LIBRARY)
-            override fun openSearch() = select(ToollyDestination.SEARCH)
-            override fun openProfile() = select(ToollyDestination.PROFILE)
-            override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
-            override fun scanDocument() {
-                if (state.sessionState == ToollySessionState.SIGNED_OUT) {
-                    dispatch(ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
-                } else {
-                    select(ToollyDestination.LIBRARY)
+    CompositionLocalProvider(
+        LocalCaptureLaunchRequest provides CaptureLaunchRequest(
+            requested = captureRequested,
+            consume = { captureRequested = false },
+        ),
+    ) {
+        ToollyApp(
+            state = state,
+            actions = object : ToollyUiActions {
+                override fun finishSplash() = dispatch(ToollyUiEvent.SplashFinished)
+                override fun nextTutorial() = dispatch(ToollyUiEvent.TutorialAdvanced)
+                override fun skipTutorial() = persistTutorialCompletion(ToollyUiEvent.TutorialSkipped)
+                override fun completeTutorial() = persistTutorialCompletion(ToollyUiEvent.TutorialCompleted)
+                override fun showSignIn() = dispatch(ToollyUiEvent.SignInSelected)
+                override fun showCreateProfile() = dispatch(ToollyUiEvent.CreateProfileSelected)
+                override fun backToWelcome() = dispatch(ToollyUiEvent.BackToWelcome)
+                override fun continueLocally(destination: ToollyDestination) {
+                    dispatch(ToollyUiEvent.LocalSessionStarted(destination))
                 }
-            }
-            override fun openDocument(id: DocumentUiId) = Unit
-            override fun discardCapture() = Unit
-            override fun saveCapture() = Unit
-            override fun navigateBack() = Unit
+                override fun authenticate(method: ToollyAuthenticationMethod) = Unit
+                override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
+                override fun openHome() = select(ToollyDestination.HOME)
+                override fun openLibrary() = select(ToollyDestination.LIBRARY)
+                override fun openSearch() = select(ToollyDestination.SEARCH)
+                override fun openProfile() = select(ToollyDestination.PROFILE)
+                override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
+                override fun scanDocument() {
+                    if (state.sessionState == ToollySessionState.SIGNED_OUT) {
+                        dispatch(ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
+                    } else {
+                        select(ToollyDestination.LIBRARY)
+                    }
+                    captureRequested = true
+                }
+                override fun openDocument(id: DocumentUiId) = Unit
+                override fun discardCapture() = Unit
+                override fun saveCapture() = Unit
+                override fun navigateBack() = Unit
 
-            private fun select(destination: ToollyDestination) {
-                dispatch(ToollyUiEvent.MainDestinationSelected(destination))
-            }
-        },
-        documentsContent = documentsContent,
-    )
+                private fun select(destination: ToollyDestination) {
+                    dispatch(ToollyUiEvent.MainDestinationSelected(destination))
+                }
+            },
+            documentsContent = documentsContent,
+        )
+    }
 }
 
 private const val PREFERENCES_NAME = "toolly_ui_preferences"
