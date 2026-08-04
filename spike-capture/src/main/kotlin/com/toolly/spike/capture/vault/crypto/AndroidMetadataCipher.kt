@@ -42,13 +42,16 @@ internal class AndroidMetadataCipher(
             contentCipher.updateAAD(associatedData.encode(AadPurpose.CONTENT))
             val ciphertext = contentCipher.doFinal(plaintext)
 
-            val wrappingNonce = randomNonce()
             val wrappingCipher = Cipher.getInstance(TRANSFORMATION)
-            wrappingCipher.init(
-                Cipher.ENCRYPT_MODE,
-                getOrCreateWrappingKey(),
-                GCMParameterSpec(GCM_TAG_BITS, wrappingNonce),
-            )
+            // Android Keystore rejects caller-provided IVs for encryption when the wrapping key
+            // requires randomized encryption. Let the provider generate the nonce, then persist it.
+            wrappingCipher.init(Cipher.ENCRYPT_MODE, getOrCreateWrappingKey())
+            val wrappingNonce = wrappingCipher.iv?.copyOf()
+                ?: throw VaultCryptoException.PlatformFailure()
+            if (wrappingNonce.size != MetadataEnvelopeCodec.GCM_NONCE_BYTES) {
+                wrappingNonce.fill(0)
+                throw VaultCryptoException.PlatformFailure()
+            }
             wrappingCipher.updateAAD(associatedData.encode(AadPurpose.WRAPPED_KEY))
             val wrappedDataKey = wrappingCipher.doFinal(dataKeyBytes)
             MetadataEnvelopeCodec.encode(
