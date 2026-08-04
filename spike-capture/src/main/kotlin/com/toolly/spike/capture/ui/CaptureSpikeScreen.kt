@@ -378,7 +378,7 @@ private fun DocumentScreen(
         )
         DocumentPageGrid(
             pages = document.pages,
-            loadAssetBitmap = loadDocumentAssetBitmap,
+            loadAssetBitmap = loadAssetBitmap,
             modifier = Modifier.weight(1f),
         )
         StatusMessage(message)
