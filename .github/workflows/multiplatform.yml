@@ -57,3 +57,12 @@ jobs:
         run: |
           chmod +x ./scripts/ios_simulator_smoke.sh
           ./scripts/ios_simulator_smoke.sh
+
+      - name: Publish iOS simulator app
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: toolly-ios-simulator-${{ github.sha }}
+          path: build/ios-host/Build/Products/Debug-iphonesimulator/ToollyApp.app
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
