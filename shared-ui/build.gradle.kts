@@ -26,6 +26,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":shared-core"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
