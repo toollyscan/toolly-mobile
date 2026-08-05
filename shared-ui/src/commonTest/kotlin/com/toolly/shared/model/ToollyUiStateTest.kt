@@ -170,6 +170,48 @@ class ToollyUiStateTest {
         assertFalse(androidState.appleSignInAvailable)
     }
 
+
+    @Test
+    fun captureLifecycleIsExplicitAndPreservesOrderedPageCount() {
+        val welcome = reduceToollyUiState(
+            ToollyUiState.returningSignedOut(),
+            ToollyUiEvent.SplashFinished,
+        )
+        val library = reduceToollyUiState(
+            welcome,
+            ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY),
+        )
+        val busy = reduceToollyUiState(library, ToollyUiEvent.CaptureStarted)
+        val review = reduceToollyUiState(busy, ToollyUiEvent.CaptureCompleted(pageCount = 3))
+        val discarded = reduceToollyUiState(review, ToollyUiEvent.CaptureDiscarded)
+
+        assertTrue(busy.busy)
+        assertEquals(ToollyDestination.CAPTURE_REVIEW, review.destination)
+        assertEquals(3, review.reviewPageCount)
+        assertFalse(review.busy)
+        assertEquals(ToollyDestination.LIBRARY, discarded.destination)
+        assertEquals(0, discarded.reviewPageCount)
+    }
+
+    @Test
+    fun cancelledAndFailedCaptureReturnToLibraryWithoutPublishingPages() {
+        val active = ToollyUiState.firstLaunch()
+            .copy(
+                destination = ToollyDestination.LIBRARY,
+                tutorialCompleted = true,
+                sessionState = ToollySessionState.LOCAL,
+                busy = true,
+            )
+
+        val cancelled = reduceToollyUiState(active, ToollyUiEvent.CaptureCancelled)
+        val failed = reduceToollyUiState(active, ToollyUiEvent.CaptureFailed)
+
+        assertEquals(ToollyDestination.LIBRARY, cancelled.destination)
+        assertEquals(0, cancelled.reviewPageCount)
+        assertFalse(cancelled.busy)
+        assertEquals(cancelled, failed)
+    }
+
     @Test
     fun invalidCountsAndTutorialPageAreRejected() {
         assertFailsWith<IllegalArgumentException> {
