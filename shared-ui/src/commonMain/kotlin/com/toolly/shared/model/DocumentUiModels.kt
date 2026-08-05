@@ -51,6 +51,15 @@ sealed interface ToollyUiEvent {
     data object DevelopmentAccessGranted : ToollyUiEvent
     data class MainDestinationSelected(val destination: ToollyDestination) : ToollyUiEvent
     data object SignedOut : ToollyUiEvent
+    data object CaptureStarted : ToollyUiEvent
+    data class CaptureCompleted(val pageCount: Int) : ToollyUiEvent {
+        init {
+            require(pageCount > 0)
+        }
+    }
+    data object CaptureCancelled : ToollyUiEvent
+    data object CaptureFailed : ToollyUiEvent
+    data object CaptureDiscarded : ToollyUiEvent
 }
 
 data class ToollyUiState(
@@ -245,6 +254,7 @@ fun reduceToollyUiState(
     is ToollyUiEvent.MainDestinationSelected -> {
         if (
             state.sessionState == ToollySessionState.SIGNED_OUT ||
+            state.busy ||
             event.destination !in setOf(
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,
@@ -255,6 +265,59 @@ fun reduceToollyUiState(
             state
         } else {
             state.copy(destination = event.destination)
+        }
+    }
+
+    ToollyUiEvent.CaptureStarted -> {
+        if (
+            state.sessionState == ToollySessionState.SIGNED_OUT ||
+            state.busy ||
+            state.destination !in setOf(ToollyDestination.HOME, ToollyDestination.LIBRARY)
+        ) {
+            state
+        } else {
+            state.copy(
+                busy = true,
+                reviewPageCount = 0,
+                selectedDocumentId = null,
+            )
+        }
+    }
+
+    is ToollyUiEvent.CaptureCompleted -> {
+        if (!state.busy) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.CAPTURE_REVIEW,
+                reviewPageCount = event.pageCount,
+                busy = false,
+            )
+        }
+    }
+
+    ToollyUiEvent.CaptureCancelled,
+    ToollyUiEvent.CaptureFailed -> {
+        if (!state.busy) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.LIBRARY,
+                reviewPageCount = 0,
+                busy = false,
+            )
+        }
+    }
+
+    ToollyUiEvent.CaptureDiscarded -> {
+        if (state.destination != ToollyDestination.CAPTURE_REVIEW) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.LIBRARY,
+                reviewPageCount = 0,
+                busy = false,
+            )
         }
     }
 
