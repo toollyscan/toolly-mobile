@@ -1,6 +1,7 @@
 package com.toolly.domain.contracts
 
 import com.toolly.domain.model.AssetId
+import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentSummary
@@ -21,6 +22,20 @@ interface DocumentRepository {
     suspend fun getDocument(documentId: DocumentId): ToollyResult<DocumentDetails>
 
     suspend fun saveCapturedDocument(command: SaveCapturedDocumentCommand): ToollyResult<DocumentDetails>
+
+    /** Sets or clears (`displayName = null`) the document's user-facing title. */
+    suspend fun renameDocument(
+        documentId: DocumentId,
+        displayName: String?,
+        updatedAtEpochMillis: Long,
+    ): ToollyResult<DocumentDetails>
+
+    /** Sets or clears (`category = null`) the document's Library filter category. */
+    suspend fun tagDocument(
+        documentId: DocumentId,
+        category: DocumentCategory?,
+        updatedAtEpochMillis: Long,
+    ): ToollyResult<DocumentDetails>
 }
 
 data class SaveCapturedDocumentCommand(

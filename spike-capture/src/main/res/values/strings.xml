@@ -46,4 +46,17 @@
     <string name="export_share_pdf">Export and share PDF</string>
     <string name="export_share_jpeg">Export and share JPEG</string>
     <string name="share_document">Share document</string>
+
+    <string name="library_search_hint">Search by name</string>
+    <string name="no_search_results">No documents match</string>
+    <string name="category_all">All</string>
+    <string name="category_receipts">Receipts</string>
+    <string name="category_ids">IDs</string>
+    <string name="category_other">Other</string>
+    <string name="category_untagged">Untagged</string>
+    <string name="document_category_label">Category</string>
+    <string name="rename_document">Rename</string>
+    <string name="rename_document_title">Document name</string>
+    <string name="rename_document_hint">e.g. Electricity bill</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

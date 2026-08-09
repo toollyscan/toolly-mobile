@@ -30,6 +30,20 @@ Each screen must exist in at least two variants: **phone** and **tablet**. Table
 > `shared-ui/.../ui/PrivacyBackupScreens.kt`) covering the intent of the wireframe's `6.1-6.4`
 > screens, presentation-only pending the Phase 5 cloud-backup gate. Physical-device and Figma-frame
 > evidence for all of the above remain outstanding per this table's own status key.
+>
+> **Document naming and categorization (follow-up to TLY-013).** `DocumentSummary` previously had
+> no name/title/category field at all, which is why LI-02's filter chips and SE-01/02/03 search
+> were descoped from the TLY-013 milestones above rather than built as non-functional UI. That gap
+> is now closed: the encrypted vault's manifest schema gained optional, backward-compatible
+> `displayName`/`category` fields (`EncryptedDocumentRepository`, `RenameDocumentUseCase`,
+> `TagDocumentUseCase`), and Library (`CaptureSpikeScreen.kt`) now has a real search field and
+> Receipts/IDs/Other/Untagged filter chips driven by that data, plus a rename affordance and
+> category chips on the document viewer. This covers LI-02's filtering intent and a name-based
+> subset of SE-01/02/03 (title matching only, per `USER_FLOW_MATRIX.md` PT-04 — OCR-text search
+> stays premium/deferred). It is reachable only through Library's own search field, not as a
+> separate SEARCH tab destination — shared-ui's `SearchScreen()` stub is unchanged; wiring a real
+> SEARCH tab would need the document list state lifted out of `ToollyDocumentApp` so both
+> destinations can share it, left as further follow-up rather than rushed into this pass.
 
 ---
 

@@ -44,4 +44,17 @@
     <string name="export_share_pdf">PDF ರಫ್ತು ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="export_share_jpeg">JPEG ರಫ್ತು ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="share_document">ದಾಖಲೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ</string>
+
+    <string name="library_search_hint">ಹೆಸರಿನಿಂದ ಹುಡುಕಿ</string>
+    <string name="no_search_results">ಯಾವುದೇ ದಾಖಲೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ</string>
+    <string name="category_all">ಎಲ್ಲಾ</string>
+    <string name="category_receipts">ರಸೀದಿಗಳು</string>
+    <string name="category_ids">ಗುರುತಿನ ಚೀಟಿಗಳು</string>
+    <string name="category_other">ಇತರೆ</string>
+    <string name="category_untagged">ವರ್ಗವಿಲ್ಲದ</string>
+    <string name="document_category_label">ವರ್ಗ</string>
+    <string name="rename_document">ಹೆಸರು ಬದಲಿಸಿ</string>
+    <string name="rename_document_title">ದಾಖಲೆಯ ಹೆಸರು</string>
+    <string name="rename_document_hint">ಉದಾ. ವಿದ್ಯುತ್ ಬಿಲ್</string>
+    <string name="dialog_cancel">ರದ್ದುಮಾಡಿ</string>
 </resources>

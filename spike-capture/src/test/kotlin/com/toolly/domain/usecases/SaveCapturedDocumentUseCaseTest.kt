@@ -3,6 +3,7 @@ package com.toolly.domain.usecases
 import com.toolly.domain.contracts.DocumentRepository
 import com.toolly.domain.contracts.SaveCapturedDocumentCommand
 import com.toolly.domain.model.CapturedPageDraft
+import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentLifecycle
@@ -75,6 +76,18 @@ class SaveCapturedDocumentUseCaseTest {
 
         override suspend fun getDocument(documentId: DocumentId): ToollyResult<DocumentDetails> =
             error("Not used")
+
+        override suspend fun renameDocument(
+            documentId: DocumentId,
+            displayName: String?,
+            updatedAtEpochMillis: Long,
+        ): ToollyResult<DocumentDetails> = error("Not used")
+
+        override suspend fun tagDocument(
+            documentId: DocumentId,
+            category: DocumentCategory?,
+            updatedAtEpochMillis: Long,
+        ): ToollyResult<DocumentDetails> = error("Not used")
 
         override suspend fun saveCapturedDocument(
             command: SaveCapturedDocumentCommand,

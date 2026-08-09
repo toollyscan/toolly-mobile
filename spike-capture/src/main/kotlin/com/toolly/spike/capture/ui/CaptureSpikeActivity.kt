@@ -22,7 +22,9 @@ import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
 import com.toolly.domain.usecases.ListDocumentsUseCase
 import com.toolly.domain.usecases.OpenDocumentUseCase
+import com.toolly.domain.usecases.RenameDocumentUseCase
 import com.toolly.domain.usecases.SaveCapturedDocumentUseCase
+import com.toolly.domain.usecases.TagDocumentUseCase
 import com.toolly.foundation.OpaqueIdGenerator
 import com.toolly.foundation.ToollyClock
 import com.toolly.foundation.ToollyError
@@ -107,6 +109,14 @@ class CaptureSpikeActivity : ComponentActivity() {
         )
         val listDocuments = ListDocumentsUseCase(documentRepository)
         val openDocument = OpenDocumentUseCase(documentRepository)
+        val renameDocument = RenameDocumentUseCase(
+            repository = documentRepository,
+            clock = ToollyClock(System::currentTimeMillis),
+        )
+        val tagDocument = TagDocumentUseCase(
+            repository = documentRepository,
+            clock = ToollyClock(System::currentTimeMillis),
+        )
 
         setContent {
             MaterialTheme {
@@ -141,6 +151,16 @@ class CaptureSpikeActivity : ComponentActivity() {
                             }
                         },
                         onExportDocument = ::launchExport,
+                        onRenameDocument = { documentId, name, onResult ->
+                            lifecycleScope.launch {
+                                onResult(renameDocument(documentId, name))
+                            }
+                        },
+                        onTagDocument = { documentId, category, onResult ->
+                            lifecycleScope.launch {
+                                onResult(tagDocument(documentId, category))
+                            }
+                        },
                         resolveTemporaryAsset = temporaryStore::resolve,
                         loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
                         onReleaseAssets = temporaryStore::release,

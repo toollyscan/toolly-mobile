@@ -2,12 +2,23 @@ package com.toolly.domain.model
 
 const val DOCUMENT_SCHEMA_VERSION: Int = 1
 const val MAX_DOCUMENT_PAGES: Int = 20
+const val MAX_DISPLAY_NAME_LENGTH: Int = 120
 
 enum class DocumentLifecycle {
     ACTIVE,
     DELETION_PENDING,
     CORRUPT,
     UNKNOWN,
+}
+
+/**
+ * User-assigned grouping for a document. Deliberately small and closed (no free-form tags) so
+ * Library's filter chips stay a fixed, predictable set rather than an open-ended taxonomy.
+ */
+enum class DocumentCategory {
+    RECEIPT,
+    IDENTIFICATION,
+    OTHER,
 }
 
 enum class AssetKind {
@@ -24,6 +35,8 @@ data class DocumentSummary(
     val createdAtEpochMillis: Long,
     val updatedAtEpochMillis: Long,
     val lifecycle: DocumentLifecycle,
+    val displayName: String? = null,
+    val category: DocumentCategory? = null,
     val schemaVersion: Int = DOCUMENT_SCHEMA_VERSION,
 ) {
     init {
@@ -31,6 +44,8 @@ data class DocumentSummary(
         require(createdAtEpochMillis >= 0)
         require(updatedAtEpochMillis >= createdAtEpochMillis)
         require(schemaVersion > 0)
+        require(displayName == null || displayName.isNotBlank())
+        require(displayName == null || displayName.length <= MAX_DISPLAY_NAME_LENGTH)
     }
 }
 

@@ -44,4 +44,17 @@
     <string name="export_share_pdf">PDF निर्यात करके साझा करें</string>
     <string name="export_share_jpeg">JPEG निर्यात करके साझा करें</string>
     <string name="share_document">दस्तावेज़ साझा करें</string>
+
+    <string name="library_search_hint">नाम से खोजें</string>
+    <string name="no_search_results">कोई दस्तावेज़ मेल नहीं खाता</string>
+    <string name="category_all">सभी</string>
+    <string name="category_receipts">रसीदें</string>
+    <string name="category_ids">पहचान पत्र</string>
+    <string name="category_other">अन्य</string>
+    <string name="category_untagged">बिना श्रेणी</string>
+    <string name="document_category_label">श्रेणी</string>
+    <string name="rename_document">नाम बदलें</string>
+    <string name="rename_document_title">दस्तावेज़ का नाम</string>
+    <string name="rename_document_hint">जैसे बिजली का बिल</string>
+    <string name="dialog_cancel">रद्द करें</string>
 </resources>
