@@ -181,7 +181,14 @@ If a provider migration is ever approved, see [FIREBASE_TO_AWS_RUNBOOK.md](../op
 
 ## Release blockers
 
-- [ ] P0: Android physical-device encrypted Save fails closed with `ToollyErrorCode.CORRUPT` (TLY-011A / #51)
-- [ ] Release application shell and platform-host integration incomplete (TLY-013 / #52)
+- [x] P0: Android physical-device encrypted Save fails closed with `ToollyErrorCode.CORRUPT` (TLY-011A / #51) —
+  fixed (Android Keystore IV handling; provider-generated nonce, not caller-supplied) and merged to `main` via
+  PR #55 (`02aded6`). Physical-device evidence: OnePlus Nord CE5, Android 16, single/multi-page save, order
+  preserved, force-stop/restart/offline reopen all PASS (build SHA `3ae3d7b`, PR #55 comment, 2026-08-05).
+- [ ] Release application shell and platform-host integration incomplete (TLY-013 / #52) — the Android shell,
+  auth journey, crop/enhance port, export/share, backup/privacy UI and document naming/search are now merged
+  to `main` (PR #55). Still incomplete: Apple capture is a tested port with no Swift host or iOS vault wired
+  up yet (#48), so iOS remains capture-stubbed; and physical-device evidence for everything landed in PR #55
+  beyond the original walking slice is still outstanding.
 
 See [PRODUCTION_GATE.md](PRODUCTION_GATE.md) and [docs/security/SECURITY_BASELINE.md](../security/SECURITY_BASELINE.md).
