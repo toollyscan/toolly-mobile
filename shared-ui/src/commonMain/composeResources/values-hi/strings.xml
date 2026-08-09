@@ -134,4 +134,16 @@
     <string name="enhance_mode_black_and_white">ब्लैक एंड व्हाइट</string>
     <string name="enhance_intensity_label">तीव्रता</string>
     <string name="save_page">पृष्ठ सहेजें</string>
+    <string name="export_builder_title">निर्यात से पहले सटीक फ़ाइल देखें</string>
+    <string name="export_builder_description">एक फ़ॉर्मैट चुनें। पुष्टि करने तक आपका दस्तावेज़ एन्क्रिप्टेड रहता है।</string>
+    <string name="export_format_pdf">PDF</string>
+    <string name="export_format_jpeg">JPEG</string>
+    <string name="export_securely">सुरक्षित रूप से निर्यात करें</string>
+    <string name="searchable_pdf_label">खोजने योग्य PDF</string>
+    <string name="searchable_pdf_premium_notice">टेक्स्ट पहचानें ताकि यह दस्तावेज़ खोजने योग्य हो। Toolly Premium के साथ उपलब्ध।</string>
+    <string name="premium_lock_label">प्रीमियम</string>
+    <string name="privacy_check_title">इसके डिवाइस से बाहर जाने से पहले</string>
+    <string name="privacy_check_description">एन्क्रिप्टेड वॉल्ट से बाहर सहेजे या साझा किए जाने के बाद Toolly दस्तावेज़ का नियंत्रण नहीं रख सकता।</string>
+    <string name="save_to_device">डिवाइस में सहेजें</string>
+    <string name="share">साझा करें</string>
 </resources>

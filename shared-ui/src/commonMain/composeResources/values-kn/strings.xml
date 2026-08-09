@@ -134,4 +134,16 @@
     <string name="enhance_mode_black_and_white">ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ</string>
     <string name="enhance_intensity_label">ತೀವ್ರತೆ</string>
     <string name="save_page">ಪುಟ ಉಳಿಸಿ</string>
+    <string name="export_builder_title">ರಫ್ತು ಮಾಡುವ ಮೊದಲು ನಿಖರವಾದ ಫೈಲ್ ಪೂರ್ವವೀಕ್ಷಿಸಿ</string>
+    <string name="export_builder_description">ಒಂದು ಫಾರ್ಮ್ಯಾಟ್ ಆಯ್ಕೆಮಾಡಿ. ನೀವು ದೃಢೀಕರಿಸುವವರೆಗೆ ನಿಮ್ಮ ದಾಖಲೆ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಆಗಿರುತ್ತದೆ.</string>
+    <string name="export_format_pdf">PDF</string>
+    <string name="export_format_jpeg">JPEG</string>
+    <string name="export_securely">ಸುರಕ್ಷಿತವಾಗಿ ರಫ್ತು ಮಾಡಿ</string>
+    <string name="searchable_pdf_label">ಹುಡುಕಬಹುದಾದ PDF</string>
+    <string name="searchable_pdf_premium_notice">ಈ ದಾಖಲೆ ಹುಡುಕಬಹುದಾಗಿರಲು ಪಠ್ಯವನ್ನು ಗುರುತಿಸಿ. Toolly Premium ನೊಂದಿಗೆ ಲಭ್ಯ.</string>
+    <string name="premium_lock_label">ಪ್ರೀಮಿಯಂ</string>
+    <string name="privacy_check_title">ಇದು ನಿಮ್ಮ ಸಾಧನದಿಂದ ಹೊರಹೋಗುವ ಮೊದಲು</string>
+    <string name="privacy_check_description">ಎನ್‌ಕ್ರಿಪ್ಟೆಡ್ ವಾಲ್ಟ್‌ನಿಂದ ಹೊರಗೆ ಉಳಿಸಿದ ಅಥವಾ ಹಂಚಿಕೊಂಡ ನಂತರ ದಾಖಲೆಗೆ ಏನಾಗುತ್ತದೆ ಎಂಬುದನ್ನು Toolly ನಿಯಂತ್ರಿಸಲಾಗುವುದಿಲ್ಲ.</string>
+    <string name="save_to_device">ಸಾಧನದಲ್ಲಿ ಉಳಿಸಿ</string>
+    <string name="share">ಹಂಚಿಕೊಳ್ಳಿ</string>
 </resources>

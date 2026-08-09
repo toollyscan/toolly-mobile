@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +53,9 @@ import com.toolly.shared.capture.ScanError
 import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId
+import com.toolly.shared.ui.ExportBuilderScreen
+import com.toolly.shared.ui.ExportPrivacyCheckScreen
+import com.toolly.shared.ui.ToollyExportFormat
 import java.io.File
 
 /**
@@ -188,26 +192,82 @@ fun ToollyDocumentApp(
 
             is AppScreen.Document -> DocumentScreen(
                 document = current.details,
-                isExporting = isWorking,
                 message = message,
                 loadAssetBitmap = loadDocumentAssetBitmap,
-                onExport = { format, delivery ->
-                    if (!isWorking) {
-                        isWorking = true
-                        message = null
-                        onExportDocument(current.details, format, delivery) { outcome ->
-                            isWorking = false
-                            message = UiMessage(exportOutcomeMessage(outcome))
-                        }
-                    }
+                onStartExport = {
+                    message = null
+                    screen = AppScreen.ExportBuilder(current.details)
                 },
                 onBack = {
                     message = null
                     screen = AppScreen.Library
                 },
             )
+
+            is AppScreen.ExportBuilder -> {
+                var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                ExportBuilderScreen(
+                    format = format,
+                    onFormatChange = { format = it },
+                    onContinue = {
+                        screen = AppScreen.ExportPrivacyCheck(current.details, format)
+                    },
+                    onBack = {
+                        message = null
+                        screen = AppScreen.Document(current.details)
+                    },
+                    previewContent = {
+                        DocumentPageGrid(
+                            pages = current.details.pages,
+                            loadAssetBitmap = loadDocumentAssetBitmap,
+                            modifier = Modifier.heightIn(max = 240.dp),
+                        )
+                    },
+                )
+            }
+
+            is AppScreen.ExportPrivacyCheck -> {
+                val domainFormat = current.format.toDomainFormat()
+                ExportPrivacyCheckScreen(
+                    busy = isWorking,
+                    onSaveToDevice = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SAVE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = AppScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onShare = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SHARE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = AppScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onBack = {
+                        screen = AppScreen.ExportBuilder(current.details)
+                    },
+                )
+            }
         }
     }
+}
+
+private fun ToollyExportFormat.toDomainFormat(): DocumentExportFormat = when (this) {
+    ToollyExportFormat.PDF -> DocumentExportFormat.PDF
+    ToollyExportFormat.JPEG -> DocumentExportFormat.JPEG
 }
 
 @Composable
@@ -343,10 +403,9 @@ private fun CapturePreviewScreen(
 @Composable
 private fun DocumentScreen(
     document: DocumentDetails,
-    isExporting: Boolean,
     message: UiMessage?,
     loadAssetBitmap: suspend (AssetId) -> Bitmap?,
-    onExport: (DocumentExportFormat, DocumentExportDelivery) -> Unit,
+    onStartExport: () -> Unit,
     onBack: () -> Unit,
 ) {
     Column(
@@ -382,51 +441,11 @@ private fun DocumentScreen(
             modifier = Modifier.weight(1f),
         )
         StatusMessage(message)
-        Row(
+        Button(
+            onClick = onStartExport,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SAVE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_pdf))
-            }
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SAVE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_jpeg))
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SHARE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_share_pdf))
-            }
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SHARE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_share_jpeg))
-            }
+            Text(stringResource(R.string.export_document))
         }
     }
 }
@@ -485,4 +504,6 @@ private sealed interface AppScreen {
     data object Library : AppScreen
     data class CapturePreview(val pages: List<ScannedPage>) : AppScreen
     data class Document(val details: DocumentDetails) : AppScreen
+    data class ExportBuilder(val details: DocumentDetails) : AppScreen
+    data class ExportPrivacyCheck(val details: DocumentDetails, val format: ToollyExportFormat) : AppScreen
 }

@@ -104,7 +104,7 @@ class PageEditTest {
 
     @Test
     fun colorAdjustPreservesAlpha() {
-        val translucentBlue = 0x80_00_00_FF
+        val translucentBlue = 0x80_00_00_FF.toInt()
         val source = PixelBuffer.solid(1, 1, translucentBlue)
 
         val result = ColorAdjust.apply(source, EnhancementMode.CLEAN, intensity = 0.5f)

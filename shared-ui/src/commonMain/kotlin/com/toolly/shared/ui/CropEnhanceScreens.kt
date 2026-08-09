@@ -31,7 +31,9 @@ import com.toolly.shared.resources.enhance_mode_clean
 import com.toolly.shared.resources.enhance_mode_color
 import com.toolly.shared.resources.enhance_mode_gray
 import com.toolly.shared.resources.enhance_title
+import com.toolly.shared.resources.product_name
 import com.toolly.shared.resources.retake
+import com.toolly.shared.resources.rotate
 import com.toolly.shared.resources.save_page
 import org.jetbrains.compose.resources.stringResource
 
@@ -49,7 +51,6 @@ fun CropPageScreen(
     onRotate: () -> Unit,
     onRetake: () -> Unit,
     onContinue: () -> Unit,
-    modifier: Modifier = Modifier,
     busy: Boolean = false,
 ) {
     val cornerLabels = mapOf(
@@ -58,7 +59,7 @@ fun CropPageScreen(
         Corner.BOTTOM_RIGHT to stringResource(Res.string.corner_bottom_right),
         Corner.BOTTOM_LEFT to stringResource(Res.string.corner_bottom_left),
     )
-    ScreenColumn(modifier = modifier) {
+    ScreenColumn {
         Text(stringResource(Res.string.product_name), style = MaterialTheme.typography.headlineMedium)
         Text(
             stringResource(Res.string.crop_edges_detected),
@@ -94,7 +95,6 @@ fun EnhancePageScreen(
     onModeChange: (EnhancementMode) -> Unit,
     onIntensityChange: (Float) -> Unit,
     onSave: () -> Unit,
-    modifier: Modifier = Modifier,
     busy: Boolean = false,
 ) {
     val modeOptions = listOf(
@@ -104,7 +104,7 @@ fun EnhancePageScreen(
         ToollyChipOption(EnhancementMode.GRAY, Res.string.enhance_mode_gray),
         ToollyChipOption(EnhancementMode.BLACK_AND_WHITE, Res.string.enhance_mode_black_and_white),
     )
-    ScreenColumn(modifier = modifier) {
+    ScreenColumn {
         Text(stringResource(Res.string.product_name), style = MaterialTheme.typography.headlineMedium)
         Text(stringResource(Res.string.enhance_title), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Box(
