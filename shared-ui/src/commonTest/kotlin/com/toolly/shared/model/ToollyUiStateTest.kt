@@ -333,4 +333,86 @@ class ToollyUiStateTest {
             reduceToollyUiState(home, ToollyUiEvent.PhoneNumberSubmitted("9876543210")),
         )
     }
+
+    private fun atProfile(): ToollyUiState {
+        val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
+        val local = reduceToollyUiState(welcome, ToollyUiEvent.LocalSessionStarted(ToollyDestination.HOME))
+        return reduceToollyUiState(local, ToollyUiEvent.MainDestinationSelected(ToollyDestination.PROFILE))
+    }
+
+    @Test
+    fun privacyCenterAndBackupChoiceAreReachableFromProfileAndUnwindWithNavigateBack() {
+        val profile = atProfile()
+        val privacyCenter = reduceToollyUiState(profile, ToollyUiEvent.PrivacyCenterOpened)
+        val backupChoice = reduceToollyUiState(privacyCenter, ToollyUiEvent.BackupSettingsOpened)
+        val backToPrivacyCenter = reduceToollyUiState(backupChoice, ToollyUiEvent.NavigateBack)
+        val backToProfile = reduceToollyUiState(backToPrivacyCenter, ToollyUiEvent.NavigateBack)
+
+        assertEquals(ToollyDestination.PRIVACY_CENTER, privacyCenter.destination)
+        assertEquals(ToollyDestination.BACKUP_CHOICE, backupChoice.destination)
+        assertEquals(ToollyDestination.PRIVACY_CENTER, backToPrivacyCenter.destination)
+        assertEquals(ToollyDestination.PROFILE, backToProfile.destination)
+    }
+
+    @Test
+    fun navigateBackFromDocumentViewerReturnsToLibrary() {
+        val local = reduceToollyUiState(
+            reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished),
+            ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY),
+        )
+        val viewer = local.copy(destination = ToollyDestination.DOCUMENT_VIEWER)
+
+        val back = reduceToollyUiState(viewer, ToollyUiEvent.NavigateBack)
+
+        assertEquals(ToollyDestination.LIBRARY, back.destination)
+    }
+
+    @Test
+    fun navigateBackIsANoOpFromDestinationsWithoutABackTarget() {
+        val profile = atProfile()
+
+        assertEquals(profile, reduceToollyUiState(profile, ToollyUiEvent.NavigateBack))
+    }
+
+    @Test
+    fun backupPreferencesDefaultMatchesWireframeAndOnlyToggleFromBackupChoice() {
+        val defaults = ToollyUiState.empty().backupPreferences
+
+        assertFalse(defaults.enabled)
+        assertTrue(defaults.wifiOnly)
+        assertTrue(defaults.whileCharging)
+        assertFalse(defaults.includeOriginals)
+        assertFalse(defaults.endToEndEncryption)
+
+        val profile = atProfile()
+        val unchanged = reduceToollyUiState(
+            profile,
+            ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.WIFI_ONLY, false),
+        )
+        assertEquals(profile, unchanged)
+    }
+
+    @Test
+    fun togglingEachBackupPreferenceOnlyChangesThatPreference() {
+        val backupChoice = reduceToollyUiState(
+            reduceToollyUiState(atProfile(), ToollyUiEvent.PrivacyCenterOpened),
+            ToollyUiEvent.BackupSettingsOpened,
+        )
+
+        val wifiOff = reduceToollyUiState(
+            backupChoice,
+            ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.WIFI_ONLY, false),
+        )
+        val originalsOn = reduceToollyUiState(
+            wifiOff,
+            ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.INCLUDE_ORIGINALS, true),
+        )
+        val enabled = reduceToollyUiState(originalsOn, ToollyUiEvent.BackupEnabledChanged(true))
+
+        assertFalse(enabled.backupPreferences.wifiOnly)
+        assertTrue(enabled.backupPreferences.includeOriginals)
+        assertTrue(enabled.backupPreferences.whileCharging)
+        assertFalse(enabled.backupPreferences.endToEndEncryption)
+        assertTrue(enabled.backupPreferences.enabled)
+    }
 }

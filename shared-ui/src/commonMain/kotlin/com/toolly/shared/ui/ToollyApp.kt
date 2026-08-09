@@ -159,6 +159,16 @@ fun ToollyApp(
                 ToollyDestination.PROFILE -> MainShell(state, actions, documentsContent)
                 ToollyDestination.CAPTURE_REVIEW -> ReviewScreen(state, actions)
                 ToollyDestination.DOCUMENT_VIEWER -> ViewerScreen(state, actions)
+                ToollyDestination.PRIVACY_CENTER -> PrivacyCenterScreen(
+                    onOpenBackupSettings = actions::openBackupSettings,
+                    onBack = actions::navigateBack,
+                )
+                ToollyDestination.BACKUP_CHOICE -> BackupChoiceScreen(
+                    preferences = state.backupPreferences,
+                    onPreferenceChanged = actions::setBackupPreference,
+                    onEnabledChanged = actions::setBackupEnabled,
+                    onBack = actions::navigateBack,
+                )
             }
         }
     }
@@ -741,7 +751,7 @@ private fun ProfileScreen(state: ToollyUiState, actions: ToollyUiActions) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().clickable(onClick = actions::openPrivacyCenter),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surfaceVariant,
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),

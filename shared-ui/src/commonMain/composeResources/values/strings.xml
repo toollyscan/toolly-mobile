@@ -146,4 +146,25 @@
     <string name="privacy_check_description">Toolly cannot control what happens to a document after it is saved or shared outside the encrypted vault.</string>
     <string name="save_to_device">Save to device</string>
     <string name="share">Share</string>
+    <string name="privacy_center_title">Understand where every document lives</string>
+    <string name="privacy_center_only_on_device_title">Only on this device</string>
+    <string name="privacy_center_only_on_device_description">Private and offline</string>
+    <string name="privacy_center_backed_up_title">Backed up</string>
+    <string name="privacy_center_backed_up_description_empty">No documents backed up yet</string>
+    <string name="privacy_center_needs_attention_title">Needs attention</string>
+    <string name="privacy_center_needs_attention_description_empty">Nothing needs attention</string>
+    <string name="backup_settings_button">Backup settings</string>
+    <string name="backup_choice_title">Back up only when you choose</string>
+    <string name="encrypted_backup_label">Encrypted backup</string>
+    <string name="encrypted_backup_off">Off</string>
+    <string name="encrypted_backup_on">On</string>
+    <string name="encrypted_backup_description">Your scans stay only on this device.</string>
+    <string name="backup_wifi_only_label">Wi-Fi only</string>
+    <string name="backup_while_charging_label">While charging</string>
+    <string name="backup_include_originals_label">Include originals</string>
+    <string name="backup_e2e_encryption_label">End-to-end encryption</string>
+    <string name="estimated_cloud_use_label">Estimated cloud use</string>
+    <string name="estimated_cloud_use_value">0 MB until backup is enabled</string>
+    <string name="enable_backup_button">Enable backup</string>
+    <string name="disable_backup_button">Disable backup</string>
 </resources>

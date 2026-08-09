@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
+import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyDestination
@@ -71,7 +72,7 @@ fun MainViewController(
             override fun openDocument(id: DocumentUiId) = Unit
             override fun discardCapture() = Unit
             override fun saveCapture() = Unit
-            override fun navigateBack() = Unit
+            override fun navigateBack() = dispatch(ToollyUiEvent.NavigateBack)
             override fun submitPhoneNumber(phoneNumber: String) =
                 dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
             override fun verifyOtp() = dispatch(ToollyUiEvent.OtpVerified)
@@ -81,6 +82,12 @@ fun MainViewController(
             override fun selectForgotPassword() = dispatch(ToollyUiEvent.ForgotPasswordSelected)
             override fun completeProfile() = dispatch(ToollyUiEvent.ProfileCompleted)
             override fun authStepBack() = dispatch(ToollyUiEvent.AuthStepBackRequested)
+            override fun openPrivacyCenter() = dispatch(ToollyUiEvent.PrivacyCenterOpened)
+            override fun openBackupSettings() = dispatch(ToollyUiEvent.BackupSettingsOpened)
+            override fun setBackupPreference(kind: BackupPreferenceKind, enabled: Boolean) =
+                dispatch(ToollyUiEvent.BackupPreferenceToggled(kind, enabled))
+            override fun setBackupEnabled(enabled: Boolean) =
+                dispatch(ToollyUiEvent.BackupEnabledChanged(enabled))
 
             private fun select(destination: ToollyDestination) {
                 dispatch(ToollyUiEvent.MainDestinationSelected(destination))

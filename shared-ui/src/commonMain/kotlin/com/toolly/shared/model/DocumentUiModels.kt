@@ -43,7 +43,25 @@ enum class ToollyDestination {
     PROFILE,
     CAPTURE_REVIEW,
     DOCUMENT_VIEWER,
+    PRIVACY_CENTER,
+    BACKUP_CHOICE,
 }
+
+enum class BackupPreferenceKind { WIFI_ONLY, WHILE_CHARGING, INCLUDE_ORIGINALS, END_TO_END_ENCRYPTION }
+
+/**
+ * Local, presentation-only backup preferences (wireframe `6.2/6.4 Backup choice`). Nothing here is
+ * persisted or sent anywhere -- Phase 5 (optional cloud backup) is blocked until Phase 4
+ * (authentication) is complete and its own service-processing approvals land (ROADMAP.md). Toggling
+ * these only changes what the Backup Choice screen displays.
+ */
+data class BackupPreferences(
+    val enabled: Boolean = false,
+    val wifiOnly: Boolean = true,
+    val whileCharging: Boolean = true,
+    val includeOriginals: Boolean = false,
+    val endToEndEncryption: Boolean = false,
+)
 
 sealed interface ToollyUiEvent {
     data object SplashFinished : ToollyUiEvent
@@ -68,6 +86,12 @@ sealed interface ToollyUiEvent {
     data object ForgotPasswordSelected : ToollyUiEvent
     data object ProfileCompleted : ToollyUiEvent
     data object AuthStepBackRequested : ToollyUiEvent
+
+    data object PrivacyCenterOpened : ToollyUiEvent
+    data object BackupSettingsOpened : ToollyUiEvent
+    data class BackupPreferenceToggled(val kind: BackupPreferenceKind, val enabled: Boolean) : ToollyUiEvent
+    data class BackupEnabledChanged(val enabled: Boolean) : ToollyUiEvent
+    data object NavigateBack : ToollyUiEvent
 }
 
 data class ToollyUiState(
@@ -87,6 +111,7 @@ data class ToollyUiState(
     val authOrigin: ToollyDestination? = null,
     val pendingPhoneNumber: String? = null,
     val pendingEmail: String? = null,
+    val backupPreferences: BackupPreferences = BackupPreferences(),
 ) {
     init {
         require(tutorialPageIndex in 0 until TUTORIAL_PAGE_COUNT)
@@ -111,6 +136,8 @@ data class ToollyUiState(
             ToollyDestination.PROFILE,
             ToollyDestination.CAPTURE_REVIEW,
             ToollyDestination.DOCUMENT_VIEWER,
+            ToollyDestination.PRIVACY_CENTER,
+            ToollyDestination.BACKUP_CHOICE,
         )
 
         fun firstLaunch(
@@ -408,6 +435,56 @@ fun reduceToollyUiState(
         ToollyDestination.RESET_PASSWORD -> state.copy(destination = ToollyDestination.EMAIL_SIGN_IN)
         else -> state
     }
+
+    ToollyUiEvent.PrivacyCenterOpened -> {
+        if (state.destination != ToollyDestination.PROFILE) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.PRIVACY_CENTER)
+        }
+    }
+
+    ToollyUiEvent.BackupSettingsOpened -> {
+        if (state.destination != ToollyDestination.PRIVACY_CENTER) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.BACKUP_CHOICE)
+        }
+    }
+
+    is ToollyUiEvent.BackupPreferenceToggled -> {
+        if (state.destination != ToollyDestination.BACKUP_CHOICE) {
+            state
+        } else {
+            state.copy(
+                backupPreferences = when (event.kind) {
+                    BackupPreferenceKind.WIFI_ONLY ->
+                        state.backupPreferences.copy(wifiOnly = event.enabled)
+                    BackupPreferenceKind.WHILE_CHARGING ->
+                        state.backupPreferences.copy(whileCharging = event.enabled)
+                    BackupPreferenceKind.INCLUDE_ORIGINALS ->
+                        state.backupPreferences.copy(includeOriginals = event.enabled)
+                    BackupPreferenceKind.END_TO_END_ENCRYPTION ->
+                        state.backupPreferences.copy(endToEndEncryption = event.enabled)
+                },
+            )
+        }
+    }
+
+    is ToollyUiEvent.BackupEnabledChanged -> {
+        if (state.destination != ToollyDestination.BACKUP_CHOICE) {
+            state
+        } else {
+            state.copy(backupPreferences = state.backupPreferences.copy(enabled = event.enabled))
+        }
+    }
+
+    ToollyUiEvent.NavigateBack -> when (state.destination) {
+        ToollyDestination.DOCUMENT_VIEWER -> state.copy(destination = ToollyDestination.LIBRARY)
+        ToollyDestination.PRIVACY_CENTER -> state.copy(destination = ToollyDestination.PROFILE)
+        ToollyDestination.BACKUP_CHOICE -> state.copy(destination = ToollyDestination.PRIVACY_CENTER)
+        else -> state
+    }
 }
 
 interface ToollyUiActions {
@@ -439,4 +516,8 @@ interface ToollyUiActions {
     fun selectForgotPassword()
     fun completeProfile()
     fun authStepBack()
+    fun openPrivacyCenter()
+    fun openBackupSettings()
+    fun setBackupPreference(kind: BackupPreferenceKind, enabled: Boolean)
+    fun setBackupEnabled(enabled: Boolean)
 }

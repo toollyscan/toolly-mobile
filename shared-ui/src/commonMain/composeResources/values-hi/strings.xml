@@ -146,4 +146,25 @@
     <string name="privacy_check_description">एन्क्रिप्टेड वॉल्ट से बाहर सहेजे या साझा किए जाने के बाद Toolly दस्तावेज़ का नियंत्रण नहीं रख सकता।</string>
     <string name="save_to_device">डिवाइस में सहेजें</string>
     <string name="share">साझा करें</string>
+    <string name="privacy_center_title">जानें हर दस्तावेज़ कहाँ है</string>
+    <string name="privacy_center_only_on_device_title">केवल इसी डिवाइस पर</string>
+    <string name="privacy_center_only_on_device_description">निजी और ऑफ़लाइन</string>
+    <string name="privacy_center_backed_up_title">बैकअप किया गया</string>
+    <string name="privacy_center_backed_up_description_empty">अभी तक कोई दस्तावेज़ बैकअप नहीं हुआ</string>
+    <string name="privacy_center_needs_attention_title">ध्यान देने योग्य</string>
+    <string name="privacy_center_needs_attention_description_empty">ध्यान देने योग्य कुछ नहीं</string>
+    <string name="backup_settings_button">बैकअप सेटिंग्स</string>
+    <string name="backup_choice_title">जब आप चाहें तभी बैकअप लें</string>
+    <string name="encrypted_backup_label">एन्क्रिप्टेड बैकअप</string>
+    <string name="encrypted_backup_off">बंद</string>
+    <string name="encrypted_backup_on">चालू</string>
+    <string name="encrypted_backup_description">आपके स्कैन केवल इसी डिवाइस पर रहते हैं।</string>
+    <string name="backup_wifi_only_label">केवल वाई-फ़ाई</string>
+    <string name="backup_while_charging_label">चार्जिंग के दौरान</string>
+    <string name="backup_include_originals_label">मूल शामिल करें</string>
+    <string name="backup_e2e_encryption_label">एंड-टू-एंड एन्क्रिप्शन</string>
+    <string name="estimated_cloud_use_label">अनुमानित क्लाउड उपयोग</string>
+    <string name="estimated_cloud_use_value">बैकअप चालू होने तक 0 MB</string>
+    <string name="enable_backup_button">बैकअप चालू करें</string>
+    <string name="disable_backup_button">बैकअप बंद करें</string>
 </resources>

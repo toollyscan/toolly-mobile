@@ -146,4 +146,25 @@
     <string name="privacy_check_description">ಎನ್‌ಕ್ರಿಪ್ಟೆಡ್ ವಾಲ್ಟ್‌ನಿಂದ ಹೊರಗೆ ಉಳಿಸಿದ ಅಥವಾ ಹಂಚಿಕೊಂಡ ನಂತರ ದಾಖಲೆಗೆ ಏನಾಗುತ್ತದೆ ಎಂಬುದನ್ನು Toolly ನಿಯಂತ್ರಿಸಲಾಗುವುದಿಲ್ಲ.</string>
     <string name="save_to_device">ಸಾಧನದಲ್ಲಿ ಉಳಿಸಿ</string>
     <string name="share">ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="privacy_center_title">ಪ್ರತಿ ದಾಖಲೆ ಎಲ್ಲಿದೆ ಎಂದು ತಿಳಿಯಿರಿ</string>
+    <string name="privacy_center_only_on_device_title">ಈ ಸಾಧನದಲ್ಲಿ ಮಾತ್ರ</string>
+    <string name="privacy_center_only_on_device_description">ಖಾಸಗಿ ಮತ್ತು ಆಫ್‌ಲೈನ್</string>
+    <string name="privacy_center_backed_up_title">ಬ್ಯಾಕಪ್ ಆಗಿದೆ</string>
+    <string name="privacy_center_backed_up_description_empty">ಇನ್ನೂ ಯಾವುದೇ ದಾಖಲೆ ಬ್ಯಾಕಪ್ ಆಗಿಲ್ಲ</string>
+    <string name="privacy_center_needs_attention_title">ಗಮನ ಅಗತ್ಯವಿದೆ</string>
+    <string name="privacy_center_needs_attention_description_empty">ಯಾವುದೇ ಗಮನ ಅಗತ್ಯವಿಲ್ಲ</string>
+    <string name="backup_settings_button">ಬ್ಯಾಕಪ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
+    <string name="backup_choice_title">ನೀವು ಆಯ್ಕೆಮಾಡಿದಾಗ ಮಾತ್ರ ಬ್ಯಾಕಪ್ ಮಾಡಿ</string>
+    <string name="encrypted_backup_label">ಎನ್‌ಕ್ರಿಪ್ಟೆಡ್ ಬ್ಯಾಕಪ್</string>
+    <string name="encrypted_backup_off">ಆಫ್</string>
+    <string name="encrypted_backup_on">ಆನ್</string>
+    <string name="encrypted_backup_description">ನಿಮ್ಮ ಸ್ಕ್ಯಾನ್‌ಗಳು ಈ ಸಾಧನದಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತವೆ.</string>
+    <string name="backup_wifi_only_label">ವೈ-ಫೈ ಮಾತ್ರ</string>
+    <string name="backup_while_charging_label">ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ</string>
+    <string name="backup_include_originals_label">ಮೂಲಗಳನ್ನು ಸೇರಿಸಿ</string>
+    <string name="backup_e2e_encryption_label">ಎಂಡ್-ಟು-ಎಂಡ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್</string>
+    <string name="estimated_cloud_use_label">ಅಂದಾಜು ಕ್ಲೌಡ್ ಬಳಕೆ</string>
+    <string name="estimated_cloud_use_value">ಬ್ಯಾಕಪ್ ಆನ್ ಆಗುವವರೆಗೆ 0 MB</string>
+    <string name="enable_backup_button">ಬ್ಯಾಕಪ್ ಆನ್ ಮಾಡಿ</string>
+    <string name="disable_backup_button">ಬ್ಯಾಕಪ್ ಆಫ್ ಮಾಡಿ</string>
 </resources>
