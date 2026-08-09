@@ -30,6 +30,13 @@ enum class ToollyDestination {
     WELCOME,
     SIGN_IN,
     CREATE_PROFILE,
+    PHONE_ENTRY,
+    OTP_VERIFICATION,
+    EMAIL_SIGN_IN,
+    CREATE_ACCOUNT,
+    RESET_PASSWORD,
+    PROFILE_COMPLETION,
+    SESSION_ROUTING,
     HOME,
     LIBRARY,
     SEARCH,
@@ -51,6 +58,16 @@ sealed interface ToollyUiEvent {
     data object DevelopmentAccessGranted : ToollyUiEvent
     data class MainDestinationSelected(val destination: ToollyDestination) : ToollyUiEvent
     data object SignedOut : ToollyUiEvent
+
+    /** [ToollyAuthenticationMethod.GOOGLE] / [ToollyAuthenticationMethod.APPLE] are no-ops until a real provider adapter lands behind the authentication port. */
+    data class AuthenticationMethodSelected(val method: ToollyAuthenticationMethod) : ToollyUiEvent
+    data class PhoneNumberSubmitted(val phoneNumber: String) : ToollyUiEvent
+    data object OtpVerified : ToollyUiEvent
+    data object CreateAccountSelected : ToollyUiEvent
+    data class AccountCreated(val email: String) : ToollyUiEvent
+    data object ForgotPasswordSelected : ToollyUiEvent
+    data object ProfileCompleted : ToollyUiEvent
+    data object AuthStepBackRequested : ToollyUiEvent
 }
 
 data class ToollyUiState(
@@ -64,6 +81,12 @@ data class ToollyUiState(
     val selectedDocumentId: DocumentUiId?,
     val reviewPageCount: Int,
     val busy: Boolean,
+    // Optional-account auth sub-flow (2.x/3.x/4.x wireframes). None of this is persisted or sent
+    // anywhere yet -- real Firebase Authentication stays behind the authentication port until its
+    // Phase 4 gate is approved (see README architecture principles + issue #52).
+    val authOrigin: ToollyDestination? = null,
+    val pendingPhoneNumber: String? = null,
+    val pendingEmail: String? = null,
 ) {
     init {
         require(tutorialPageIndex in 0 until TUTORIAL_PAGE_COUNT)
@@ -73,10 +96,13 @@ data class ToollyUiState(
             sessionState != ToollySessionState.SIGNED_OUT ||
                 destination !in productDestinations,
         )
+        require(authOrigin == null || authOrigin in setOf(ToollyDestination.SIGN_IN, ToollyDestination.CREATE_PROFILE))
+        require(destination != ToollyDestination.OTP_VERIFICATION || pendingPhoneNumber != null)
     }
 
     companion object {
         const val TUTORIAL_PAGE_COUNT = 3
+        const val OTP_LENGTH = 6
 
         private val productDestinations = setOf(
             ToollyDestination.HOME,
@@ -116,6 +142,8 @@ data class ToollyUiState(
         fun empty(): ToollyUiState = firstLaunch()
     }
 }
+
+private val accountEntryDestinations = setOf(ToollyDestination.SIGN_IN, ToollyDestination.CREATE_PROFILE)
 
 fun reduceToollyUiState(
     state: ToollyUiState,
@@ -197,6 +225,9 @@ fun reduceToollyUiState(
             } else {
                 ToollyDestination.WELCOME
             },
+            authOrigin = null,
+            pendingPhoneNumber = null,
+            pendingEmail = null,
         )
     }
 
@@ -219,11 +250,16 @@ fun reduceToollyUiState(
             state.destination !in setOf(
                 ToollyDestination.SIGN_IN,
                 ToollyDestination.CREATE_PROFILE,
+                ToollyDestination.EMAIL_SIGN_IN,
+                ToollyDestination.SESSION_ROUTING,
             )
         ) state
         else state.copy(
             destination = ToollyDestination.HOME,
             sessionState = ToollySessionState.AUTHENTICATED,
+            authOrigin = null,
+            pendingPhoneNumber = null,
+            pendingEmail = null,
         )
     }
 
@@ -268,8 +304,109 @@ fun reduceToollyUiState(
                 selectedDocumentId = null,
                 reviewPageCount = 0,
                 busy = false,
+                authOrigin = null,
+                pendingPhoneNumber = null,
+                pendingEmail = null,
             )
         }
+    }
+
+    is ToollyUiEvent.AuthenticationMethodSelected -> {
+        if (state.destination !in accountEntryDestinations) {
+            state
+        } else {
+            when (event.method) {
+                ToollyAuthenticationMethod.PHONE -> state.copy(
+                    destination = ToollyDestination.PHONE_ENTRY,
+                    authOrigin = state.destination,
+                )
+                ToollyAuthenticationMethod.EMAIL -> state.copy(
+                    destination = ToollyDestination.EMAIL_SIGN_IN,
+                    authOrigin = state.destination,
+                )
+                // Google/Apple require a real provider SDK behind the authentication port; not
+                // implemented in this phase, so the request is a deliberate no-op.
+                ToollyAuthenticationMethod.GOOGLE, ToollyAuthenticationMethod.APPLE -> state
+            }
+        }
+    }
+
+    is ToollyUiEvent.PhoneNumberSubmitted -> {
+        if (state.destination != ToollyDestination.PHONE_ENTRY || event.phoneNumber.isBlank()) {
+            state
+        } else {
+            state.copy(
+                destination = ToollyDestination.OTP_VERIFICATION,
+                pendingPhoneNumber = event.phoneNumber,
+            )
+        }
+    }
+
+    ToollyUiEvent.OtpVerified -> {
+        if (state.destination != ToollyDestination.OTP_VERIFICATION) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.PROFILE_COMPLETION)
+        }
+    }
+
+    ToollyUiEvent.CreateAccountSelected -> {
+        if (state.destination != ToollyDestination.EMAIL_SIGN_IN) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.CREATE_ACCOUNT)
+        }
+    }
+
+    is ToollyUiEvent.AccountCreated -> {
+        if (state.destination != ToollyDestination.CREATE_ACCOUNT || event.email.isBlank()) {
+            state
+        } else {
+            // New accounts (any provider) verify a phone as a security step before profile
+            // completion -- matches wireframe 4.1 "One last security step."
+            state.copy(
+                destination = ToollyDestination.PHONE_ENTRY,
+                pendingEmail = event.email,
+            )
+        }
+    }
+
+    ToollyUiEvent.ForgotPasswordSelected -> {
+        if (state.destination != ToollyDestination.EMAIL_SIGN_IN) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.RESET_PASSWORD)
+        }
+    }
+
+    ToollyUiEvent.ProfileCompleted -> {
+        if (state.destination != ToollyDestination.PROFILE_COMPLETION) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.SESSION_ROUTING)
+        }
+    }
+
+    ToollyUiEvent.AuthStepBackRequested -> when (state.destination) {
+        ToollyDestination.PHONE_ENTRY -> state.copy(
+            destination = if (state.pendingEmail != null) {
+                ToollyDestination.EMAIL_SIGN_IN
+            } else {
+                state.authOrigin ?: ToollyDestination.WELCOME
+            },
+        )
+        ToollyDestination.OTP_VERIFICATION -> state.copy(
+            destination = ToollyDestination.PHONE_ENTRY,
+            pendingPhoneNumber = null,
+        )
+        ToollyDestination.EMAIL_SIGN_IN -> state.copy(
+            destination = state.authOrigin ?: ToollyDestination.WELCOME,
+            authOrigin = null,
+            pendingEmail = null,
+        )
+        ToollyDestination.CREATE_ACCOUNT,
+        ToollyDestination.RESET_PASSWORD -> state.copy(destination = ToollyDestination.EMAIL_SIGN_IN)
+        else -> state
     }
 }
 
@@ -294,4 +431,12 @@ interface ToollyUiActions {
     fun discardCapture()
     fun saveCapture()
     fun navigateBack()
+    fun submitPhoneNumber(phoneNumber: String)
+    fun verifyOtp()
+    fun completeAuthentication()
+    fun selectCreateAccount()
+    fun createAccount(email: String)
+    fun selectForgotPassword()
+    fun completeProfile()
+    fun authStepBack()
 }

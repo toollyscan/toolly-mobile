@@ -146,6 +146,13 @@ fun ToollyApp(
                 ToollyDestination.WELCOME -> WelcomeScreen(state, actions)
                 ToollyDestination.SIGN_IN -> SignInScreen(state, actions)
                 ToollyDestination.CREATE_PROFILE -> CreateProfileScreen(state, actions)
+                ToollyDestination.PHONE_ENTRY -> PhoneEntryScreen(state, actions)
+                ToollyDestination.OTP_VERIFICATION -> OtpVerificationScreen(state, actions)
+                ToollyDestination.EMAIL_SIGN_IN -> EmailSignInScreen(state, actions)
+                ToollyDestination.CREATE_ACCOUNT -> CreateAccountScreen(actions)
+                ToollyDestination.RESET_PASSWORD -> ResetPasswordScreen(actions)
+                ToollyDestination.PROFILE_COMPLETION -> ProfileCompletionScreen(state, actions)
+                ToollyDestination.SESSION_ROUTING -> SessionRoutingScreen(actions)
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,
                 ToollyDestination.SEARCH,
@@ -195,7 +202,7 @@ private fun SplashScreen(actions: ToollyUiActions) {
 }
 
 @Composable
-private fun ToollyMark(modifier: Modifier = Modifier) {
+internal fun ToollyMark(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(Res.drawable.toolly_mark),
         contentDescription = null,
@@ -995,7 +1002,7 @@ private fun ViewerScreen(state: ToollyUiState, actions: ToollyUiActions) {
 }
 
 @Composable
-private fun PrimaryButton(
+internal fun PrimaryButton(
     label: StringResource,
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -1021,7 +1028,7 @@ private fun PrimaryButton(
 }
 
 @Composable
-private fun SecondaryButton(label: StringResource, onClick: () -> Unit) {
+internal fun SecondaryButton(label: StringResource, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.PrimaryActionHeight),
@@ -1032,7 +1039,7 @@ private fun SecondaryButton(label: StringResource, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ScreenColumn(
+internal fun ScreenColumn(
     applySafeInsets: Boolean = true,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit,

@@ -4,7 +4,11 @@ Defines the approved design token system for Toolly.
 
 Tokens must be referenced by semantic name in Figma and in production design-system components. Hardcoded hex values must not appear in component code; use token names.
 
----
+> **Source of truth note:** the primary/surface/outline/text values below are aligned to the
+> exported "Toolly Scan — Low-Fidelity Product Flows" Figma file, GitHub issue #52 (TLY-013), and
+> the values actually implemented in `shared-ui/src/commonMain/kotlin/com/toolly/shared/ui/ToollyTheme.kt`
+> (`ToollyColors`). This table previously listed an earlier placeholder palette (`#2563EB` primary)
+> that predates the Figma export and was never implemented; it has been corrected to match.
 
 ## Primitive colour tokens
 
@@ -12,11 +16,13 @@ Primitive tokens are the raw values. They must not be used directly in component
 
 | Token name | Value | Notes |
 |------------|-------|-------|
-| `color.primitive.blue.600` | `#2563EB` | Signal Blue — primary brand |
+| `color.primitive.blue.600` | `#2961F2` | Toolly Blue — primary brand |
+| `color.primitive.blue.100` | `#E5ECFF` | Primary container |
 | `color.primitive.cyan.600` | `#0891B2` | Scan Cyan — capture accent |
-| `color.primitive.gray.900` | `#0B1220` | Ink Primary |
-| `color.primitive.gray.600` | `#475569` | Ink Secondary |
-| `color.primitive.gray.50` | `#F8FAFC` | Surface |
+| `color.primitive.gray.900` | `#1C2129` | Ink Primary |
+| `color.primitive.gray.600` | `#616B78` | Ink Secondary |
+| `color.primitive.gray.300` | `#C7CFD9` | Outline |
+| `color.primitive.gray.50` | `#F5F7FA` | Surface |
 | `color.primitive.white` | `#FFFFFF` | Surface Elevated |
 | `color.primitive.green.600` | `#047857` | Success |
 | `color.primitive.amber.800` | `#92400E` | Warning |
@@ -52,6 +58,7 @@ Semantic tokens communicate intent. Use these in all design and implementation w
 | `color.surface.default` | `color.primitive.gray.50` | Screen backgrounds |
 | `color.surface.elevated` | `color.primitive.white` | Cards, sheets, dialogs |
 | `color.surface.overlay` | `color.primitive.gray.900` @ 60% opacity | Scrim behind modal content |
+| `color.border.outline` | `color.primitive.gray.300` | Card/input/chip borders, dividers |
 
 ### Interactive
 

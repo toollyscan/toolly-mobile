@@ -65,7 +65,8 @@ internal fun AndroidToollyApp(
                 override fun continueLocally(destination: ToollyDestination) {
                     dispatch(ToollyUiEvent.LocalSessionStarted(destination))
                 }
-                override fun authenticate(method: ToollyAuthenticationMethod) = Unit
+                override fun authenticate(method: ToollyAuthenticationMethod) =
+                    dispatch(ToollyUiEvent.AuthenticationMethodSelected(method))
                 override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
                 override fun openHome() = select(ToollyDestination.HOME)
                 override fun openLibrary() = select(ToollyDestination.LIBRARY)
@@ -84,6 +85,15 @@ internal fun AndroidToollyApp(
                 override fun discardCapture() = Unit
                 override fun saveCapture() = Unit
                 override fun navigateBack() = Unit
+                override fun submitPhoneNumber(phoneNumber: String) =
+                    dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
+                override fun verifyOtp() = dispatch(ToollyUiEvent.OtpVerified)
+                override fun completeAuthentication() = dispatch(ToollyUiEvent.AuthenticationSucceeded)
+                override fun selectCreateAccount() = dispatch(ToollyUiEvent.CreateAccountSelected)
+                override fun createAccount(email: String) = dispatch(ToollyUiEvent.AccountCreated(email))
+                override fun selectForgotPassword() = dispatch(ToollyUiEvent.ForgotPasswordSelected)
+                override fun completeProfile() = dispatch(ToollyUiEvent.ProfileCompleted)
+                override fun authStepBack() = dispatch(ToollyUiEvent.AuthStepBackRequested)
 
                 private fun select(destination: ToollyDestination) {
                     dispatch(ToollyUiEvent.MainDestinationSelected(destination))
