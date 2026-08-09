@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import java.io.File
@@ -64,6 +65,22 @@ internal fun PrivateFileImage(
         modifier = modifier,
     )
 }
+
+/**
+ * Decodes a scanner-owned temporary file to a Compose Multiplatform [ImageBitmap] -- the common
+ * type (not an Android-specific one) that [com.toolly.shared.ui.CropOverlay] and the crop/enhance
+ * screens accept, so the same decoded bitmap can be reused for both the main preview and the
+ * precision loupe without decoding twice.
+ *
+ * On Android, `Bitmap.asImageBitmap()` wraps the same [Bitmap] instance rather than copying it, so
+ * the underlying bitmap must stay alive for as long as the returned [ImageBitmap] is used. Callers
+ * own that lifetime and must release it via `imageBitmap.asAndroidBitmap().recycle()` (e.g. in a
+ * `DisposableEffect`) once the page-edit session using it ends.
+ */
+internal suspend fun decodeBoundedImageBitmap(file: File): ImageBitmap? =
+    withContext(Dispatchers.IO) {
+        file.takeIf(File::isFile)?.let(::decodeBoundedBitmap)?.asImageBitmap()
+    }
 
 private fun decodeBoundedBitmap(file: File): Bitmap? {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }

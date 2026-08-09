@@ -116,4 +116,22 @@
     <string name="profile_complete">Profile complete</string>
     <string name="profile_complete_description">Phone verified. Session saved securely.</string>
     <string name="go_to_home">Go to Home</string>
+    <string name="checkmark_glyph">✓</string>
+    <string name="auto_crop">Auto crop</string>
+    <string name="rotate">Rotate</string>
+    <string name="retake">Retake</string>
+    <string name="confirm_crop">Continue</string>
+    <string name="corner_top_left">Top-left corner</string>
+    <string name="corner_top_right">Top-right corner</string>
+    <string name="corner_bottom_right">Bottom-right corner</string>
+    <string name="corner_bottom_left">Bottom-left corner</string>
+    <string name="crop_edges_detected">Edges detected · drag any corner to adjust</string>
+    <string name="enhance_title">Choose a natural, readable finish</string>
+    <string name="enhance_mode_auto">Auto</string>
+    <string name="enhance_mode_clean">Clean</string>
+    <string name="enhance_mode_color">Color</string>
+    <string name="enhance_mode_gray">Gray</string>
+    <string name="enhance_mode_black_and_white">B&amp;W</string>
+    <string name="enhance_intensity_label">Intensity</string>
+    <string name="save_page">Save page</string>
 </resources>

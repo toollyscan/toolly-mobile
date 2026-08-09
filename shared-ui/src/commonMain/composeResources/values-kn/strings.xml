@@ -116,4 +116,22 @@
     <string name="profile_complete">ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ</string>
     <string name="profile_complete_description">ಫೋನ್ ಪರಿಶೀಲಿತ. ಸೆಷನ್ ಸುರಕ್ಷಿತವಾಗಿ ಉಳಿಸಲಾಗಿದೆ.</string>
     <string name="go_to_home">ಹೋಮ್‌ಗೆ ಹೋಗಿ</string>
+    <string name="checkmark_glyph">✓</string>
+    <string name="auto_crop">ಸ್ವಯಂ ಕ್ರಾಪ್</string>
+    <string name="rotate">ತಿರುಗಿಸಿ</string>
+    <string name="retake">ಮತ್ತೆ ತೆಗೆಯಿರಿ</string>
+    <string name="confirm_crop">ಮುಂದುವರಿಸಿ</string>
+    <string name="corner_top_left">ಮೇಲ್ಭಾಗ-ಎಡ ಮೂಲೆ</string>
+    <string name="corner_top_right">ಮೇಲ್ಭಾಗ-ಬಲ ಮೂಲೆ</string>
+    <string name="corner_bottom_right">ಕೆಳಭಾಗ-ಬಲ ಮೂಲೆ</string>
+    <string name="corner_bottom_left">ಕೆಳಭಾಗ-ಎಡ ಮೂಲೆ</string>
+    <string name="crop_edges_detected">ಅಂಚುಗಳು ಪತ್ತೆಯಾಗಿವೆ · ಸರಿಹೊಂದಿಸಲು ಯಾವುದೇ ಮೂಲೆಯನ್ನು ಎಳೆಯಿರಿ</string>
+    <string name="enhance_title">ಸಹಜ, ಓದಬಲ್ಲ ಫಿನಿಶ್ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="enhance_mode_auto">ಸ್ವಯಂ</string>
+    <string name="enhance_mode_clean">ಕ್ಲೀನ್</string>
+    <string name="enhance_mode_color">ಬಣ್ಣ</string>
+    <string name="enhance_mode_gray">ಬೂದು</string>
+    <string name="enhance_mode_black_and_white">ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ</string>
+    <string name="enhance_intensity_label">ತೀವ್ರತೆ</string>
+    <string name="save_page">ಪುಟ ಉಳಿಸಿ</string>
 </resources>

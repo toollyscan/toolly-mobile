@@ -35,6 +35,7 @@ import com.toolly.shared.resources.apple_sign_in
 import com.toolly.shared.resources.back
 import com.toolly.shared.resources.back_to_sign_in
 import com.toolly.shared.resources.change_phone_number
+import com.toolly.shared.resources.checkmark_glyph
 import com.toolly.shared.resources.confirm_password_label
 import com.toolly.shared.resources.create_account
 import com.toolly.shared.resources.create_account_description
@@ -382,7 +383,11 @@ internal fun SessionRoutingScreen(actions: ToollyUiActions) {
                     Canvas(modifier = Modifier.size(40.dp)) {
                         drawCircle(color = ToollyColors.Positive, radius = size.minDimension / 2)
                     }
-                    Text("✓", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(Res.string.checkmark_glyph),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                 }
                 Column {
                     Text(stringResource(Res.string.profile_complete), style = MaterialTheme.typography.titleMedium)

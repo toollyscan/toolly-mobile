@@ -116,4 +116,22 @@
     <string name="profile_complete">प्रोफ़ाइल पूर्ण</string>
     <string name="profile_complete_description">फ़ोन सत्यापित। सत्र सुरक्षित रूप से सहेजा गया।</string>
     <string name="go_to_home">होम पर जाएँ</string>
+    <string name="checkmark_glyph">✓</string>
+    <string name="auto_crop">ऑटो क्रॉप</string>
+    <string name="rotate">घुमाएँ</string>
+    <string name="retake">फिर से लें</string>
+    <string name="confirm_crop">जारी रखें</string>
+    <string name="corner_top_left">ऊपर-बायाँ कोना</string>
+    <string name="corner_top_right">ऊपर-दायाँ कोना</string>
+    <string name="corner_bottom_right">नीचे-दायाँ कोना</string>
+    <string name="corner_bottom_left">नीचे-बायाँ कोना</string>
+    <string name="crop_edges_detected">किनारे पहचाने गए · समायोजित करने के लिए कोई भी कोना खींचें</string>
+    <string name="enhance_title">सहज, पठनीय फिनिश चुनें</string>
+    <string name="enhance_mode_auto">ऑटो</string>
+    <string name="enhance_mode_clean">क्लीन</string>
+    <string name="enhance_mode_color">रंगीन</string>
+    <string name="enhance_mode_gray">ग्रे</string>
+    <string name="enhance_mode_black_and_white">ब्लैक एंड व्हाइट</string>
+    <string name="enhance_intensity_label">तीव्रता</string>
+    <string name="save_page">पृष्ठ सहेजें</string>
 </resources>
