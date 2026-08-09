@@ -415,4 +415,41 @@ class ToollyUiStateTest {
         assertFalse(enabled.backupPreferences.endToEndEncryption)
         assertTrue(enabled.backupPreferences.enabled)
     }
+
+    private fun atLibrary(): ToollyUiState {
+        val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
+        return reduceToollyUiState(welcome, ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
+    }
+
+    @Test
+    fun captureReviewStartedEntersReviewWithTheRealPageCountAndDiscardReturnsToLibrary() {
+        val library = atLibrary()
+        val review = reduceToollyUiState(library, ToollyUiEvent.CaptureReviewStarted(3))
+        val discarded = reduceToollyUiState(review, ToollyUiEvent.CaptureDiscarded)
+
+        assertEquals(ToollyDestination.CAPTURE_REVIEW, review.destination)
+        assertEquals(3, review.reviewPageCount)
+        assertEquals(ToollyDestination.LIBRARY, discarded.destination)
+        assertEquals(0, discarded.reviewPageCount)
+    }
+
+    @Test
+    fun captureReviewStartedIsANoOpWithoutASessionOrAwayFromHomeAndLibrary() {
+        val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
+        val signedOutAttempt = reduceToollyUiState(welcome, ToollyUiEvent.CaptureReviewStarted(2))
+        val profileAttempt = reduceToollyUiState(atProfile(), ToollyUiEvent.CaptureReviewStarted(2))
+        val zeroPagesAttempt = reduceToollyUiState(atLibrary(), ToollyUiEvent.CaptureReviewStarted(0))
+
+        assertEquals(welcome, signedOutAttempt)
+        assertEquals(atProfile(), profileAttempt)
+        assertEquals(atLibrary(), zeroPagesAttempt)
+    }
+
+    @Test
+    fun captureDiscardedIsANoOpOutsideCaptureReview() {
+        val library = atLibrary()
+        val unchanged = reduceToollyUiState(library, ToollyUiEvent.CaptureDiscarded)
+
+        assertEquals(library, unchanged)
+    }
 }

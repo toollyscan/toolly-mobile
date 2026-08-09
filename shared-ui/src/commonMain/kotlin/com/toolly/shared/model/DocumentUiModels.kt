@@ -92,6 +92,10 @@ sealed interface ToollyUiEvent {
     data class BackupPreferenceToggled(val kind: BackupPreferenceKind, val enabled: Boolean) : ToollyUiEvent
     data class BackupEnabledChanged(val enabled: Boolean) : ToollyUiEvent
     data object NavigateBack : ToollyUiEvent
+
+    /** A real capture just finished with [pageCount] pages; enters the review screen. */
+    data class CaptureReviewStarted(val pageCount: Int) : ToollyUiEvent
+    data object CaptureDiscarded : ToollyUiEvent
 }
 
 data class ToollyUiState(
@@ -484,6 +488,26 @@ fun reduceToollyUiState(
         ToollyDestination.PRIVACY_CENTER -> state.copy(destination = ToollyDestination.PROFILE)
         ToollyDestination.BACKUP_CHOICE -> state.copy(destination = ToollyDestination.PRIVACY_CENTER)
         else -> state
+    }
+
+    is ToollyUiEvent.CaptureReviewStarted -> {
+        if (
+            state.destination !in setOf(ToollyDestination.HOME, ToollyDestination.LIBRARY) ||
+            state.sessionState == ToollySessionState.SIGNED_OUT ||
+            event.pageCount <= 0
+        ) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.CAPTURE_REVIEW, reviewPageCount = event.pageCount)
+        }
+    }
+
+    ToollyUiEvent.CaptureDiscarded -> {
+        if (state.destination != ToollyDestination.CAPTURE_REVIEW) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.LIBRARY, reviewPageCount = 0)
+        }
     }
 }
 

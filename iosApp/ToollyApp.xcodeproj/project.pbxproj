@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		100000000000000000000001 /* ToollyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* ToollyApp.swift */; };
 		100000000000000000000002 /* ToollySharedUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* ToollySharedUI.framework */; };
+		100000000000000000000003 /* AppleCaptureSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* AppleCaptureSessionImpl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		100000000000000000000010 /* ToollyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToollyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000011 /* ToollyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToollyApp.swift; sourceTree = "<group>"; };
 		100000000000000000000012 /* ToollySharedUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ToollySharedUI.framework; path = ../shared-ui/build/bin/iosSimulatorArm64/debugFramework/ToollySharedUI.framework; sourceTree = SOURCE_ROOT; };
+		100000000000000000000013 /* AppleCaptureSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCaptureSessionImpl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000011 /* ToollyApp.swift */,
+				100000000000000000000013 /* AppleCaptureSessionImpl.swift */,
 			);
 			path = ToollyApp;
 			sourceTree = "<group>";
@@ -131,6 +134,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000001 /* ToollyApp.swift in Sources */,
+				100000000000000000000003 /* AppleCaptureSessionImpl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +204,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -234,6 +239,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
