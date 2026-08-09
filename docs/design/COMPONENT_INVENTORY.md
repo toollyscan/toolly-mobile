@@ -18,7 +18,10 @@ Component names in this document are canonical and must map cleanly to productio
 
 Purpose: Primary navigation for phone in non-immersive screens.
 
-Tabs: Home, Documents, Tools, Profile. Prominent Scan action (floating or elevated centre tab).
+Tabs: Home, Library, Scan, Search, You. Prominent Scan action (elevated centre tab). Implemented
+in `CompactNavigation` (`shared-ui/.../ui/ToollyApp.kt`) per the Figma-aligned flow in issue #52 —
+supersedes this document's earlier placeholder tab set ("Home, Documents, Tools, Profile"), which
+predates the Figma export and was never implemented.
 
 Variants: Default, icon-only (compact height), badge active.
 
@@ -28,7 +31,8 @@ Platform: Android phone, iPhone.
 
 Purpose: Primary navigation for tablet in non-immersive screens.
 
-Items: Home, Documents, Tools, Profile.
+Items: Home, Library, Scan, Search, You. Implemented in `ExpandedNavigation`
+(`shared-ui/.../ui/ToollyApp.kt`).
 
 Variants: Default, collapsed (icon-only), expanded (icon + label).
 

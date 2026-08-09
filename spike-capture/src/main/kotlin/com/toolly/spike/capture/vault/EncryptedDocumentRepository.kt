@@ -6,11 +6,13 @@ import android.graphics.BitmapFactory
 import com.toolly.domain.contracts.DocumentRepository
 import com.toolly.domain.contracts.SaveCapturedDocumentCommand
 import com.toolly.domain.model.AssetId
+import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentLifecycle
 import com.toolly.domain.model.DocumentPage
 import com.toolly.domain.model.DocumentSummary
+import com.toolly.domain.model.MAX_DISPLAY_NAME_LENGTH
 import com.toolly.domain.model.PageId
 import com.toolly.foundation.ToollyError
 import com.toolly.foundation.ToollyErrorCode
@@ -34,6 +36,19 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+
+/** Allowlisted, content-free save diagnostics for device validation. */
+internal enum class VaultSaveStage {
+    PREPARE_TRANSACTION,
+    RESOLVE_SOURCE,
+    VALIDATE_SOURCE,
+    ENCRYPT_ASSET,
+    VERIFY_ASSET,
+    WRITE_MANIFEST,
+    WRITE_COMMIT_MARKER,
+    PROMOTE_TRANSACTION,
+    VERIFY_COMMITTED_DOCUMENT,
+}
 
 /**
  * Android encrypted repository candidate behind Toolly's platform-neutral document contract.
@@ -108,33 +123,44 @@ internal class EncryptedDocumentRepository(
             if (destination.isDirectory && File(destination, COMMITTED_MARKER).isFile) {
                 return@withContext readDocument(destination).fold(
                     onSuccess = { ToollyResult.Success(it) },
-                    onFailure = { failure -> cryptoOrCorruptFailure(failure) },
+                    onFailure = { failure ->
+                        failure.toToollyFailure(VaultSaveStage.VERIFY_COMMITTED_DOCUMENT)
+                    },
                 )
             }
 
+            var saveStage = VaultSaveStage.PREPARE_TRANSACTION
             val transaction = File(staging, command.operationId.value)
             transaction.deleteRecursivelySafely()
-            if (!transaction.mkdirs()) return@withContext storageFailure()
+            if (!transaction.mkdirs()) return@withContext storageFailure(saveStage)
 
             try {
                 for (page in command.pages.sortedBy { it.ordinal }) {
+                    saveStage = VaultSaveStage.RESOLVE_SOURCE
                     val source = resolveTemporaryAsset(page.temporaryAssetId.value)
                         ?: throw IOException()
+                    saveStage = VaultSaveStage.VALIDATE_SOURCE
                     requireCompleteJpeg(source)
                     val target = File(transaction, assetFileName(page.assetId))
                     val associatedData = assetAssociatedData(page.assetId)
+                    saveStage = VaultSaveStage.ENCRYPT_ASSET
                     assetCipher.encrypt(source, target, associatedData)
+                    saveStage = VaultSaveStage.VERIFY_ASSET
                     assetCipher.verify(target, associatedData)
                 }
+                saveStage = VaultSaveStage.WRITE_MANIFEST
                 writeManifest(transaction, manifestFrom(command))
+                saveStage = VaultSaveStage.WRITE_COMMIT_MARKER
                 writeAndSync(File(transaction, COMMITTED_MARKER), MARKER_BYTES)
 
+                saveStage = VaultSaveStage.PROMOTE_TRANSACTION
                 if (!transaction.renameTo(destination)) throw IOException()
+                saveStage = VaultSaveStage.VERIFY_COMMITTED_DOCUMENT
                 readDocument(destination).fold(
                     onSuccess = { ToollyResult.Success(it) },
                     onFailure = { failure ->
                         destination.deleteRecursivelySafely()
-                        cryptoOrCorruptFailure(failure)
+                        failure.toToollyFailure(saveStage)
                     },
                 )
             } catch (cancelled: CancellationException) {
@@ -142,8 +168,85 @@ internal class EncryptedDocumentRepository(
                 throw cancelled
             } catch (failure: Exception) {
                 transaction.deleteRecursivelySafely()
-                failure.toToollyFailure()
+                failure.toToollyFailure(saveStage)
             }
+        }
+    }
+
+    override suspend fun renameDocument(
+        documentId: DocumentId,
+        displayName: String?,
+        updatedAtEpochMillis: Long,
+    ): ToollyResult<DocumentDetails> = updateMetadata(documentId) { existing ->
+        require(displayName == null || displayName.isNotBlank())
+        require(displayName == null || displayName.length <= MAX_DISPLAY_NAME_LENGTH)
+        existing.copy(displayName = displayName, updatedAtEpochMillis = updatedAtEpochMillis)
+    }
+
+    override suspend fun tagDocument(
+        documentId: DocumentId,
+        category: DocumentCategory?,
+        updatedAtEpochMillis: Long,
+    ): ToollyResult<DocumentDetails> = updateMetadata(documentId) { existing ->
+        existing.copy(category = category, updatedAtEpochMillis = updatedAtEpochMillis)
+    }
+
+    /**
+     * Rewrites an already-committed document's manifest (name/category only; pages are untouched)
+     * without ever risking the working manifest.
+     *
+     * The replacement ciphertext is decrypted and re-parsed in memory *before* it ever touches
+     * disk, so a bug here can only fail closed -- it can never swap a healthy manifest for a
+     * broken one. The on-disk swap itself is a same-directory atomic rename over a synced temp
+     * file, mirroring the vault-scope write below.
+     */
+    private suspend fun updateMetadata(
+        documentId: DocumentId,
+        transform: (ManifestRecord) -> ManifestRecord,
+    ): ToollyResult<DocumentDetails> = withContext(Dispatchers.IO) {
+        synchronized(lock) {
+            if (legacyMigrationBlocked) return@withContext migrationFailure()
+            val destination = documentDirectory(documentId)
+            if (!destination.isDirectory || !File(destination, COMMITTED_MARKER).isFile) {
+                return@withContext unavailableFailure()
+            }
+            runSafely {
+                val manifestFile = File(destination, MANIFEST_FILE)
+                if (!manifestFile.isFile || manifestFile.length() !in 1..MAX_MANIFEST_ENVELOPE_BYTES) {
+                    throw IOException()
+                }
+                val existingPlaintext = metadataCipher.decrypt(
+                    manifestFile.readBytes(),
+                    metadataAssociatedData(documentId),
+                )
+                val existingRecord = try {
+                    parseManifestPlaintext(existingPlaintext, documentId)
+                } finally {
+                    existingPlaintext.fill(0)
+                }
+                val updatedRecord = transform(existingRecord)
+                require(updatedRecord.updatedAtEpochMillis >= existingRecord.createdAtEpochMillis)
+                require(updatedRecord.pages == existingRecord.pages)
+                updateCommittedManifest(destination, updatedRecord)
+                readDocument(destination).getOrThrow()
+            }
+        }
+    }
+
+    private fun updateCommittedManifest(destination: File, record: ManifestRecord) {
+        val encrypted = encryptManifest(record)
+        val verifyPlaintext = metadataCipher.decrypt(encrypted, metadataAssociatedData(record.documentId))
+        try {
+            val reparsed = parseManifestPlaintext(verifyPlaintext, record.documentId)
+            check(reparsed == record)
+        } finally {
+            verifyPlaintext.fill(0)
+        }
+        val tmp = File(destination, "$MANIFEST_FILE.tmp")
+        writeAndSync(tmp, encrypted)
+        if (!tmp.renameTo(File(destination, MANIFEST_FILE))) {
+            tmp.delete()
+            throw IOException()
         }
     }
 
@@ -266,6 +369,10 @@ internal class EncryptedDocumentRepository(
     }
 
     private fun writeManifest(directory: File, record: ManifestRecord) {
+        writeAndSync(File(directory, MANIFEST_FILE), encryptManifest(record))
+    }
+
+    private fun encryptManifest(record: ManifestRecord): ByteArray {
         val pages = JSONArray()
         for (page in record.pages.sortedBy { it.ordinal }) {
             pages.put(
@@ -282,17 +389,71 @@ internal class EncryptedDocumentRepository(
             .put(KEY_DOCUMENT_ID, record.documentId.value)
             .put(KEY_CREATED_AT, record.createdAtEpochMillis)
             .put(KEY_UPDATED_AT, record.updatedAtEpochMillis)
+            .put(KEY_DISPLAY_NAME, record.displayName ?: JSONObject.NULL)
+            .put(KEY_CATEGORY, record.category?.name ?: JSONObject.NULL)
             .put(KEY_PAGES, pages)
             .toString()
             .toByteArray(Charsets.UTF_8)
-        try {
-            val encrypted = metadataCipher.encrypt(
-                plaintext,
-                metadataAssociatedData(record.documentId),
-            )
-            writeAndSync(File(directory, MANIFEST_FILE), encrypted)
+        return try {
+            metadataCipher.encrypt(plaintext, metadataAssociatedData(record.documentId))
         } finally {
             plaintext.fill(0)
+        }
+    }
+
+    /**
+     * Parses a decrypted manifest payload into a [ManifestRecord].
+     *
+     * [KEY_DISPLAY_NAME] and [KEY_CATEGORY] are read as optional: manifests written before this
+     * field existed have neither key, and must keep opening exactly as they did before (name and
+     * category simply read back as `null`) rather than being rejected as corrupt.
+     */
+    private fun parseManifestPlaintext(plaintext: ByteArray, documentId: DocumentId): ManifestRecord {
+        val json = JSONObject(plaintext.toString(Charsets.UTF_8))
+        if (
+            json.getInt(KEY_SCHEMA_VERSION) != SCHEMA_VERSION ||
+            json.getString(KEY_DOCUMENT_ID) != documentId.value
+        ) {
+            throw IOException()
+        }
+        val pagesJson = json.getJSONArray(KEY_PAGES)
+        val pages = buildList {
+            for (index in 0 until pagesJson.length()) {
+                val page = pagesJson.getJSONObject(index)
+                add(
+                    ManifestPage(
+                        pageId = PageId(canonicalUuid(page.getString(KEY_PAGE_ID))),
+                        assetId = AssetId(canonicalUuid(page.getString(KEY_ASSET_ID))),
+                        ordinal = page.getInt(KEY_ORDINAL),
+                        widthPixels = page.optionalPositiveInt(KEY_WIDTH),
+                        heightPixels = page.optionalPositiveInt(KEY_HEIGHT),
+                    ),
+                )
+            }
+        }
+        return ManifestRecord(
+            documentId = documentId,
+            createdAtEpochMillis = json.getLong(KEY_CREATED_AT),
+            updatedAtEpochMillis = json.getLong(KEY_UPDATED_AT),
+            displayName = json.optionalDisplayName(),
+            category = json.optionalCategory(),
+            pages = pages,
+        )
+    }
+
+    private fun JSONObject.optionalDisplayName(): String? {
+        if (!has(KEY_DISPLAY_NAME) || isNull(KEY_DISPLAY_NAME)) return null
+        val value = getString(KEY_DISPLAY_NAME)
+        if (value.isBlank() || value.length > MAX_DISPLAY_NAME_LENGTH) throw IOException()
+        return value
+    }
+
+    private fun JSONObject.optionalCategory(): DocumentCategory? {
+        if (!has(KEY_CATEGORY) || isNull(KEY_CATEGORY)) return null
+        return try {
+            DocumentCategory.valueOf(getString(KEY_CATEGORY))
+        } catch (malformed: IllegalArgumentException) {
+            throw IOException()
         }
     }
 
@@ -306,46 +467,34 @@ internal class EncryptedDocumentRepository(
             manifestFile.readBytes(),
             metadataAssociatedData(documentId),
         )
-        try {
-            val json = JSONObject(plaintext.toString(Charsets.UTF_8))
-            if (
-                json.getInt(KEY_SCHEMA_VERSION) != SCHEMA_VERSION ||
-                json.getString(KEY_DOCUMENT_ID) != documentId.value
-            ) {
-                throw IOException()
-            }
-            val pagesJson = json.getJSONArray(KEY_PAGES)
-            val pages = buildList {
-                for (index in 0 until pagesJson.length()) {
-                    val page = pagesJson.getJSONObject(index)
-                    val assetId = AssetId(canonicalUuid(page.getString(KEY_ASSET_ID)))
-                    val encryptedAsset = File(directory, assetFileName(assetId))
-                    assetCipher.verify(encryptedAsset, assetAssociatedData(assetId))
-                    add(
-                        DocumentPage(
-                            id = PageId(canonicalUuid(page.getString(KEY_PAGE_ID))),
-                            sourceAssetId = assetId,
-                            ordinal = page.getInt(KEY_ORDINAL),
-                            widthPixels = page.optionalPositiveInt(KEY_WIDTH),
-                            heightPixels = page.optionalPositiveInt(KEY_HEIGHT),
-                        ),
-                    )
-                }
-            }
-            val createdAt = json.getLong(KEY_CREATED_AT)
-            DocumentDetails(
-                summary = DocumentSummary(
-                    id = documentId,
-                    pageCount = pages.size,
-                    createdAtEpochMillis = createdAt,
-                    updatedAtEpochMillis = json.getLong(KEY_UPDATED_AT),
-                    lifecycle = DocumentLifecycle.ACTIVE,
-                ),
-                pages = pages.sortedBy { it.ordinal },
-            )
+        val record = try {
+            parseManifestPlaintext(plaintext, documentId)
         } finally {
             plaintext.fill(0)
         }
+        val pages = record.pages.map { page ->
+            val encryptedAsset = File(directory, assetFileName(page.assetId))
+            assetCipher.verify(encryptedAsset, assetAssociatedData(page.assetId))
+            DocumentPage(
+                id = page.pageId,
+                sourceAssetId = page.assetId,
+                ordinal = page.ordinal,
+                widthPixels = page.widthPixels,
+                heightPixels = page.heightPixels,
+            )
+        }
+        DocumentDetails(
+            summary = DocumentSummary(
+                id = documentId,
+                pageCount = pages.size,
+                createdAtEpochMillis = record.createdAtEpochMillis,
+                updatedAtEpochMillis = record.updatedAtEpochMillis,
+                lifecycle = DocumentLifecycle.ACTIVE,
+                displayName = record.displayName,
+                category = record.category,
+            ),
+            pages = pages.sortedBy { it.ordinal },
+        )
     }
 
     private fun readLegacyManifest(directory: File): ManifestRecord {
@@ -376,6 +525,8 @@ internal class EncryptedDocumentRepository(
             documentId = documentId,
             createdAtEpochMillis = json.getLong(KEY_CREATED_AT),
             updatedAtEpochMillis = json.getLong(KEY_UPDATED_AT),
+            displayName = null,
+            category = null,
             pages = pages,
         )
     }
@@ -385,6 +536,8 @@ internal class EncryptedDocumentRepository(
             documentId = command.documentId,
             createdAtEpochMillis = command.createdAtEpochMillis,
             updatedAtEpochMillis = command.createdAtEpochMillis,
+            displayName = null,
+            category = null,
             pages = command.pages.map {
                 ManifestPage(
                     pageId = it.pageId,
@@ -512,23 +665,31 @@ internal class EncryptedDocumentRepository(
         failure.toToollyFailure()
     }
 
-    private fun <T> Throwable.toToollyFailure(): ToollyResult<T> = when (this) {
-        is VaultCryptoException.KeyUnavailable -> ToollyResult.Failure(
-            ToollyError(ToollyErrorCode.UNAUTHORIZED, ToollyErrorCode.UNAUTHORIZED.name),
+    private fun <T> Throwable.toToollyFailure(
+        saveStage: VaultSaveStage? = null,
+    ): ToollyResult<T> {
+        val code = when (this) {
+            is VaultCryptoException.KeyUnavailable -> ToollyErrorCode.UNAUTHORIZED
+            is VaultCryptoException,
+            is JSONException,
+            is IllegalArgumentException -> ToollyErrorCode.CORRUPT
+            else -> ToollyErrorCode.RETRYABLE
+        }
+        return ToollyResult.Failure(
+            ToollyError(code, saveStage?.name ?: code.name),
         )
-        is VaultCryptoException,
-        is JSONException,
-        is IllegalArgumentException -> ToollyResult.Failure(
-            ToollyError(ToollyErrorCode.CORRUPT, ToollyErrorCode.CORRUPT.name),
-        )
-        else -> storageFailure()
     }
 
     private fun <T> cryptoOrCorruptFailure(failure: Throwable): ToollyResult<T> =
         failure.toToollyFailure()
 
-    private fun <T> storageFailure(): ToollyResult<T> = ToollyResult.Failure(
-        ToollyError(ToollyErrorCode.RETRYABLE, ToollyErrorCode.RETRYABLE.name),
+    private fun <T> storageFailure(
+        saveStage: VaultSaveStage? = null,
+    ): ToollyResult<T> = ToollyResult.Failure(
+        ToollyError(
+            ToollyErrorCode.RETRYABLE,
+            saveStage?.name ?: ToollyErrorCode.RETRYABLE.name,
+        ),
     )
 
     private fun <T> migrationFailure(): ToollyResult<T> = ToollyResult.Failure(
@@ -562,6 +723,8 @@ internal class EncryptedDocumentRepository(
         val documentId: DocumentId,
         val createdAtEpochMillis: Long,
         val updatedAtEpochMillis: Long,
+        val displayName: String?,
+        val category: DocumentCategory?,
         val pages: List<ManifestPage>,
     )
 
@@ -604,6 +767,8 @@ internal class EncryptedDocumentRepository(
         const val KEY_DOCUMENT_ID = "documentId"
         const val KEY_CREATED_AT = "createdAtEpochMillis"
         const val KEY_UPDATED_AT = "updatedAtEpochMillis"
+        const val KEY_DISPLAY_NAME = "displayName"
+        const val KEY_CATEGORY = "category"
         const val KEY_PAGES = "pages"
         const val KEY_PAGE_ID = "pageId"
         const val KEY_ASSET_ID = "assetId"

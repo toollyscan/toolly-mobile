@@ -1,18 +1,26 @@
 package com.toolly.spike.capture
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.toolly.domain.contracts.SaveCapturedDocumentCommand
 import com.toolly.domain.contracts.SaveCapturedPage
 import com.toolly.domain.model.AssetId
+import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.OperationId
 import com.toolly.domain.model.PageId
 import com.toolly.domain.model.TemporaryAssetId
+import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
+import com.toolly.spike.capture.vault.VaultSaveStage
 import com.toolly.spike.capture.vault.crypto.AndroidAssetCipher
 import com.toolly.spike.capture.vault.crypto.AndroidMetadataCipher
+import com.toolly.spike.capture.vault.crypto.MetadataAssociatedData
+import com.toolly.spike.capture.vault.crypto.RecordKind
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.UUID
@@ -21,6 +29,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -38,7 +47,8 @@ class EncryptedDocumentRepositoryInstrumentedTest {
         val assetAlias = "com.toolly.test.asset.$suffix"
         val metadataCipher = AndroidMetadataCipher(metadataAlias)
         val assetCipher = AndroidAssetCipher(assetAlias)
-        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(testJpeg()) }
+        val jpeg = testJpeg()
+        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(jpeg) }
         val command = testCommand()
         val resolver = { rawId: String ->
             source.takeIf { rawId == command.pages.single().temporaryAssetId.value }
@@ -56,11 +66,14 @@ class EncryptedDocumentRepositoryInstrumentedTest {
             assertTrue(first.saveCapturedDocument(command) is ToollyResult.Success)
 
             val encryptedRoot = File(context.noBackupFilesDir, rootName)
-            val persistentBytes = encryptedRoot.walkTopDown()
-                .filter(File::isFile)
-                .flatMap { it.readBytes().asSequence() }
-                .toList()
-            assertFalse(persistentBytes.windowed(testJpeg().size).any { it == testJpeg().toList() })
+            val persistentBytes = ByteArrayOutputStream().use { output ->
+                encryptedRoot.walkTopDown()
+                    .filter(File::isFile)
+                    .forEach { output.write(it.readBytes()) }
+                output.toByteArray()
+            }
+            val plaintextProbe = jpeg.copyOfRange(jpeg.size / 2, jpeg.size / 2 + 512)
+            assertFalse(persistentBytes.containsSubsequence(plaintextProbe))
 
             val reopened = EncryptedDocumentRepository(
                 context = context,
@@ -136,6 +149,48 @@ class EncryptedDocumentRepositoryInstrumentedTest {
     }
 
     @Test
+    fun invalidJpeg_reportsAllowlistedStageAndPublishesNothing() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val suffix = UUID.randomUUID().toString()
+        val rootName = "toolly-test-vault-$suffix"
+        val legacyName = "toolly-test-legacy-$suffix"
+        val metadataCipher = AndroidMetadataCipher("com.toolly.test.metadata.$suffix")
+        val assetCipher = AndroidAssetCipher("com.toolly.test.asset.$suffix")
+        val source = File(context.cacheDir, "$suffix.jpg").apply {
+            writeBytes(byteArrayOf(1, 2, 3, 4))
+        }
+        val command = testCommand()
+
+        try {
+            val repository = EncryptedDocumentRepository(
+                context = context,
+                resolveTemporaryAsset = { source },
+                metadataCipher = metadataCipher,
+                assetCipher = assetCipher,
+                rootDirectoryName = rootName,
+                legacyRootDirectoryName = legacyName,
+            )
+            val result = repository.saveCapturedDocument(command)
+
+            assertTrue(result is ToollyResult.Failure)
+            val failure = result as ToollyResult.Failure
+            assertEquals(ToollyErrorCode.RETRYABLE, failure.error.code)
+            assertEquals(VaultSaveStage.VALIDATE_SOURCE.name, failure.error.safeMessage)
+            assertFalse(
+                File(context.noBackupFilesDir, "$rootName/documents")
+                    .walkTopDown()
+                    .any { it.name == "COMMITTED" },
+            )
+        } finally {
+            metadataCipher.deleteWrappingKeyForTesting()
+            assetCipher.deleteWrappingKeyForTesting()
+            File(context.noBackupFilesDir, rootName).deleteRecursively()
+            File(context.filesDir, legacyName).deleteRecursively()
+            source.delete()
+        }
+    }
+
+    @Test
     fun missingVaultScope_withCommittedDocument_failsClosed() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val suffix = UUID.randomUUID().toString()
@@ -168,6 +223,138 @@ class EncryptedDocumentRepositoryInstrumentedTest {
                     legacyRootDirectoryName = legacyName,
                 )
             }
+        } finally {
+            metadataCipher.deleteWrappingKeyForTesting()
+            assetCipher.deleteWrappingKeyForTesting()
+            File(context.noBackupFilesDir, rootName).deleteRecursively()
+            File(context.filesDir, legacyName).deleteRecursively()
+            source.delete()
+        }
+    }
+
+    @Test
+    fun renameAndTagDocument_persistAndSurviveReopen() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val suffix = UUID.randomUUID().toString()
+        val rootName = "toolly-test-vault-$suffix"
+        val legacyName = "toolly-test-legacy-$suffix"
+        val metadataAlias = "com.toolly.test.metadata.$suffix"
+        val assetAlias = "com.toolly.test.asset.$suffix"
+        val metadataCipher = AndroidMetadataCipher(metadataAlias)
+        val assetCipher = AndroidAssetCipher(assetAlias)
+        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(testJpeg()) }
+        val command = testCommand()
+
+        try {
+            val repository = EncryptedDocumentRepository(
+                context = context,
+                resolveTemporaryAsset = { source },
+                metadataCipher = metadataCipher,
+                assetCipher = assetCipher,
+                rootDirectoryName = rootName,
+                legacyRootDirectoryName = legacyName,
+            )
+            val saved = repository.saveCapturedDocument(command)
+            assertTrue(saved is ToollyResult.Success)
+            assertNull((saved as ToollyResult.Success).value.summary.displayName)
+            assertNull(saved.value.summary.category)
+
+            val renamed = repository.renameDocument(command.documentId, "Electricity bill", 200L)
+            assertTrue(renamed is ToollyResult.Success)
+            assertEquals("Electricity bill", (renamed as ToollyResult.Success).value.summary.displayName)
+            assertEquals(1, renamed.value.pages.size)
+            assertEquals(200L, renamed.value.summary.updatedAtEpochMillis)
+
+            val tagged = repository.tagDocument(command.documentId, DocumentCategory.RECEIPT, 300L)
+            assertTrue(tagged is ToollyResult.Success)
+            assertEquals(DocumentCategory.RECEIPT, (tagged as ToollyResult.Success).value.summary.category)
+            assertEquals("Electricity bill", tagged.value.summary.displayName)
+
+            val reopened = EncryptedDocumentRepository(
+                context = context,
+                resolveTemporaryAsset = { null },
+                metadataCipher = AndroidMetadataCipher(metadataAlias),
+                assetCipher = AndroidAssetCipher(assetAlias),
+                rootDirectoryName = rootName,
+                legacyRootDirectoryName = legacyName,
+            )
+            val details = reopened.getDocument(command.documentId)
+            assertTrue(details is ToollyResult.Success)
+            val summary = (details as ToollyResult.Success).value.summary
+            assertEquals("Electricity bill", summary.displayName)
+            assertEquals(DocumentCategory.RECEIPT, summary.category)
+        } finally {
+            metadataCipher.deleteWrappingKeyForTesting()
+            assetCipher.deleteWrappingKeyForTesting()
+            File(context.noBackupFilesDir, rootName).deleteRecursively()
+            File(context.filesDir, legacyName).deleteRecursively()
+            source.delete()
+        }
+    }
+
+    @Test
+    fun manifestWithoutOptionalMetadataKeys_readsWithNullNameAndCategory() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val suffix = UUID.randomUUID().toString()
+        val rootName = "toolly-test-vault-$suffix"
+        val legacyName = "toolly-test-legacy-$suffix"
+        val metadataCipher = AndroidMetadataCipher("com.toolly.test.metadata.$suffix")
+        val assetCipher = AndroidAssetCipher("com.toolly.test.asset.$suffix")
+        val source = File(context.cacheDir, "$suffix.jpg").apply { writeBytes(testJpeg()) }
+        val command = testCommand()
+
+        try {
+            val repository = EncryptedDocumentRepository(
+                context = context,
+                resolveTemporaryAsset = { source },
+                metadataCipher = metadataCipher,
+                assetCipher = assetCipher,
+                rootDirectoryName = rootName,
+                legacyRootDirectoryName = legacyName,
+            )
+            assertTrue(repository.saveCapturedDocument(command) is ToollyResult.Success)
+
+            // Simulate a document committed by a build that predates displayName/category: replace
+            // the manifest with an equivalent payload that omits both keys entirely.
+            val vaultScopeId = File(context.noBackupFilesDir, "$rootName/vault.scope")
+                .readText(Charsets.UTF_8)
+            val page = command.pages.single()
+            val preMigrationPlaintext = JSONObject()
+                .put("schemaVersion", 1)
+                .put("documentId", command.documentId.value)
+                .put("createdAtEpochMillis", command.createdAtEpochMillis)
+                .put("updatedAtEpochMillis", command.createdAtEpochMillis)
+                .put(
+                    "pages",
+                    JSONArray().put(
+                        JSONObject()
+                            .put("pageId", page.pageId.value)
+                            .put("assetId", page.assetId.value)
+                            .put("ordinal", page.ordinal)
+                            .put("widthPixels", JSONObject.NULL)
+                            .put("heightPixels", JSONObject.NULL),
+                    ),
+                )
+                .toString()
+                .toByteArray(Charsets.UTF_8)
+            val associatedData = MetadataAssociatedData(
+                vaultScopeId = vaultScopeId,
+                recordId = command.documentId.value,
+                recordKind = RecordKind.DOCUMENT,
+                schemaVersion = 1,
+                revision = 0L,
+            )
+            val preMigrationManifest = metadataCipher.encrypt(preMigrationPlaintext, associatedData)
+            File(
+                context.noBackupFilesDir,
+                "$rootName/documents/${command.documentId.value}/manifest.tlym",
+            ).writeBytes(preMigrationManifest)
+
+            val reopened = repository.getDocument(command.documentId)
+            assertTrue(reopened is ToollyResult.Success)
+            val summary = (reopened as ToollyResult.Success).value.summary
+            assertNull(summary.displayName)
+            assertNull(summary.category)
         } finally {
             metadataCipher.deleteWrappingKeyForTesting()
             assetCipher.deleteWrappingKeyForTesting()
@@ -217,12 +404,44 @@ class EncryptedDocumentRepositoryInstrumentedTest {
             .toString()
     }
 
-    private fun testJpeg(): ByteArray = byteArrayOf(
-        0xFF.toByte(),
-        0xD8.toByte(),
-        0x01,
-        0x02,
-        0xFF.toByte(),
-        0xD9.toByte(),
-    )
+    private fun ByteArray.containsSubsequence(candidate: ByteArray): Boolean {
+        if (candidate.isEmpty()) return true
+        if (candidate.size > size) return false
+        for (start in 0..size - candidate.size) {
+            var matches = true
+            for (offset in candidate.indices) {
+                if (this[start + offset] != candidate[offset]) {
+                    matches = false
+                    break
+                }
+            }
+            if (matches) return true
+        }
+        return false
+    }
+
+    private fun testJpeg(): ByteArray {
+        val width = 1024
+        val height = 1536
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        return try {
+            val pixels = IntArray(width * height) { index ->
+                val value = index * 1103515245 + 12345
+                Color.rgb(
+                    value ushr 16 and 0xFF,
+                    value ushr 8 and 0xFF,
+                    value and 0xFF,
+                )
+            }
+            bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+            ByteArrayOutputStream().use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.JPEG, 90, output))
+                output.toByteArray().also { encoded ->
+                    check(encoded.size > 256 * 1024)
+                }
+            }
+        } finally {
+            bitmap.recycle()
+        }
+    }
 }

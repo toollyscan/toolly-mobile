@@ -4,23 +4,30 @@ import android.graphics.Bitmap
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +45,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.toolly.domain.model.AssetId
+import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentExportDelivery
 import com.toolly.domain.model.DocumentExportFormat
@@ -52,6 +60,9 @@ import com.toolly.shared.capture.ScanError
 import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId
+import com.toolly.shared.ui.ExportBuilderScreen
+import com.toolly.shared.ui.ExportPrivacyCheckScreen
+import com.toolly.shared.ui.ToollyExportFormat
 import java.io.File
 
 /**
@@ -72,6 +83,8 @@ fun ToollyDocumentApp(
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
+    onRenameDocument: (DocumentId, String?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onTagDocument: (DocumentId, DocumentCategory?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
     onReleaseAssets: (Collection<TemporaryAssetId>) -> Unit,
@@ -80,6 +93,7 @@ fun ToollyDocumentApp(
     var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
     var isWorking by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<UiMessage?>(null) }
+    val captureLaunchRequest = LocalCaptureLaunchRequest.current
 
     fun refreshLibrary() {
         isWorking = true
@@ -95,8 +109,43 @@ fun ToollyDocumentApp(
         }
     }
 
+    fun launchCapture() {
+        if (!isWorking && screen == AppScreen.Library) {
+            isWorking = true
+            message = null
+            onLaunchCapture(ScanConfig()) { result ->
+                isWorking = false
+                when (result) {
+                    is ScanResult.Success -> {
+                        screen = AppScreen.CapturePreview(result.pages)
+                    }
+                    ScanResult.Cancelled -> {
+                        message = UiMessage(R.string.capture_cancelled)
+                    }
+                    is ScanResult.Failure -> {
+                        val error = result.error
+                        message = UiMessage(captureErrorMessage(error))
+                        if (error is ScanError.PartialCapture) {
+                            screen = AppScreen.CapturePreview(error.capturedPages)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         refreshLibrary()
+    }
+    LaunchedEffect(captureLaunchRequest.requested, isWorking, screen) {
+        if (
+            captureLaunchRequest.requested &&
+            !isWorking &&
+            screen == AppScreen.Library
+        ) {
+            captureLaunchRequest.consume()
+            launchCapture()
+        }
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -105,30 +154,7 @@ fun ToollyDocumentApp(
                 documents = documents,
                 isWorking = isWorking,
                 message = message,
-                onScan = {
-                    if (!isWorking) {
-                        isWorking = true
-                        message = null
-                        onLaunchCapture(ScanConfig()) { result ->
-                            isWorking = false
-                            when (result) {
-                                is ScanResult.Success -> {
-                                    screen = AppScreen.CapturePreview(result.pages)
-                                }
-                                ScanResult.Cancelled -> {
-                                    message = UiMessage(R.string.capture_cancelled)
-                                }
-                                is ScanResult.Failure -> {
-                                    val error = result.error
-                                    message = UiMessage(captureErrorMessage(error))
-                                    if (error is ScanError.PartialCapture) {
-                                        screen = AppScreen.CapturePreview(error.capturedPages)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
+                onScan = ::launchCapture,
                 onOpen = { documentId ->
                     isWorking = true
                     onOpenDocument(documentId) { result ->
@@ -175,26 +201,134 @@ fun ToollyDocumentApp(
 
             is AppScreen.Document -> DocumentScreen(
                 document = current.details,
-                isExporting = isWorking,
                 message = message,
                 loadAssetBitmap = loadDocumentAssetBitmap,
-                onExport = { format, delivery ->
-                    if (!isWorking) {
-                        isWorking = true
-                        message = null
-                        onExportDocument(current.details, format, delivery) { outcome ->
-                            isWorking = false
-                            message = UiMessage(exportOutcomeMessage(outcome))
+                onRename = { name ->
+                    onRenameDocument(current.details.summary.id, name) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = AppScreen.Document(result.value)
+                                message = null
+                                refreshLibrary()
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
                         }
                     }
+                },
+                onTag = { category ->
+                    onTagDocument(current.details.summary.id, category) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = AppScreen.Document(result.value)
+                                message = null
+                                refreshLibrary()
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
+                },
+                onStartExport = {
+                    message = null
+                    screen = AppScreen.ExportBuilder(current.details)
                 },
                 onBack = {
                     message = null
                     screen = AppScreen.Library
                 },
             )
+
+            is AppScreen.ExportBuilder -> {
+                var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                ExportBuilderScreen(
+                    format = format,
+                    onFormatChange = { format = it },
+                    onContinue = {
+                        screen = AppScreen.ExportPrivacyCheck(current.details, format)
+                    },
+                    onBack = {
+                        message = null
+                        screen = AppScreen.Document(current.details)
+                    },
+                    previewContent = {
+                        DocumentPageGrid(
+                            pages = current.details.pages,
+                            loadAssetBitmap = loadDocumentAssetBitmap,
+                            modifier = Modifier.heightIn(max = 240.dp),
+                        )
+                    },
+                )
+            }
+
+            is AppScreen.ExportPrivacyCheck -> {
+                val domainFormat = current.format.toDomainFormat()
+                ExportPrivacyCheckScreen(
+                    busy = isWorking,
+                    onSaveToDevice = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SAVE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = AppScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onShare = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SHARE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = AppScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onBack = {
+                        screen = AppScreen.ExportBuilder(current.details)
+                    },
+                )
+            }
         }
     }
+}
+
+private fun ToollyExportFormat.toDomainFormat(): DocumentExportFormat = when (this) {
+    ToollyExportFormat.PDF -> DocumentExportFormat.PDF
+    ToollyExportFormat.JPEG -> DocumentExportFormat.JPEG
+}
+
+/**
+ * Library's Receipts/IDs/Other chips filter on [DocumentSummary.category]; Untagged surfaces
+ * documents nobody has categorized yet. This is a fixed, closed set (mirrors [DocumentCategory]
+ * plus an explicit "no category" bucket) rather than the wireframe's "Offline" chip, which would
+ * have been misleading here -- every document in this vault is already local-only, so an
+ * "Offline" filter would just duplicate "All".
+ */
+private enum class LibraryFilter { ALL, RECEIPTS, IDS, OTHER, UNTAGGED }
+
+private fun DocumentSummary.matchesFilter(filter: LibraryFilter): Boolean = when (filter) {
+    LibraryFilter.ALL -> true
+    LibraryFilter.RECEIPTS -> category == DocumentCategory.RECEIPT
+    LibraryFilter.IDS -> category == DocumentCategory.IDENTIFICATION
+    LibraryFilter.OTHER -> category == DocumentCategory.OTHER
+    LibraryFilter.UNTAGGED -> category == null
+}
+
+@StringRes
+private fun LibraryFilter.labelRes(): Int = when (this) {
+    LibraryFilter.ALL -> R.string.category_all
+    LibraryFilter.RECEIPTS -> R.string.category_receipts
+    LibraryFilter.IDS -> R.string.category_ids
+    LibraryFilter.OTHER -> R.string.category_other
+    LibraryFilter.UNTAGGED -> R.string.category_untagged
 }
 
 @Composable
@@ -206,6 +340,14 @@ private fun LibraryScreen(
     onOpen: (DocumentId) -> Unit,
 ) {
     val expanded = LocalConfiguration.current.screenWidthDp >= 600
+    var query by remember { mutableStateOf("") }
+    var filter by remember { mutableStateOf(LibraryFilter.ALL) }
+    val filteredDocuments = remember(documents, query, filter) {
+        documents.filter { document ->
+            document.matchesFilter(filter) &&
+                (query.isBlank() || document.displayName?.contains(query, ignoreCase = true) == true)
+        }
+    }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
@@ -238,6 +380,29 @@ private fun LibraryScreen(
                 }
             }
             StatusMessage(message)
+            if (documents.isNotEmpty()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text(stringResource(R.string.library_search_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                ) {
+                    for (option in LibraryFilter.entries) {
+                        FilterChip(
+                            selected = filter == option,
+                            onClick = { filter = option },
+                            label = { Text(stringResource(option.labelRes())) },
+                        )
+                    }
+                }
+            }
             if (documents.isEmpty() && !isWorking) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
@@ -245,9 +410,16 @@ private fun LibraryScreen(
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
+            } else if (documents.isNotEmpty() && filteredDocuments.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        stringResource(R.string.no_search_results),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(documents, key = { it.id.value }) { document ->
+                    items(filteredDocuments, key = { it.id.value }) { document ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -258,7 +430,7 @@ private fun LibraryScreen(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Text(
-                                    stringResource(R.string.scanned_document),
+                                    document.displayName ?: stringResource(R.string.scanned_document),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                                 Text(
@@ -330,12 +502,14 @@ private fun CapturePreviewScreen(
 @Composable
 private fun DocumentScreen(
     document: DocumentDetails,
-    isExporting: Boolean,
     message: UiMessage?,
     loadAssetBitmap: suspend (AssetId) -> Bitmap?,
-    onExport: (DocumentExportFormat, DocumentExportDelivery) -> Unit,
+    onRename: (String?) -> Unit,
+    onTag: (DocumentCategory?) -> Unit,
+    onStartExport: () -> Unit,
     onBack: () -> Unit,
 ) {
+    var renaming by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -351,9 +525,13 @@ private fun DocumentScreen(
                 Text(stringResource(R.string.back))
             }
             Text(
-                stringResource(R.string.scanned_document),
+                document.summary.displayName ?: stringResource(R.string.scanned_document),
                 style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f),
             )
+            TextButton(onClick = { renaming = true }) {
+                Text(stringResource(R.string.rename_document))
+            }
         }
         Text(
             pluralStringResource(
@@ -363,59 +541,89 @@ private fun DocumentScreen(
             ),
             style = MaterialTheme.typography.bodyMedium,
         )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                stringResource(R.string.document_category_label),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                for (option in DocumentCategory.entries) {
+                    FilterChip(
+                        selected = document.summary.category == option,
+                        onClick = {
+                            onTag(if (document.summary.category == option) null else option)
+                        },
+                        label = { Text(stringResource(option.labelRes())) },
+                    )
+                }
+            }
+        }
         DocumentPageGrid(
             pages = document.pages,
             loadAssetBitmap = loadAssetBitmap,
             modifier = Modifier.weight(1f),
         )
         StatusMessage(message)
-        Row(
+        Button(
+            onClick = onStartExport,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SAVE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_pdf))
-            }
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SAVE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_jpeg))
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.PDF, DocumentExportDelivery.SHARE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_share_pdf))
-            }
-            OutlinedButton(
-                onClick = {
-                    onExport(DocumentExportFormat.JPEG, DocumentExportDelivery.SHARE)
-                },
-                enabled = !isExporting,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.export_share_jpeg))
-            }
+            Text(stringResource(R.string.export_document))
         }
     }
+    if (renaming) {
+        RenameDocumentDialog(
+            initialName = document.summary.displayName.orEmpty(),
+            onConfirm = { name ->
+                renaming = false
+                onRename(name)
+            },
+            onDismiss = { renaming = false },
+        )
+    }
+}
+
+@Composable
+private fun RenameDocumentDialog(
+    initialName: String,
+    onConfirm: (String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var name by remember { mutableStateOf(initialName) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.rename_document_title)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                label = { Text(stringResource(R.string.rename_document_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name.trim().ifEmpty { null }) }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_cancel))
+            }
+        },
+    )
+}
+
+@StringRes
+private fun DocumentCategory.labelRes(): Int = when (this) {
+    DocumentCategory.RECEIPT -> R.string.category_receipts
+    DocumentCategory.IDENTIFICATION -> R.string.category_ids
+    DocumentCategory.OTHER -> R.string.category_other
 }
 
 @Composable
@@ -472,4 +680,6 @@ private sealed interface AppScreen {
     data object Library : AppScreen
     data class CapturePreview(val pages: List<ScannedPage>) : AppScreen
     data class Document(val details: DocumentDetails) : AppScreen
+    data class ExportBuilder(val details: DocumentDetails) : AppScreen
+    data class ExportPrivacyCheck(val details: DocumentDetails, val format: ToollyExportFormat) : AppScreen
 }

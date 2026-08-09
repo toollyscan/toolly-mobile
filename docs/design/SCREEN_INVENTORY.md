@@ -17,6 +17,34 @@ Each screen must exist in at least two variants: **phone** and **tablet**. Table
 
 > All screens below are currently **Evidence pending** — the live Figma file has not been audited.
 
+> **Note on implementation status vs. this table.** The Phone/Tablet columns above track Figma
+> *design-frame* evidence specifically, not code. As of the TLY-013 shared-application-flow work
+> (issue #52, PR #55), Compose implementations now exist — independent of, and not a substitute
+> for, the Figma evidence this table tracks — for: AU-01 through AU-11 (splash through session
+> routing, minus Google/Apple provider screens which remain behind the Phase 4 gate), CE-01/02/03/04
+> (crop review with draggable corners and a precision loupe — built but not yet wired into the live
+> ML Kit capture flow; see the Milestone 2 commit on that branch for why), ES-01/06/12 (export format
+> selection, the searchable-PDF premium-lock affordance, and OS share-sheet delivery — ES-02/03 PDF
+> and JPEG export themselves were already implemented and physically validated well before this
+> table existed), and a Privacy/Backup center (`PrivacyCenterScreen`/`BackupChoiceScreen` in
+> `shared-ui/.../ui/PrivacyBackupScreens.kt`) covering the intent of the wireframe's `6.1-6.4`
+> screens, presentation-only pending the Phase 5 cloud-backup gate. Physical-device and Figma-frame
+> evidence for all of the above remain outstanding per this table's own status key.
+>
+> **Document naming and categorization (follow-up to TLY-013).** `DocumentSummary` previously had
+> no name/title/category field at all, which is why LI-02's filter chips and SE-01/02/03 search
+> were descoped from the TLY-013 milestones above rather than built as non-functional UI. That gap
+> is now closed: the encrypted vault's manifest schema gained optional, backward-compatible
+> `displayName`/`category` fields (`EncryptedDocumentRepository`, `RenameDocumentUseCase`,
+> `TagDocumentUseCase`), and Library (`CaptureSpikeScreen.kt`) now has a real search field and
+> Receipts/IDs/Other/Untagged filter chips driven by that data, plus a rename affordance and
+> category chips on the document viewer. This covers LI-02's filtering intent and a name-based
+> subset of SE-01/02/03 (title matching only, per `USER_FLOW_MATRIX.md` PT-04 — OCR-text search
+> stays premium/deferred). It is reachable only through Library's own search field, not as a
+> separate SEARCH tab destination — shared-ui's `SearchScreen()` stub is unchanged; wiring a real
+> SEARCH tab would need the document list state lifted out of `ToollyDocumentApp` so both
+> destinations can share it, left as further follow-up rather than rushed into this pass.
+
 ---
 
 ## Launch and authentication
