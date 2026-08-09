@@ -44,6 +44,25 @@ Each screen must exist in at least two variants: **phone** and **tablet**. Table
 > separate SEARCH tab destination — shared-ui's `SearchScreen()` stub is unchanged; wiring a real
 > SEARCH tab would need the document list state lifted out of `ToollyDocumentApp` so both
 > destinations can share it, left as further follow-up rather than rushed into this pass.
+>
+> **Apple capture wired into a real Swift host (#48).** `AppleCaptureSessionImpl.swift`
+> (`iosApp/ToollyApp/`) implements the `AppleCaptureSession` boundary using VisionKit's
+> `VNDocumentCameraViewController` -- the first real capture adapter on iOS, staging captured
+> pages as JPEGs in an app-private caches directory (mirrors Android's `TemporaryScanStore`; no
+> Photos/Files access requested, matching #48's minimum-access requirement). `MainViewController.kt`
+> now actually launches it from the shared Scan action and, on a successful ordered-page result,
+> enters a real capture-review state (two new guarded reducer events, `CaptureReviewStarted`/
+> `CaptureDiscarded`) driving the existing shared `ReviewScreen`. Discard releases the staged
+> files for real. **What's still explicitly out of scope, not silently missing:** issue #48 itself
+> scopes only capture returning ordered pages, not persistence -- there is still no iOS equivalent
+> of `EncryptedDocumentRepository`, so `saveCapture()` remains an intentional no-op (its own
+> follow-up: a real iOS vault). No physical-device or simulator-camera evidence exists yet
+> (VisionKit's document camera has no simulator hardware to test against; CI can only confirm the
+> app compiles and launches). No Swift XCTest exists for the new adapter specifically -- the
+> existing `AppleDocumentScannerTest.kt` (iosTest, Kotlin) already covers the shared
+> ScanResult/ScanError bridging logic; a dedicated Swift test would need a Tests target added to
+> the Xcode project, which wasn't attempted here to avoid hand-editing `project.pbxproj` into an
+> unverifiable state without Xcode to check it against.
 
 ---
 
