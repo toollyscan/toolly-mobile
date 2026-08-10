@@ -300,6 +300,238 @@ fun ToollyDocumentApp(
     }
 }
 
+/**
+ * Real Search (wireframe 4.2/4.4) -- title-only matching against [DocumentSummary.displayName]
+ * (see `USER_FLOW_MATRIX.md` PT-04: recognized-text/OCR matching is premium/deferred, there is no
+ * OCR pipeline to match against). Loads its own copy of the document list independently of
+ * [ToollyDocumentApp]'s Library tab -- a second cheap local-disk read on switching to this tab,
+ * traded for not hoisting document/navigation state across both tabs' composables.
+ */
+@Composable
+fun SearchDocumentsScreen(
+    onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
+    onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onExportDocument: (
+        DocumentDetails,
+        DocumentExportFormat,
+        DocumentExportDelivery,
+        onResult: (DocumentExportOutcome) -> Unit,
+    ) -> Unit,
+    onRenameDocument: (DocumentId, String?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onTagDocument: (DocumentId, DocumentCategory?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
+) {
+    var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
+    var query by remember { mutableStateOf("") }
+    var isWorking by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<UiMessage?>(null) }
+    var screen by remember { mutableStateOf<SearchResultScreen>(SearchResultScreen.Results) }
+
+    LaunchedEffect(Unit) {
+        onLoadDocuments { result ->
+            if (result is ToollyResult.Success) documents = result.value
+        }
+    }
+
+    val results = remember(documents, query) {
+        if (query.isBlank()) {
+            emptyList()
+        } else {
+            documents.filter { it.displayName?.contains(query, ignoreCase = true) == true }
+        }
+    }
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        when (val current = screen) {
+            SearchResultScreen.Results -> SearchResultsScreen(
+                query = query,
+                onQueryChange = { query = it },
+                results = results,
+                message = message,
+                onOpen = { documentId ->
+                    isWorking = true
+                    onOpenDocument(documentId) { result ->
+                        isWorking = false
+                        when (result) {
+                            is ToollyResult.Success -> screen = SearchResultScreen.Document(result.value)
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
+                },
+            )
+
+            is SearchResultScreen.Document -> DocumentScreen(
+                document = current.details,
+                message = message,
+                loadAssetBitmap = loadDocumentAssetBitmap,
+                onRename = { name ->
+                    onRenameDocument(current.details.summary.id, name) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = SearchResultScreen.Document(result.value)
+                                message = null
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
+                },
+                onTag = { category ->
+                    onTagDocument(current.details.summary.id, category) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = SearchResultScreen.Document(result.value)
+                                message = null
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
+                },
+                onStartExport = {
+                    message = null
+                    screen = SearchResultScreen.ExportBuilder(current.details)
+                },
+                onBack = {
+                    message = null
+                    screen = SearchResultScreen.Results
+                },
+            )
+
+            is SearchResultScreen.ExportBuilder -> {
+                var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                ExportBuilderScreen(
+                    format = format,
+                    onFormatChange = { format = it },
+                    onContinue = {
+                        screen = SearchResultScreen.ExportPrivacyCheck(current.details, format)
+                    },
+                    onBack = {
+                        message = null
+                        screen = SearchResultScreen.Document(current.details)
+                    },
+                    previewContent = {
+                        DocumentPageGrid(
+                            pages = current.details.pages,
+                            loadAssetBitmap = loadDocumentAssetBitmap,
+                            modifier = Modifier.heightIn(max = 240.dp),
+                        )
+                    },
+                )
+            }
+
+            is SearchResultScreen.ExportPrivacyCheck -> {
+                val domainFormat = current.format.toDomainFormat()
+                ExportPrivacyCheckScreen(
+                    busy = isWorking,
+                    onSaveToDevice = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SAVE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = SearchResultScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onShare = {
+                        if (!isWorking) {
+                            isWorking = true
+                            message = null
+                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SHARE) { outcome ->
+                                isWorking = false
+                                message = UiMessage(exportOutcomeMessage(outcome))
+                                if (outcome is DocumentExportOutcome.Success) {
+                                    screen = SearchResultScreen.Document(current.details)
+                                }
+                            }
+                        }
+                    },
+                    onBack = {
+                        screen = SearchResultScreen.ExportBuilder(current.details)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsScreen(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    results: List<DocumentSummary>,
+    message: UiMessage?,
+    onOpen: (DocumentId) -> Unit,
+) {
+    val expanded = LocalConfiguration.current.screenWidthDp >= 600
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = if (expanded) 920.dp else 640.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+            Text(
+                stringResource(R.string.search_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                label = { Text(stringResource(R.string.library_search_hint)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            StatusMessage(message)
+            when {
+                query.isBlank() -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.search_prompt), style = MaterialTheme.typography.titleMedium)
+                }
+                results.isEmpty() -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.no_search_results), style = MaterialTheme.typography.titleMedium)
+                }
+                else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(results, key = { it.id.value }) { document ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().clickable { onOpen(document.id) },
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    document.displayName ?: stringResource(R.string.scanned_document),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Text(
+                                    stringResource(R.string.search_result_matched_title),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private sealed interface SearchResultScreen {
+    data object Results : SearchResultScreen
+    data class Document(val details: DocumentDetails) : SearchResultScreen
+    data class ExportBuilder(val details: DocumentDetails) : SearchResultScreen
+    data class ExportPrivacyCheck(val details: DocumentDetails, val format: ToollyExportFormat) : SearchResultScreen
+}
+
 private fun ToollyExportFormat.toDomainFormat(): DocumentExportFormat = when (this) {
     ToollyExportFormat.PDF -> DocumentExportFormat.PDF
     ToollyExportFormat.JPEG -> DocumentExportFormat.JPEG

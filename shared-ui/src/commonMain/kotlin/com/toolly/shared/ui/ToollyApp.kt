@@ -137,6 +137,7 @@ fun ToollyApp(
     state: ToollyUiState,
     actions: ToollyUiActions,
     documentsContent: (@Composable () -> Unit)? = null,
+    searchContent: (@Composable () -> Unit)? = null,
 ) {
     ToollyTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -156,7 +157,7 @@ fun ToollyApp(
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,
                 ToollyDestination.SEARCH,
-                ToollyDestination.PROFILE -> MainShell(state, actions, documentsContent)
+                ToollyDestination.PROFILE -> MainShell(state, actions, documentsContent, searchContent)
                 ToollyDestination.CAPTURE_REVIEW -> ReviewScreen(state, actions)
                 ToollyDestination.DOCUMENT_VIEWER -> ViewerScreen(state, actions)
                 ToollyDestination.PRIVACY_CENTER -> PrivacyCenterScreen(
@@ -590,6 +591,7 @@ private fun MainShell(
     state: ToollyUiState,
     actions: ToollyUiActions,
     documentsContent: (@Composable () -> Unit)?,
+    searchContent: (@Composable () -> Unit)?,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         if (maxWidth >= 600.dp) {
@@ -598,7 +600,7 @@ private fun MainShell(
             ) {
                 ExpandedNavigation(state, actions)
                 Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                    MainDestinationContent(state, actions, documentsContent)
+                    MainDestinationContent(state, actions, documentsContent, searchContent)
                 }
             }
         } else {
@@ -606,7 +608,7 @@ private fun MainShell(
                 modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
             ) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    MainDestinationContent(state, actions, documentsContent)
+                    MainDestinationContent(state, actions, documentsContent, searchContent)
                 }
                 CompactNavigation(state, actions)
             }
@@ -619,6 +621,7 @@ private fun MainDestinationContent(
     state: ToollyUiState,
     actions: ToollyUiActions,
     documentsContent: (@Composable () -> Unit)?,
+    searchContent: (@Composable () -> Unit)?,
 ) {
     when (state.destination) {
         ToollyDestination.HOME -> HomeScreen(state, actions)
@@ -626,7 +629,10 @@ private fun MainDestinationContent(
             if (documentsContent == null) LibraryScreen(state, actions)
             else documentsContent()
         }
-        ToollyDestination.SEARCH -> SearchScreen()
+        ToollyDestination.SEARCH -> {
+            if (searchContent == null) SearchScreen()
+            else searchContent()
+        }
         ToollyDestination.PROFILE -> ProfileScreen(state, actions)
         else -> Unit
     }

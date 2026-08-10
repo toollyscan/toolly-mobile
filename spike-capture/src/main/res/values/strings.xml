@@ -59,4 +59,7 @@
     <string name="rename_document_title">Document name</string>
     <string name="rename_document_hint">e.g. Electricity bill</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="search_subtitle">Search titles and categories</string>
+    <string name="search_prompt">Type to search your documents</string>
+    <string name="search_result_matched_title">Matched title</string>
 </resources>

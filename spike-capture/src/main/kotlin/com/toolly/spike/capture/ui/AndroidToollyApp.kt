@@ -23,6 +23,7 @@ import com.toolly.spike.capture.BuildConfig
 @Composable
 internal fun AndroidToollyApp(
     documentsContent: @Composable () -> Unit,
+    searchContent: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val preferences = remember(context) {
@@ -107,6 +108,7 @@ internal fun AndroidToollyApp(
                 }
             },
             documentsContent = documentsContent,
+            searchContent = searchContent,
         )
     }
 }
