@@ -62,45 +62,22 @@ class ToollyUiStateTest {
     }
 
     @Test
-    fun localUseDoesNotRequireAuthentication() {
-        val welcome = reduceToollyUiState(
-            ToollyUiState.returningSignedOut(),
-            ToollyUiEvent.SplashFinished,
-        )
-        val library = reduceToollyUiState(
-            welcome,
-            ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY),
-        )
-        val search = reduceToollyUiState(
-            library,
-            ToollyUiEvent.MainDestinationSelected(ToollyDestination.SEARCH),
-        )
+    fun authenticatedUserCanNavigateToLibraryAndSearch() {
+        val library = reduceToollyUiState(atHome(), ToollyUiEvent.MainDestinationSelected(ToollyDestination.LIBRARY))
+        val search = reduceToollyUiState(library, ToollyUiEvent.MainDestinationSelected(ToollyDestination.SEARCH))
 
-        assertEquals(ToollySessionState.LOCAL, library.sessionState)
+        assertEquals(ToollySessionState.AUTHENTICATED, library.sessionState)
         assertEquals(ToollyDestination.LIBRARY, library.destination)
         assertEquals(ToollyDestination.SEARCH, search.destination)
     }
 
     @Test
-    fun localSessionCanOpenOptionalAccountAndReturnToProfile() {
-        val welcome = reduceToollyUiState(
-            ToollyUiState.returningSignedOut(),
-            ToollyUiEvent.SplashFinished,
-        )
-        val local = reduceToollyUiState(
-            welcome,
-            ToollyUiEvent.LocalSessionStarted(ToollyDestination.HOME),
-        )
-        val profile = reduceToollyUiState(
-            local,
-            ToollyUiEvent.MainDestinationSelected(ToollyDestination.PROFILE),
-        )
-        val signIn = reduceToollyUiState(profile, ToollyUiEvent.SignInSelected)
-        val returned = reduceToollyUiState(signIn, ToollyUiEvent.BackToWelcome)
+    fun signInIsOnlyReachableFromWelcomeNowThatThereIsNoLocalSession() {
+        // D-049: sign-in is required before first scan -- there is no local/guest session, so the
+        // "optional account entry from Profile" path this used to test no longer exists.
+        val signIn = reduceToollyUiState(atProfile(), ToollyUiEvent.SignInSelected)
 
-        assertEquals(ToollyDestination.SIGN_IN, signIn.destination)
-        assertEquals(ToollySessionState.LOCAL, signIn.sessionState)
-        assertEquals(ToollyDestination.PROFILE, returned.destination)
+        assertEquals(atProfile(), signIn)
     }
 
     @Test
@@ -129,7 +106,7 @@ class ToollyUiStateTest {
     }
 
     @Test
-    fun signedOutUserCannotOpenProductDestinationsWithoutChoosingLocalUse() {
+    fun signedOutUserCannotOpenProductDestinationsWithoutAuthenticating() {
         val state = reduceToollyUiState(
             ToollyUiState.returningSignedOut(),
             ToollyUiEvent.MainDestinationSelected(ToollyDestination.LIBRARY),
@@ -192,6 +169,20 @@ class ToollyUiStateTest {
     private fun atSignIn(): ToollyUiState {
         val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
         return reduceToollyUiState(welcome, ToollyUiEvent.SignInSelected)
+    }
+
+    /**
+     * Shortest real path to an authenticated Home -- existing-email sign-in, no OTP/profile-
+     * completion detour needed (see [existingEmailAccountSignsInDirectlyWithoutProfileCompletion]).
+     * There is no local/guest session (D-049), so this is the only way any other fixture below
+     * reaches a product destination.
+     */
+    private fun atHome(): ToollyUiState {
+        val emailSignIn = reduceToollyUiState(
+            atSignIn(),
+            ToollyUiEvent.AuthenticationMethodSelected(ToollyAuthenticationMethod.EMAIL),
+        )
+        return reduceToollyUiState(emailSignIn, ToollyUiEvent.AuthenticationSucceeded)
     }
 
     @Test
@@ -319,10 +310,7 @@ class ToollyUiStateTest {
 
     @Test
     fun eventsAreNoOpsFromTheWrongDestination() {
-        val home = reduceToollyUiState(
-            reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished),
-            ToollyUiEvent.LocalSessionStarted(ToollyDestination.HOME),
-        )
+        val home = atHome()
 
         assertEquals(home, reduceToollyUiState(home, ToollyUiEvent.OtpVerified))
         assertEquals(home, reduceToollyUiState(home, ToollyUiEvent.CreateAccountSelected))
@@ -334,11 +322,8 @@ class ToollyUiStateTest {
         )
     }
 
-    private fun atProfile(): ToollyUiState {
-        val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
-        val local = reduceToollyUiState(welcome, ToollyUiEvent.LocalSessionStarted(ToollyDestination.HOME))
-        return reduceToollyUiState(local, ToollyUiEvent.MainDestinationSelected(ToollyDestination.PROFILE))
-    }
+    private fun atProfile(): ToollyUiState =
+        reduceToollyUiState(atHome(), ToollyUiEvent.MainDestinationSelected(ToollyDestination.PROFILE))
 
     @Test
     fun privacyCenterAndBackupChoiceAreReachableFromProfileAndUnwindWithNavigateBack() {
@@ -356,11 +341,7 @@ class ToollyUiStateTest {
 
     @Test
     fun navigateBackFromDocumentViewerReturnsToLibrary() {
-        val local = reduceToollyUiState(
-            reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished),
-            ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY),
-        )
-        val viewer = local.copy(destination = ToollyDestination.DOCUMENT_VIEWER)
+        val viewer = atLibrary().copy(destination = ToollyDestination.DOCUMENT_VIEWER)
 
         val back = reduceToollyUiState(viewer, ToollyUiEvent.NavigateBack)
 
@@ -416,10 +397,8 @@ class ToollyUiStateTest {
         assertTrue(enabled.backupPreferences.enabled)
     }
 
-    private fun atLibrary(): ToollyUiState {
-        val welcome = reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished)
-        return reduceToollyUiState(welcome, ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
-    }
+    private fun atLibrary(): ToollyUiState =
+        reduceToollyUiState(atHome(), ToollyUiEvent.MainDestinationSelected(ToollyDestination.LIBRARY))
 
     @Test
     fun captureReviewStartedEntersReviewWithTheRealPageCountAndDiscardReturnsToLibrary() {

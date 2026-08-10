@@ -22,11 +22,10 @@
     <string name="get_started">शुरू करें</string>
     <string name="welcome_title">Toolly में आपका स्वागत है</string>
     <string name="welcome_description">स्थानीय कार्य चुनें या वैकल्पिक अकाउंट सेटअप खोलें।</string>
-    <string name="available_offline">निजी तौर पर स्कैन करें — अकाउंट आवश्यक नहीं</string>
+    <string name="search_subtitle">नाम और श्रेणी से खोजें</string>
+    <string name="welcome_sign_in_prompt">सुरक्षित रूप से स्कैन शुरू करने के लिए साइन इन करें</string>
     <string name="welcome_headline">आपका फ़ोन एक निजी स्कैनर बन जाता है</string>
     <string name="welcome_body">इंटरनेट के बिना भी दस्तावेज़ कैप्चर, साफ़, व्यवस्थित और निर्यात करें।</string>
-    <string name="scan_first_document">मेरा पहला दस्तावेज़ स्कैन करें</string>
-    <string name="explore_library">लाइब्रेरी देखें</string>
     <string name="account_and_backup">अकाउंट और बैकअप</string>
     <string name="account_description">एन्क्रिप्टेड बैकअप, सिंक या रिकवरी चालू करने पर ही साइन इन करें।</string>
     <string name="local_documents_notice">बैकअप चालू करने तक आपके दस्तावेज़ इसी डिवाइस पर रहते हैं।</string>

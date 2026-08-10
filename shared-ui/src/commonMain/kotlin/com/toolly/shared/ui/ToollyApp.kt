@@ -78,7 +78,6 @@ import com.toolly.shared.resources.account_description
 import com.toolly.shared.resources.all_documents
 import com.toolly.shared.resources.app_name
 import com.toolly.shared.resources.apple_sign_in
-import com.toolly.shared.resources.available_offline
 import com.toolly.shared.resources.back
 import com.toolly.shared.resources.backup_optional
 import com.toolly.shared.resources.create_account
@@ -89,7 +88,6 @@ import com.toolly.shared.resources.discard
 import com.toolly.shared.resources.document_page_count
 import com.toolly.shared.resources.documents
 import com.toolly.shared.resources.email_sign_in
-import com.toolly.shared.resources.explore_library
 import com.toolly.shared.resources.get_started
 import com.toolly.shared.resources.google_sign_in
 import com.toolly.shared.resources.home
@@ -105,10 +103,10 @@ import com.toolly.shared.resources.review_scan
 import com.toolly.shared.resources.save
 import com.toolly.shared.resources.scan
 import com.toolly.shared.resources.scan_document
-import com.toolly.shared.resources.scan_first_document
 import com.toolly.shared.resources.scanned_document
 import com.toolly.shared.resources.search
 import com.toolly.shared.resources.search_documents
+import com.toolly.shared.resources.search_subtitle
 import com.toolly.shared.resources.sign_in
 import com.toolly.shared.resources.sign_in_description
 import com.toolly.shared.resources.sign_out
@@ -124,6 +122,7 @@ import com.toolly.shared.resources.tutorial_scan_body
 import com.toolly.shared.resources.tutorial_scan_title
 import com.toolly.shared.resources.welcome_body
 import com.toolly.shared.resources.welcome_headline
+import com.toolly.shared.resources.welcome_sign_in_prompt
 import com.toolly.shared.resources.working
 import com.toolly.shared.resources.you
 import kotlinx.coroutines.delay
@@ -440,7 +439,7 @@ private fun WelcomeScreen(state: ToollyUiState, actions: ToollyUiActions) {
     ScreenColumn {
         Text(stringResource(Res.string.product_name), style = MaterialTheme.typography.titleLarge)
         Text(
-            stringResource(Res.string.available_offline),
+            stringResource(Res.string.welcome_sign_in_prompt),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Surface(
@@ -466,19 +465,9 @@ private fun WelcomeScreen(state: ToollyUiState, actions: ToollyUiActions) {
         }
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButton(
-            label = Res.string.scan_first_document,
-            onClick = actions::scanDocument,
-        )
-        SecondaryButton(
-            label = Res.string.explore_library,
-            onClick = { actions.continueLocally(ToollyDestination.LIBRARY) },
-        )
-        TextButton(
+            label = Res.string.get_started,
             onClick = actions::showSignIn,
-            modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
-        ) {
-            Text(stringResource(Res.string.account_and_backup))
-        }
+        )
         Text(
             stringResource(Res.string.local_documents_notice),
             style = MaterialTheme.typography.bodyMedium,
@@ -720,7 +709,7 @@ private fun SearchScreen() {
     ScreenColumn(applySafeInsets = false) {
         Text(stringResource(Res.string.product_name), style = MaterialTheme.typography.headlineMedium)
         Text(
-            stringResource(Res.string.available_offline),
+            stringResource(Res.string.search_subtitle),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         OutlinedTextField(
@@ -780,10 +769,6 @@ private fun ProfileScreen(state: ToollyUiState, actions: ToollyUiActions) {
             }
         }
         when (state.sessionState) {
-            ToollySessionState.LOCAL -> SecondaryButton(
-                label = Res.string.sign_in,
-                onClick = actions::showSignIn,
-            )
             ToollySessionState.DEVELOPMENT,
             ToollySessionState.AUTHENTICATED -> {
                 if (state.sessionState == ToollySessionState.DEVELOPMENT) {

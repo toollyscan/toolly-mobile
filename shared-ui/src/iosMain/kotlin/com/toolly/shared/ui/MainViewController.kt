@@ -13,7 +13,6 @@ import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyDestination
-import com.toolly.shared.model.ToollySessionState
 import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiEvent
 import com.toolly.shared.model.ToollyUiState
@@ -71,9 +70,6 @@ fun MainViewController(
             override fun showSignIn() = dispatch(ToollyUiEvent.SignInSelected)
             override fun showCreateProfile() = dispatch(ToollyUiEvent.CreateProfileSelected)
             override fun backToWelcome() = dispatch(ToollyUiEvent.BackToWelcome)
-            override fun continueLocally(destination: ToollyDestination) {
-                dispatch(ToollyUiEvent.LocalSessionStarted(destination))
-            }
             override fun authenticate(method: ToollyAuthenticationMethod) =
                 dispatch(ToollyUiEvent.AuthenticationMethodSelected(method))
             override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
@@ -84,19 +80,15 @@ fun MainViewController(
             override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
 
             /**
-             * Ensures a local session same as before, then -- when a real [captureSession] is
-             * wired -- launches it and, on a successful ordered-page result, enters the shared
-             * review screen with the real page count. With no session wired (`scanner == null`,
-             * e.g. simulator builds without a host-supplied session), this is unchanged from the
-             * library-navigation-only behavior that shipped before Apple capture existed.
+             * The Scan action only renders inside the authenticated main shell (Home/Library/
+             * Search/Profile), which is itself unreachable while signed out (D-049) -- so this is
+             * never invoked pre-authentication. When a real [captureSession] is wired, launches
+             * it and, on a successful ordered-page result, enters the shared review screen with
+             * the real page count.
              */
             override fun scanDocument() {
                 if (state.busy) return
-                if (state.sessionState == ToollySessionState.SIGNED_OUT) {
-                    dispatch(ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
-                } else {
-                    select(ToollyDestination.LIBRARY)
-                }
+                select(ToollyDestination.LIBRARY)
                 val activeScanner = scanner ?: return
                 state = state.copy(busy = true)
                 coroutineScope.launch {
