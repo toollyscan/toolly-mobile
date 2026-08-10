@@ -60,4 +60,8 @@
     <string name="search_subtitle">ಹೆಸರು ಮತ್ತು ವರ್ಗದಿಂದ ಹುಡುಕಿ</string>
     <string name="search_prompt">ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಟೈಪ್ ಮಾಡಿ</string>
     <string name="search_result_matched_title">ಹೆಸರು ಹೊಂದಿಕೆಯಾಗಿದೆ</string>
+    <string name="document_card_subtitle">%1$s · %2$s</string>
+    <string name="saved_today">ಇಂದು ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="saved_yesterday">ನಿನ್ನೆ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="saved_days_ago">%1$d ದಿನಗಳ ಹಿಂದೆ ಉಳಿಸಲಾಗಿದೆ</string>
 </resources>

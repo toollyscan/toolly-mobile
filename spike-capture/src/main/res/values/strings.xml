@@ -62,4 +62,8 @@
     <string name="search_subtitle">Search titles and categories</string>
     <string name="search_prompt">Type to search your documents</string>
     <string name="search_result_matched_title">Matched title</string>
+    <string name="document_card_subtitle">%1$s · %2$s</string>
+    <string name="saved_today">Saved today</string>
+    <string name="saved_yesterday">Saved yesterday</string>
+    <string name="saved_days_ago">Saved %1$d days ago</string>
 </resources>
