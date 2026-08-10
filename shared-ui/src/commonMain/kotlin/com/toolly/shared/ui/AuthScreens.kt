@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -238,6 +239,8 @@ internal fun EmailSignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
             onClick = actions::authStepBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
         ) {
+            ToollyBackIcon(iconSize = 18.dp)
+            Spacer(modifier = Modifier.width(4.dp))
             Text(stringResource(Res.string.back))
         }
         TermsNotice()
@@ -286,6 +289,8 @@ internal fun CreateAccountScreen(actions: ToollyUiActions) {
             onClick = actions::authStepBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
         ) {
+            ToollyBackIcon(iconSize = 18.dp)
+            Spacer(modifier = Modifier.width(4.dp))
             Text(stringResource(Res.string.back))
         }
     }
@@ -322,6 +327,8 @@ internal fun ResetPasswordScreen(actions: ToollyUiActions) {
                 onClick = actions::authStepBack,
                 modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
             ) {
+                ToollyBackIcon(iconSize = 18.dp)
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(stringResource(Res.string.back))
             }
         }
