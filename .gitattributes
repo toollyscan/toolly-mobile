@@ -1,0 +1,18 @@
+# Toolly repository text/binary normalization.
+#
+# The Gradle wrapper jar is committed as base64 text (see gradlew) because
+# GitHub's browser contents API cannot preserve binary bytes. On checkouts
+# with core.autocrlf=true (a common Windows Git default), Git would rewrite
+# this file's line endings to CRLF and corrupt the base64 payload, breaking
+# ./gradlew locally. Force it to be treated as text with LF-only normalization
+# so the checked-out bytes always match what gradlew's SHA-256 check expects.
+gradle/wrapper/gradle-wrapper.jar.base64 text eol=lf
+
+# Real binary assets: never apply line-ending conversion.
+*.jar -text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.keystore binary
+*.jks binary
