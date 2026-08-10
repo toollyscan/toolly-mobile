@@ -246,12 +246,19 @@ fun ToollyDocumentApp(
 
             is AppScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                var selectedOrdinals by remember(current.details) {
+                    mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
+                }
                 ExportBuilderScreen(
                     format = format,
                     onFormatChange = { format = it },
                     onContinue = {
-                        screen = AppScreen.ExportPrivacyCheck(current.details, format)
+                        screen = AppScreen.ExportPrivacyCheck(
+                            current.details.filteredToPages(selectedOrdinals),
+                            format,
+                        )
                     },
+                    continueEnabled = selectedOrdinals.isNotEmpty(),
                     onBack = {
                         message = null
                         screen = AppScreen.Document(current.details)
@@ -261,6 +268,14 @@ fun ToollyDocumentApp(
                             pages = current.details.pages,
                             loadAssetBitmap = loadDocumentAssetBitmap,
                             modifier = Modifier.heightIn(max = 240.dp),
+                            selectedOrdinals = selectedOrdinals,
+                            onToggle = { page ->
+                                selectedOrdinals = if (page.ordinal in selectedOrdinals) {
+                                    selectedOrdinals - page.ordinal
+                                } else {
+                                    selectedOrdinals + page.ordinal
+                                }
+                            },
                         )
                     },
                 )
@@ -406,12 +421,19 @@ fun SearchDocumentsScreen(
 
             is SearchResultScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                var selectedOrdinals by remember(current.details) {
+                    mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
+                }
                 ExportBuilderScreen(
                     format = format,
                     onFormatChange = { format = it },
                     onContinue = {
-                        screen = SearchResultScreen.ExportPrivacyCheck(current.details, format)
+                        screen = SearchResultScreen.ExportPrivacyCheck(
+                            current.details.filteredToPages(selectedOrdinals),
+                            format,
+                        )
                     },
+                    continueEnabled = selectedOrdinals.isNotEmpty(),
                     onBack = {
                         message = null
                         screen = SearchResultScreen.Document(current.details)
@@ -421,6 +443,14 @@ fun SearchDocumentsScreen(
                             pages = current.details.pages,
                             loadAssetBitmap = loadDocumentAssetBitmap,
                             modifier = Modifier.heightIn(max = 240.dp),
+                            selectedOrdinals = selectedOrdinals,
+                            onToggle = { page ->
+                                selectedOrdinals = if (page.ordinal in selectedOrdinals) {
+                                    selectedOrdinals - page.ordinal
+                                } else {
+                                    selectedOrdinals + page.ordinal
+                                }
+                            },
                         )
                     },
                 )
@@ -548,6 +578,22 @@ private sealed interface SearchResultScreen {
 private fun ToollyExportFormat.toDomainFormat(): DocumentExportFormat = when (this) {
     ToollyExportFormat.PDF -> DocumentExportFormat.PDF
     ToollyExportFormat.JPEG -> DocumentExportFormat.JPEG
+}
+
+/**
+ * A page-range-selected copy of [this] document, matching wireframe 5.1's page-selection grid.
+ * Pages are re-numbered to a contiguous 0-based ordinal (required by [DocumentDetails]'s own
+ * invariant) -- the export step never sees or persists the original ordinals of skipped pages.
+ * Export-only: nothing here touches the vault, [sourceAssetId]s still point at the same real
+ * encrypted assets.
+ */
+private fun DocumentDetails.filteredToPages(selectedOrdinals: Set<Int>): DocumentDetails {
+    val kept = pages.filter { it.ordinal in selectedOrdinals }.sortedBy { it.ordinal }
+    val renumbered = kept.mapIndexed { index, page -> page.copy(ordinal = index) }
+    return DocumentDetails(
+        summary = summary.copy(pageCount = renumbered.size),
+        pages = renumbered,
+    )
 }
 
 /**

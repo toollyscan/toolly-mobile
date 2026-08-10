@@ -55,6 +55,7 @@ fun ExportBuilderScreen(
     onFormatChange: (ToollyExportFormat) -> Unit,
     onContinue: () -> Unit,
     busy: Boolean = false,
+    continueEnabled: Boolean = true,
     onBack: (() -> Unit)? = null,
     previewContent: (@Composable () -> Unit)? = null,
 ) {
@@ -84,7 +85,7 @@ fun ExportBuilderScreen(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        PrimaryButton(label = Res.string.export_securely, onClick = onContinue, enabled = !busy)
+        PrimaryButton(label = Res.string.export_securely, onClick = onContinue, enabled = !busy && continueEnabled)
         if (onBack != null) {
             TextButton(
                 onClick = onBack,
