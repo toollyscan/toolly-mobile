@@ -555,6 +555,8 @@ private fun AccountScreen(
             onClick = actions::backToWelcome,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
         ) {
+            ToollyBackIcon(iconSize = 18.dp)
+            Spacer(modifier = Modifier.width(4.dp))
             Text(stringResource(Res.string.back))
         }
     }
@@ -725,6 +727,7 @@ private fun SearchScreen() {
             value = query,
             onValueChange = { query = it },
             label = { Text(stringResource(Res.string.search_documents)) },
+            leadingIcon = { ToollySearchIcon() },
             singleLine = true,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.PrimaryActionHeight),
@@ -803,19 +806,31 @@ private fun CompactNavigation(state: ToollyUiState, actions: ToollyUiActions) {
         modifier = Modifier.fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        MainNavigationItem(Res.string.home, state.destination == ToollyDestination.HOME, actions::openHome)
+        MainNavigationItem(
+            Res.string.home,
+            state.destination == ToollyDestination.HOME,
+            actions::openHome,
+            icon = { ToollyHomeIcon() },
+        )
         MainNavigationItem(
             Res.string.documents,
             state.destination == ToollyDestination.LIBRARY,
             actions::openLibrary,
+            icon = { ToollyLibraryIcon() },
         )
         MainNavigationItem(Res.string.scan, false, actions::scanDocument, primary = true)
         MainNavigationItem(
             Res.string.search,
             state.destination == ToollyDestination.SEARCH,
             actions::openSearch,
+            icon = { ToollySearchIcon() },
         )
-        MainNavigationItem(Res.string.you, state.destination == ToollyDestination.PROFILE, actions::openProfile)
+        MainNavigationItem(
+            Res.string.you,
+            state.destination == ToollyDestination.PROFILE,
+            actions::openProfile,
+            icon = { ToollyProfileIcon() },
+        )
     }
 }
 
@@ -825,6 +840,7 @@ private fun RowScope.MainNavigationItem(
     selected: Boolean,
     onClick: () -> Unit,
     primary: Boolean = false,
+    icon: @Composable () -> Unit = {},
 ) {
     NavigationBarItem(
         selected = selected,
@@ -859,7 +875,7 @@ private fun RowScope.MainNavigationItem(
                     }
                 }
             } else {
-                Box(modifier = Modifier.size(2.dp))
+                icon()
             }
         },
         label = { Text(stringResource(label)) },
@@ -879,22 +895,30 @@ private fun RowScope.ExpandedNavigation(state: ToollyUiState, actions: ToollyUiA
         ) {
             ToollyMark(modifier = Modifier.size(52.dp))
             Spacer(modifier = Modifier.height(ToollySpacing.Medium))
-            ExpandedNavigationItem(Res.string.home, state.destination == ToollyDestination.HOME, actions::openHome)
+            ExpandedNavigationItem(
+                Res.string.home,
+                state.destination == ToollyDestination.HOME,
+                actions::openHome,
+                icon = { ToollyHomeIcon() },
+            )
             ExpandedNavigationItem(
                 Res.string.documents,
                 state.destination == ToollyDestination.LIBRARY,
                 actions::openLibrary,
+                icon = { ToollyLibraryIcon() },
             )
             PrimaryButton(label = Res.string.scan, onClick = actions::scanDocument)
             ExpandedNavigationItem(
                 Res.string.search,
                 state.destination == ToollyDestination.SEARCH,
                 actions::openSearch,
+                icon = { ToollySearchIcon() },
             )
             ExpandedNavigationItem(
                 Res.string.you,
                 state.destination == ToollyDestination.PROFILE,
                 actions::openProfile,
+                icon = { ToollyProfileIcon() },
             )
         }
     }
@@ -905,6 +929,7 @@ private fun ExpandedNavigationItem(
     label: StringResource,
     selected: Boolean,
     onClick: () -> Unit,
+    icon: @Composable () -> Unit,
 ) {
     TextButton(
         onClick = onClick,
@@ -914,7 +939,13 @@ private fun ExpandedNavigationItem(
             contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         ),
     ) {
-        Text(stringResource(label))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(ToollySpacing.Small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            icon()
+            Text(stringResource(label))
+        }
     }
 }
 
@@ -999,6 +1030,8 @@ private fun ViewerScreen(state: ToollyUiState, actions: ToollyUiActions) {
                 onClick = actions::navigateBack,
                 modifier = Modifier.heightIn(min = ToollySpacing.MinimumTarget),
             ) {
+                ToollyBackIcon(iconSize = 18.dp)
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(stringResource(Res.string.back))
             }
             Text(stringResource(Res.string.scanned_document), style = MaterialTheme.typography.headlineSmall)

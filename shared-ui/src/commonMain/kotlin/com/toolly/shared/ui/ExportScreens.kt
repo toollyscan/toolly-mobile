@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.back
 import com.toolly.shared.resources.export_builder_description
@@ -88,6 +90,8 @@ fun ExportBuilderScreen(
                 onClick = onBack,
                 modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
             ) {
+                ToollyBackIcon(iconSize = 18.dp)
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(stringResource(Res.string.back))
             }
         }
@@ -120,6 +124,8 @@ fun ExportPrivacyCheckScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
         ) {
+            ToollyBackIcon(iconSize = 18.dp)
+            Spacer(modifier = Modifier.width(4.dp))
             Text(stringResource(Res.string.back))
         }
     }

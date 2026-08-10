@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,7 +64,10 @@ import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId
 import com.toolly.shared.ui.ExportBuilderScreen
 import com.toolly.shared.ui.ExportPrivacyCheckScreen
+import com.toolly.shared.ui.ToollyBackIcon
+import com.toolly.shared.ui.ToollyDocumentIcon
 import com.toolly.shared.ui.ToollyExportFormat
+import com.toolly.shared.ui.ToollySearchIcon
 import java.io.File
 
 /**
@@ -487,6 +492,7 @@ private fun SearchResultsScreen(
                 value = query,
                 onValueChange = onQueryChange,
                 label = { Text(stringResource(R.string.library_search_hint)) },
+                leadingIcon = { ToollySearchIcon() },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -503,19 +509,26 @@ private fun SearchResultsScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth().clickable { onOpen(document.id) },
                         ) {
-                            Column(
+                            Row(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    document.displayName ?: stringResource(R.string.scanned_document),
-                                    style = MaterialTheme.typography.titleMedium,
+                                ToollyDocumentIcon(
+                                    iconSize = 28.dp,
+                                    modifier = Modifier.padding(top = 2.dp),
                                 )
-                                Text(
-                                    stringResource(R.string.search_result_matched_title),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        document.displayName ?: stringResource(R.string.scanned_document),
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    Text(
+                                        stringResource(R.string.search_result_matched_title),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
                         }
                     }
@@ -617,6 +630,7 @@ private fun LibraryScreen(
                     value = query,
                     onValueChange = { query = it },
                     label = { Text(stringResource(R.string.library_search_hint)) },
+                    leadingIcon = { ToollySearchIcon() },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -657,23 +671,30 @@ private fun LibraryScreen(
                                 .fillMaxWidth()
                                 .clickable { onOpen(document.id) },
                         ) {
-                            Column(
+                            Row(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    document.displayName ?: stringResource(R.string.scanned_document),
-                                    style = MaterialTheme.typography.titleMedium,
+                                ToollyDocumentIcon(
+                                    iconSize = 28.dp,
+                                    modifier = Modifier.padding(top = 2.dp),
                                 )
-                                Text(
-                                    pluralStringResource(
-                                        R.plurals.page_count,
-                                        document.pageCount,
-                                        document.pageCount,
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        document.displayName ?: stringResource(R.string.scanned_document),
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    Text(
+                                        pluralStringResource(
+                                            R.plurals.page_count,
+                                            document.pageCount,
+                                            document.pageCount,
+                                        ),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
                         }
                     }
@@ -754,6 +775,8 @@ private fun DocumentScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(onClick = onBack) {
+                ToollyBackIcon(iconSize = 18.dp)
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(stringResource(R.string.back))
             }
             Text(
