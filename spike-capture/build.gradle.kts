@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 kotlin {
@@ -65,6 +66,11 @@ dependencies {
 
     // Coroutines
     implementation(libs.coroutines.android)
+
+    // Firebase Authentication (ADR-0004 account boundary; `dev` environment only for now —
+    // see docs/architecture/FIREBASE_ENVIRONMENTS.md for the per-environment binding plan).
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
 
     // Unit tests — JVM only, no Robolectric required for domain and mapper tests
     testImplementation(libs.junit)

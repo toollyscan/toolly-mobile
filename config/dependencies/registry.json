@@ -805,6 +805,143 @@
         "Separate Jetpack Compose and SwiftUI product screens, rejected by ADR-0001."
       ],
       "removal_plan": "Replace with native UI implementations only through an approved parity-preserving ADR and migration."
+    },
+    {
+      "id": "gradle-plugin-google-services",
+      "ecosystem": "gradle-plugin",
+      "coordinate": "com.google.gms.google-services",
+      "requested_version": "4.5.0",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "build",
+      "purpose": "Reads spike-capture/google-services.json at build time and generates the Firebase client config Android resources needed by firebase-auth. Required for ADR-0004 (authentication required before first scan) and Phase 4 of docs/execution/ROADMAP.md.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/google/play-services-plugins",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/google/play-services-plugins/blob/main/LICENSE",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-10",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-12",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Manually hand-declare Firebase resource values without the plugin — rejected, error-prone and diverges from Firebase's own supported integration path."
+      ],
+      "removal_plan": "Remove alongside firebase-bom/firebase-auth if Firebase Authentication is ever replaced by a different provider behind the ToollyAccountId port (ADR-0004)."
+    },
+    {
+      "id": "gradle-lib-firebase-bom",
+      "ecosystem": "gradle-library",
+      "coordinate": "com.google.firebase:firebase-bom",
+      "requested_version": "34.17.0",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Version-alignment platform (BOM) for Firebase Android libraries; pins firebase-auth and its Firebase-owned transitives to a mutually compatible set. No code of its own.",
+      "owner": "shivayogih",
+      "upstream": "https://firebase.google.com/support/release-notes/android",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://firebase.google.com/terms",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-10",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-12",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://firebase.google.com/support/release-notes/android",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Pin each Firebase library version by hand — rejected, this is exactly what the BOM exists to avoid."
+      ],
+      "removal_plan": "Remove alongside firebase-auth."
+    },
+    {
+      "id": "gradle-lib-firebase-auth",
+      "ecosystem": "gradle-library",
+      "coordinate": "com.google.firebase:firebase-auth",
+      "requested_version": "firebase-bom-managed",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Firebase Authentication client SDK — backs the phone-OTP, email/password, Google and Apple sign-in methods behind ADR-0004's ToollyAccountId boundary. Bound to the `toollyscan-dev` Firebase project only (see docs/architecture/FIREBASE_ENVIRONMENTS.md); test/staging/production projects and their own config files are a separate follow-up.",
+      "owner": "shivayogih",
+      "upstream": "https://firebase.google.com/docs/auth/android/start",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://firebase.google.com/terms",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-10",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-12",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://firebase.google.com/support/release-notes/android",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [
+          "www.googleapis.com",
+          "identitytoolkit.googleapis.com",
+          "securetoken.googleapis.com"
+        ],
+        "permissions": [
+          "internet"
+        ]
+      },
+      "alternatives": [
+        "Hand-rolled OTP/OAuth server and client — rejected per D-049/ADR-0004's decision to use Firebase as the identity-provider layer beneath the canonical ToollyAccountId."
+      ],
+      "removal_plan": "Replace the Firebase-backed AccountAuthenticator adapter with an alternative provider behind the same port; no shared/UI code depends on this coordinate directly."
     }
   ]
 }
