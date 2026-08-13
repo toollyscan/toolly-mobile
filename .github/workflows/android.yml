@@ -21,6 +21,16 @@ jobs:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Provision Firebase Android config (dev)
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
+            echo "$GOOGLE_SERVICES_JSON_B64" | base64 -d > spike-capture/google-services.json
+          else
+            echo "::warning::FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV secret is not set; Firebase-dependent build steps will fail."
+          fi
+
       - name: Build, lint and test
         run: |
           python3 scripts/validate_android_permissions.py

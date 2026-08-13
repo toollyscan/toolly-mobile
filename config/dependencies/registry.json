@@ -897,7 +897,7 @@
       "id": "gradle-lib-firebase-auth",
       "ecosystem": "gradle-library",
       "coordinate": "com.google.firebase:firebase-auth",
-      "requested_version": "firebase-bom-managed",
+      "requested_version": "24.2.0",
       "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
       "scope": "runtime",
       "purpose": "Firebase Authentication client SDK — backs the phone-OTP, email/password, Google and Apple sign-in methods behind ADR-0004's ToollyAccountId boundary. Bound to the `toollyscan-dev` Firebase project only (see docs/architecture/FIREBASE_ENVIRONMENTS.md); test/staging/production projects and their own config files are a separate follow-up.",
