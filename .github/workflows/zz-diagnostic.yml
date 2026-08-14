@@ -15,10 +15,12 @@ jobs:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - name: Provision Firebase Android config (dev)
-        env:
-          GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
+      - name: Python heredoc test
         run: |
-          echo "secret length check only"
+          python3 -c "
+import base64, os
+path = 'spike-capture/google-services.json'
+print('hi')
+"
 
       - run: echo "hello"
