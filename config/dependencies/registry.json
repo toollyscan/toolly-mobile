@@ -102,6 +102,56 @@
       "removal_plan": "Remove when physical-device validation no longer needs downloadable CI APKs or when an approved first-party distribution pipeline replaces workflow artifacts."
     },
     {
+      "id": "ci-actions-cache",
+      "ecosystem": "github-action",
+      "coordinate": "actions/cache",
+      "requested_version": "v6.1.0",
+      "immutable_ref": "55cc8345863c7cc4c66a329aec7e433d2d1c52a9",
+      "scope": "ci",
+      "purpose": "Persist Gradle's dependency/build cache (~/.gradle/caches) and the Kotlin/Native compiler toolchain (~/.konan) across CI runs. Every run previously started fully cold -- re-downloading all Maven dependencies and re-bootstrapping the Kotlin/Native compiler from scratch every time -- which was the dominant cost in the ~20-45 minute iOS job. Cache keys are content-derived (hash of gradle/libs.versions.toml, gradle-wrapper.properties, *.gradle.kts and gradle.lockfile files) so a dependency or version change invalidates the cache automatically rather than silently serving stale artifacts.",
+      "owner": "shivayogih",
+      "upstream": "https://github.com/actions/cache",
+      "licence_spdx": "MIT",
+      "licence_evidence": "https://github.com/actions/cache/blob/v6.1.0/LICENSE.md",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-13",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-14",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://github.com/actions/cache/security",
+          "https://github.com/actions/cache/releases/tag/v6.1.0"
+        ]
+      },
+      "transitives": {
+        "status": "bundled_upstream_not_enumerated",
+        "count": null
+      },
+      "size": {
+        "status": "not_applicable_ci_tool",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [
+          "github.com",
+          "api.github.com"
+        ],
+        "permissions": [
+          "actions-cache-read-write"
+        ]
+      },
+      "alternatives": [
+        "No caching (accept the current cold-start cost on every run)",
+        "A self-hosted remote Gradle build cache server (heavier operational cost, not justified at current CI volume)"
+      ],
+      "removal_plan": "Remove the cache steps from android.yml and multiplatform.yml if GitHub Actions cache is ever replaced by a different caching strategy."
+    },
+    {
       "id": "gradle-plugin-android-application",
       "ecosystem": "gradle-plugin",
       "coordinate": "com.android.application",

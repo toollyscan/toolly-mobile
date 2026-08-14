@@ -21,6 +21,16 @@ jobs:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Cache Gradle dependencies and build cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts', '**/gradle.lockfile') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Build and test shared Android code
         run: |
           chmod +x ./gradlew
@@ -42,6 +52,28 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
           xcodebuild -version
+
+      - name: Cache Gradle dependencies and build cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts', '**/gradle.lockfile') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # Kotlin/Native bootstraps its full compiler + platform libraries into ~/.konan
+      # on first use -- normally several minutes of download+setup before any actual
+      # compilation starts. Persisting it across runs is the single biggest lever for
+      # this job's time, independent of the Gradle build cache above.
+      - name: Cache Kotlin/Native (.konan)
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
 
       - name: Test shared code and build simulator/device targets
         run: |
