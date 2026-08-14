@@ -15,10 +15,11 @@ jobs:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - name: Minimal multiline double-quote test
+      - name: Heredoc-to-file alternative test
         run: |
-          python3 -c "
-print('hi')
-"
+          cat > /tmp/decode.py <<'PYEOF'
+          print('hi')
+          PYEOF
+          python3 /tmp/decode.py
 
       - run: echo "hello"
