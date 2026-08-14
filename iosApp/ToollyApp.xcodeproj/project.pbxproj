@@ -10,6 +10,7 @@
 		100000000000000000000001 /* ToollyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* ToollyApp.swift */; };
 		100000000000000000000002 /* ToollySharedUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* ToollySharedUI.framework */; };
 		100000000000000000000003 /* AppleCaptureSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* AppleCaptureSessionImpl.swift */; };
+		100000000000000000000004 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -17,6 +18,7 @@
 		100000000000000000000011 /* ToollyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToollyApp.swift; sourceTree = "<group>"; };
 		100000000000000000000012 /* ToollySharedUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ToollySharedUI.framework; path = ../shared-ui/build/bin/iosSimulatorArm64/debugFramework/ToollySharedUI.framework; sourceTree = SOURCE_ROOT; };
 		100000000000000000000013 /* AppleCaptureSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCaptureSessionImpl.swift; sourceTree = "<group>"; };
+		100000000000000000000014 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +47,7 @@
 			children = (
 				100000000000000000000011 /* ToollyApp.swift */,
 				100000000000000000000013 /* AppleCaptureSessionImpl.swift */,
+				100000000000000000000014 /* GoogleService-Info.plist */,
 			);
 			path = ToollyApp;
 			sourceTree = "<group>";
@@ -123,6 +126,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				100000000000000000000004 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
