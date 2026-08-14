@@ -34,20 +34,8 @@ jobs:
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
             # Decode via python3, not the base64 CLI: GNU base64 -d rejected the
-            # secret outright ("base64: invalid input") -- almost certainly stray
-            # CR characters picked up when the value was copied from a Windows
-            # clipboard. Stripping all whitespace before decoding sidesteps that
-            # regardless of which line-ending convention produced it, and matches
-            # the decode approach multiplatform-ci.yml's iOS job already needs for
-            # its own (different) cross-platform base64 CLI problem.
-            #
-            # The script is written to a file rather than passed as `python3 -c
-            # "<multi-line>"` -- a multi-line double-quoted argument split across
-            # several lines inside a `run: |` block silently broke GitHub's own
-            # workflow registration for this file (zero jobs ever scheduled on
-            # push or pull_request, workflow_dispatch rejected as absent, and the
-            # workflow's registered name fell back to its raw file path) --
-            # confirmed by bisection against a minimal throwaway workflow.
+            # secret outright. Written to a file rather than as an inline
+            # multi-line argument -- see git history for why.
             cat > /tmp/decode_google_services.py <<'PYEOF'
 import base64, os
 path = 'spike-capture/google-services.json'
