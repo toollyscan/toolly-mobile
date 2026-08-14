@@ -44,8 +44,16 @@ def main() -> int:
     # Restore any trailing '=' padding lost in transit (e.g. a copy/paste step that
     # trimmed trailing characters it mistook for insignificant whitespace).
     cleaned += "=" * (-len(cleaned) % 4)
+    # Non-sensitive diagnostics only -- lengths and a boolean charset check, never any
+    # part of the secret's actual content.
+    import re
+    valid_charset = bool(re.fullmatch(r"[A-Za-z0-9+/=]*", cleaned))
+    print(
+        f"::notice::{env_var_name}: raw length {len(raw)}, cleaned length "
+        f"{len(cleaned)}, valid base64 charset: {valid_charset}",
+    )
     with open(output_path, "wb") as handle:
-        handle.write(base64.b64decode(cleaned))
+        handle.write(base64.b64decode(cleaned, validate=True))
     return 0
 
 
