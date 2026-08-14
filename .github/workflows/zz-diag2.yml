@@ -48,24 +48,4 @@ PYEOF
             echo "::warning::FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV secret is not set; Firebase-dependent build steps will fail."
           fi
 
-      - name: Build, lint and test
-        run: |
-          python3 scripts/validate_android_permissions.py
-          python3 scripts/validate_compose_runtime_alignment.py
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace \
-            :spike-capture:assembleDebug \
-            :spike-capture:assembleDebugAndroidTest \
-            :spike-capture:lintDebug \
-            :spike-capture:testDebugUnitTest
-
-      - name: Publish phone and tablet test APKs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: toolly-capture-spike-${{ github.sha }}
-          path: |
-            spike-capture/build/outputs/apk/debug/spike-capture-debug.apk
-            spike-capture/build/outputs/apk/androidTest/debug/spike-capture-debug-androidTest.apk
-          if-no-files-found: error
-          retention-days: 7
-          compression-level: 0
+      - run: echo "hello"
