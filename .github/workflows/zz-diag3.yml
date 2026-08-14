@@ -29,6 +29,10 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
         run: |
-          echo "secret length check only"
+          if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
+            python3 scripts/zz_diag_decode.py GOOGLE_SERVICES_JSON_B64 /tmp/out.json
+          else
+            echo "::warning::not set"
+          fi
 
       - run: echo "hello"
