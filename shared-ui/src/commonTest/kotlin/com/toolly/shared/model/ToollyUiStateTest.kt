@@ -1,5 +1,6 @@
 package com.toolly.shared.model
 
+import com.toolly.shared.auth.AuthError
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -218,6 +219,64 @@ class ToollyUiStateTest {
         val unchanged = reduceToollyUiState(phoneEntry, ToollyUiEvent.PhoneNumberSubmitted("   "))
 
         assertEquals(phoneEntry, unchanged)
+    }
+
+    @Test
+    fun authenticationStartedSetsBusyAndClearsAnyPriorError() {
+        val emailSignIn = reduceToollyUiState(
+            atSignIn(),
+            ToollyUiEvent.AuthenticationMethodSelected(ToollyAuthenticationMethod.EMAIL),
+        )
+        val failed = reduceToollyUiState(
+            reduceToollyUiState(emailSignIn, ToollyUiEvent.AuthenticationStarted),
+            ToollyUiEvent.AuthenticationFailed(AuthError.InvalidCredential),
+        )
+        val retrying = reduceToollyUiState(failed, ToollyUiEvent.AuthenticationStarted)
+
+        assertTrue(retrying.authBusy)
+        assertEquals(null, retrying.authError)
+    }
+
+    @Test
+    fun authenticationStartedIsANoOpFromANonAuthDestination() {
+        val home = atHome()
+
+        assertEquals(home, reduceToollyUiState(home, ToollyUiEvent.AuthenticationStarted))
+    }
+
+    @Test
+    fun authenticationFailedSetsErrorAndClearsBusyOnlyWhenBusy() {
+        val emailSignIn = reduceToollyUiState(
+            atSignIn(),
+            ToollyUiEvent.AuthenticationMethodSelected(ToollyAuthenticationMethod.EMAIL),
+        )
+        val notBusy = reduceToollyUiState(
+            emailSignIn,
+            ToollyUiEvent.AuthenticationFailed(AuthError.NetworkUnavailable),
+        )
+        val busy = reduceToollyUiState(emailSignIn, ToollyUiEvent.AuthenticationStarted)
+        val failed = reduceToollyUiState(
+            busy,
+            ToollyUiEvent.AuthenticationFailed(AuthError.NetworkUnavailable),
+        )
+
+        assertEquals(emailSignIn, notBusy)
+        assertFalse(failed.authBusy)
+        assertEquals(AuthError.NetworkUnavailable, failed.authError)
+        assertEquals(ToollyDestination.EMAIL_SIGN_IN, failed.destination)
+    }
+
+    @Test
+    fun successfulAuthenticationClearsBusyAndError() {
+        val emailSignIn = reduceToollyUiState(
+            atSignIn(),
+            ToollyUiEvent.AuthenticationMethodSelected(ToollyAuthenticationMethod.EMAIL),
+        )
+        val busy = reduceToollyUiState(emailSignIn, ToollyUiEvent.AuthenticationStarted)
+        val home = reduceToollyUiState(busy, ToollyUiEvent.AuthenticationSucceeded)
+
+        assertFalse(home.authBusy)
+        assertEquals(null, home.authError)
     }
 
     @Test

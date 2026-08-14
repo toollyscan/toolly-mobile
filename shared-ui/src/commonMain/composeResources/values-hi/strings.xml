@@ -79,6 +79,16 @@
     <string name="phone_number_hint">10 अंकों का नंबर दर्ज करें</string>
     <string name="send_verification_code">सत्यापन कोड भेजें</string>
     <string name="otp_rate_notice">कोड अनुरोध कूलडाउन से सुरक्षित हैं। मानक SMS दरें लागू हो सकती हैं।</string>
+    <string name="auth_error_network">इंटरनेट कनेक्शन नहीं है। अपना नेटवर्क जांचें और फिर से कोशिश करें।</string>
+    <string name="auth_error_invalid_credential">ईमेल या पासवर्ड सही नहीं है।</string>
+    <string name="auth_error_incorrect_code">यह कोड सही नहीं है। जांचकर फिर से कोशिश करें।</string>
+    <string name="auth_error_expired_code">यह कोड समय-सीमा समाप्त हो गया है। नया कोड मांगें।</string>
+    <string name="auth_error_account_exists">इस ईमेल से पहले से एक खाता मौजूद है।</string>
+    <string name="auth_error_account_not_found">हमें इन विवरणों वाला कोई खाता नहीं मिला।</string>
+    <string name="auth_error_rate_limited">बहुत अधिक प्रयास। कुछ देर रुककर फिर से कोशिश करें।</string>
+    <string name="auth_error_requires_recent_login">आपकी सुरक्षा के लिए, कृपया दोबारा साइन इन करें।</string>
+    <string name="auth_error_not_supported">यह साइन-इन तरीका अभी उपलब्ध नहीं है।</string>
+    <string name="auth_error_unknown">कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।</string>
     <string name="use_another_sign_in_method">कोई अन्य साइन-इन विधि उपयोग करें</string>
     <string name="terms_privacy_notice">जारी रखकर, आप नियम और गोपनीयता नीति से सहमत होते हैं।</string>
     <string name="otp_title">6-अंकों का कोड दर्ज करें</string>

@@ -1,13 +1,19 @@
 package com.toolly.spike.capture.ui
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import com.toolly.shared.auth.AuthError
+import com.toolly.shared.auth.AuthResult
+import com.toolly.shared.auth.PhoneVerificationId
+import com.toolly.shared.auth.PhoneVerificationResult
 import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
@@ -18,6 +24,8 @@ import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.model.reduceToollyUiState
 import com.toolly.shared.ui.ToollyApp
 import com.toolly.spike.capture.BuildConfig
+import com.toolly.spike.capture.firebase.FirebaseAccountAuthenticator
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun AndroidToollyApp(
@@ -38,6 +46,16 @@ internal fun AndroidToollyApp(
         )
     }
     var captureRequested by remember { mutableStateOf(false) }
+
+    // Real ADR-0004 authentication, bound to toollyscan-dev. Constructed once per composition;
+    // FirebaseAccountAuthenticator itself needs an Activity for phone-auth's reCAPTCHA fallback.
+    val authenticator = remember { FirebaseAccountAuthenticator(context as Activity) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Host-local, not reducer-shared: the in-flight phone verification handed back by
+    // sendPhoneVerificationCode, needed by verifyOtp. Not UI state -- an adapter coordination
+    // detail, matching how captureRequested/LocalCaptureLaunchRequest already work below.
+    var pendingPhoneVerificationId by remember { mutableStateOf<PhoneVerificationId?>(null) }
 
     fun dispatch(event: ToollyUiEvent) {
         state = reduceToollyUiState(state, event)
@@ -70,7 +88,10 @@ internal fun AndroidToollyApp(
                 override fun openLibrary() = select(ToollyDestination.LIBRARY)
                 override fun openSearch() = select(ToollyDestination.SEARCH)
                 override fun openProfile() = select(ToollyDestination.PROFILE)
-                override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
+                override fun signOut() {
+                    coroutineScope.launch { authenticator.signOut() }
+                    dispatch(ToollyUiEvent.SignedOut)
+                }
                 // The Scan action only renders inside the authenticated main shell, itself
                 // unreachable while signed out (D-049) -- no signed-out branch needed here.
                 override fun scanDocument() {
@@ -81,12 +102,76 @@ internal fun AndroidToollyApp(
                 override fun discardCapture() = Unit
                 override fun saveCapture() = Unit
                 override fun navigateBack() = dispatch(ToollyUiEvent.NavigateBack)
-                override fun submitPhoneNumber(phoneNumber: String) =
-                    dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
-                override fun verifyOtp() = dispatch(ToollyUiEvent.OtpVerified)
-                override fun completeAuthentication() = dispatch(ToollyUiEvent.AuthenticationSucceeded)
+
+                override fun submitPhoneNumber(phoneNumber: String) {
+                    if (state.pendingEmail != null) {
+                        // Mandatory phone-verification step after creating an email/password
+                        // account -- this needs to LINK a credential to the just-authenticated
+                        // user, not sign in fresh. Real linking is exactly the account-linking
+                        // work ADR-0004 point 9 defers pending its own spike, so this step stays
+                        // local-only until that lands.
+                        dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
+                        return
+                    }
+                    dispatch(ToollyUiEvent.AuthenticationStarted)
+                    coroutineScope.launch {
+                        when (val result = authenticator.sendPhoneVerificationCode(phoneNumber)) {
+                            is PhoneVerificationResult.CodeSent -> {
+                                pendingPhoneVerificationId = result.id
+                                dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
+                            }
+                            is PhoneVerificationResult.Failure ->
+                                dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
+                        }
+                    }
+                }
+
+                override fun verifyOtp(code: String) {
+                    if (state.pendingEmail != null) {
+                        // Same account-linking deferral as submitPhoneNumber above.
+                        dispatch(ToollyUiEvent.OtpVerified)
+                        return
+                    }
+                    val verificationId = pendingPhoneVerificationId
+                    if (verificationId == null) {
+                        dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.ExpiredCode))
+                        return
+                    }
+                    dispatch(ToollyUiEvent.AuthenticationStarted)
+                    coroutineScope.launch {
+                        when (val result = authenticator.confirmPhoneVerificationCode(verificationId, code)) {
+                            is AuthResult.Success -> {
+                                pendingPhoneVerificationId = null
+                                dispatch(ToollyUiEvent.OtpVerified)
+                            }
+                            is AuthResult.Failure -> dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
+                        }
+                    }
+                }
+
+                override fun completeAuthentication(email: String, password: String) {
+                    dispatch(ToollyUiEvent.AuthenticationStarted)
+                    coroutineScope.launch {
+                        when (val result = authenticator.signInWithEmail(email, password)) {
+                            is AuthResult.Success -> dispatch(ToollyUiEvent.AuthenticationSucceeded)
+                            is AuthResult.Failure -> dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
+                        }
+                    }
+                }
+
                 override fun selectCreateAccount() = dispatch(ToollyUiEvent.CreateAccountSelected)
-                override fun createAccount(email: String) = dispatch(ToollyUiEvent.AccountCreated(email))
+
+                override fun createAccount(email: String, password: String) {
+                    dispatch(ToollyUiEvent.AuthenticationStarted)
+                    coroutineScope.launch {
+                        when (val result = authenticator.createAccountWithEmail(email, password)) {
+                            is AuthResult.Success -> dispatch(ToollyUiEvent.AccountCreated(email))
+                            is AuthResult.Failure -> dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
+                        }
+                    }
+                }
+
+                override fun finishOnboarding() = dispatch(ToollyUiEvent.AuthenticationSucceeded)
                 override fun selectForgotPassword() = dispatch(ToollyUiEvent.ForgotPasswordSelected)
                 override fun completeProfile() = dispatch(ToollyUiEvent.ProfileCompleted)
                 override fun authStepBack() = dispatch(ToollyUiEvent.AuthStepBackRequested)

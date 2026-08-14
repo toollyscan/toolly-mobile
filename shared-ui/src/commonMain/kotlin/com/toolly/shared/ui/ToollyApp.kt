@@ -149,7 +149,7 @@ fun ToollyApp(
                 ToollyDestination.PHONE_ENTRY -> PhoneEntryScreen(state, actions)
                 ToollyDestination.OTP_VERIFICATION -> OtpVerificationScreen(state, actions)
                 ToollyDestination.EMAIL_SIGN_IN -> EmailSignInScreen(state, actions)
-                ToollyDestination.CREATE_ACCOUNT -> CreateAccountScreen(actions)
+                ToollyDestination.CREATE_ACCOUNT -> CreateAccountScreen(state, actions)
                 ToollyDestination.RESET_PASSWORD -> ResetPasswordScreen(actions)
                 ToollyDestination.PROFILE_COMPLETION -> ProfileCompletionScreen(state, actions)
                 ToollyDestination.SESSION_ROUTING -> SessionRoutingScreen(actions)

@@ -123,10 +123,16 @@ fun MainViewController(
             override fun navigateBack() = dispatch(ToollyUiEvent.NavigateBack)
             override fun submitPhoneNumber(phoneNumber: String) =
                 dispatch(ToollyUiEvent.PhoneNumberSubmitted(phoneNumber))
-            override fun verifyOtp() = dispatch(ToollyUiEvent.OtpVerified)
-            override fun completeAuthentication() = dispatch(ToollyUiEvent.AuthenticationSucceeded)
+            // No real iOS AccountAuthenticator adapter exists yet (only the Android FirebaseAuth
+            // one does) -- these stay local-only/mock, matching the existing pattern for capture
+            // save above, until a real iOS adapter lands behind the same shared-core port.
+            override fun verifyOtp(code: String) = dispatch(ToollyUiEvent.OtpVerified)
+            override fun completeAuthentication(email: String, password: String) =
+                dispatch(ToollyUiEvent.AuthenticationSucceeded)
             override fun selectCreateAccount() = dispatch(ToollyUiEvent.CreateAccountSelected)
-            override fun createAccount(email: String) = dispatch(ToollyUiEvent.AccountCreated(email))
+            override fun createAccount(email: String, password: String) =
+                dispatch(ToollyUiEvent.AccountCreated(email))
+            override fun finishOnboarding() = dispatch(ToollyUiEvent.AuthenticationSucceeded)
             override fun selectForgotPassword() = dispatch(ToollyUiEvent.ForgotPasswordSelected)
             override fun completeProfile() = dispatch(ToollyUiEvent.ProfileCompleted)
             override fun authStepBack() = dispatch(ToollyUiEvent.AuthStepBackRequested)
