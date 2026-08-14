@@ -26,7 +26,20 @@ jobs:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
-            echo "$GOOGLE_SERVICES_JSON_B64" | base64 -d > spike-capture/google-services.json
+            # Decode via python3, not the base64 CLI: GNU base64 -d rejected the
+            # secret outright ("base64: invalid input") -- almost certainly stray
+            # CR characters picked up when the value was copied from a Windows
+            # clipboard. Stripping all whitespace before decoding sidesteps that
+            # regardless of which line-ending convention produced it, and matches
+            # the decode approach multiplatform.yml's iOS job already needs for
+            # its own (different) cross-platform base64 CLI problem.
+            python3 -c "
+import base64, os
+path = 'spike-capture/google-services.json'
+raw = ''.join(os.environ['GOOGLE_SERVICES_JSON_B64'].split())
+with open(path, 'wb') as f:
+    f.write(base64.b64decode(raw))
+"
           else
             echo "::warning::FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV secret is not set; Firebase-dependent build steps will fail."
           fi
