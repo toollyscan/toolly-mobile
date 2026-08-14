@@ -1,4 +1,4 @@
-package com.toolly.spike.capture.auth
+package com.toolly.spike.capture.firebase
 
 import android.app.Activity
 import android.content.Context
