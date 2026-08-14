@@ -1,5 +1,6 @@
 package com.toolly.shared.model
 
+import com.toolly.shared.auth.AuthError
 import kotlin.jvm.JvmInline
 
 @JvmInline
@@ -90,6 +91,12 @@ sealed interface ToollyUiEvent {
     data object ProfileCompleted : ToollyUiEvent
     data object AuthStepBackRequested : ToollyUiEvent
 
+    /** Dispatched right before a host starts a real, async authentication call. */
+    data object AuthenticationStarted : ToollyUiEvent
+
+    /** A real authentication call failed with an allowlisted [AuthError] (ADR-0004 point 8). */
+    data class AuthenticationFailed(val error: AuthError) : ToollyUiEvent
+
     data object PrivacyCenterOpened : ToollyUiEvent
     data object BackupSettingsOpened : ToollyUiEvent
     data class BackupPreferenceToggled(val kind: BackupPreferenceKind, val enabled: Boolean) : ToollyUiEvent
@@ -119,6 +126,10 @@ data class ToollyUiState(
     val pendingPhoneNumber: String? = null,
     val pendingEmail: String? = null,
     val backupPreferences: BackupPreferences = BackupPreferences(),
+    // Real, async authentication call in flight/failed (ADR-0004). Distinct from [busy], which
+    // tracks capture sessions -- these can be true/set independently of each other.
+    val authBusy: Boolean = false,
+    val authError: AuthError? = null,
 ) {
     init {
         require(tutorialPageIndex in 0 until TUTORIAL_PAGE_COUNT)
@@ -247,6 +258,8 @@ fun reduceToollyUiState(
             authOrigin = null,
             pendingPhoneNumber = null,
             pendingEmail = null,
+            authBusy = false,
+            authError = null,
         )
     }
 
@@ -265,7 +278,25 @@ fun reduceToollyUiState(
             authOrigin = null,
             pendingPhoneNumber = null,
             pendingEmail = null,
+            authBusy = false,
+            authError = null,
         )
+    }
+
+    ToollyUiEvent.AuthenticationStarted -> {
+        if (
+            state.destination !in setOf(
+                ToollyDestination.PHONE_ENTRY,
+                ToollyDestination.OTP_VERIFICATION,
+                ToollyDestination.EMAIL_SIGN_IN,
+                ToollyDestination.CREATE_ACCOUNT,
+            )
+        ) state
+        else state.copy(authBusy = true, authError = null)
+    }
+
+    is ToollyUiEvent.AuthenticationFailed -> {
+        if (!state.authBusy) state else state.copy(authBusy = false, authError = event.error)
     }
 
     ToollyUiEvent.DevelopmentAccessGranted -> {
@@ -312,6 +343,8 @@ fun reduceToollyUiState(
                 authOrigin = null,
                 pendingPhoneNumber = null,
                 pendingEmail = null,
+                authBusy = false,
+                authError = null,
             )
         }
     }
@@ -324,10 +357,12 @@ fun reduceToollyUiState(
                 ToollyAuthenticationMethod.PHONE -> state.copy(
                     destination = ToollyDestination.PHONE_ENTRY,
                     authOrigin = state.destination,
+                    authError = null,
                 )
                 ToollyAuthenticationMethod.EMAIL -> state.copy(
                     destination = ToollyDestination.EMAIL_SIGN_IN,
                     authOrigin = state.destination,
+                    authError = null,
                 )
                 // Google/Apple require a real provider SDK behind the authentication port; not
                 // implemented in this phase, so the request is a deliberate no-op.
@@ -343,6 +378,8 @@ fun reduceToollyUiState(
             state.copy(
                 destination = ToollyDestination.OTP_VERIFICATION,
                 pendingPhoneNumber = event.phoneNumber,
+                authBusy = false,
+                authError = null,
             )
         }
     }
@@ -351,7 +388,7 @@ fun reduceToollyUiState(
         if (state.destination != ToollyDestination.OTP_VERIFICATION) {
             state
         } else {
-            state.copy(destination = ToollyDestination.PROFILE_COMPLETION)
+            state.copy(destination = ToollyDestination.PROFILE_COMPLETION, authBusy = false, authError = null)
         }
     }
 
@@ -359,7 +396,7 @@ fun reduceToollyUiState(
         if (state.destination != ToollyDestination.EMAIL_SIGN_IN) {
             state
         } else {
-            state.copy(destination = ToollyDestination.CREATE_ACCOUNT)
+            state.copy(destination = ToollyDestination.CREATE_ACCOUNT, authError = null)
         }
     }
 
@@ -372,6 +409,8 @@ fun reduceToollyUiState(
             state.copy(
                 destination = ToollyDestination.PHONE_ENTRY,
                 pendingEmail = event.email,
+                authBusy = false,
+                authError = null,
             )
         }
     }
@@ -380,7 +419,7 @@ fun reduceToollyUiState(
         if (state.destination != ToollyDestination.EMAIL_SIGN_IN) {
             state
         } else {
-            state.copy(destination = ToollyDestination.RESET_PASSWORD)
+            state.copy(destination = ToollyDestination.RESET_PASSWORD, authError = null)
         }
     }
 
@@ -399,18 +438,28 @@ fun reduceToollyUiState(
             } else {
                 state.authOrigin ?: ToollyDestination.WELCOME
             },
+            authBusy = false,
+            authError = null,
         )
         ToollyDestination.OTP_VERIFICATION -> state.copy(
             destination = ToollyDestination.PHONE_ENTRY,
             pendingPhoneNumber = null,
+            authBusy = false,
+            authError = null,
         )
         ToollyDestination.EMAIL_SIGN_IN -> state.copy(
             destination = state.authOrigin ?: ToollyDestination.WELCOME,
             authOrigin = null,
             pendingEmail = null,
+            authBusy = false,
+            authError = null,
         )
         ToollyDestination.CREATE_ACCOUNT,
-        ToollyDestination.RESET_PASSWORD -> state.copy(destination = ToollyDestination.EMAIL_SIGN_IN)
+        ToollyDestination.RESET_PASSWORD -> state.copy(
+            destination = ToollyDestination.EMAIL_SIGN_IN,
+            authBusy = false,
+            authError = null,
+        )
         else -> state
     }
 
@@ -506,10 +555,17 @@ interface ToollyUiActions {
     fun saveCapture()
     fun navigateBack()
     fun submitPhoneNumber(phoneNumber: String)
-    fun verifyOtp()
-    fun completeAuthentication()
+    fun verifyOtp(code: String)
+    fun completeAuthentication(email: String, password: String)
     fun selectCreateAccount()
-    fun createAccount(email: String)
+    fun createAccount(email: String, password: String)
+
+    /**
+     * Finishes new-account onboarding (post profile-completion) and becomes authenticated. No
+     * credentials to submit here -- the account was already created and phone-verified in
+     * earlier steps -- so this is a direct, synchronous state transition, not a Firebase call.
+     */
+    fun finishOnboarding()
     fun selectForgotPassword()
     fun completeProfile()
     fun authStepBack()

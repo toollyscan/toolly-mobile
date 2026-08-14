@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,11 +30,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.toolly.shared.auth.AuthError
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.apple_sign_in
+import com.toolly.shared.resources.auth_error_account_exists
+import com.toolly.shared.resources.auth_error_account_not_found
+import com.toolly.shared.resources.auth_error_expired_code
+import com.toolly.shared.resources.auth_error_incorrect_code
+import com.toolly.shared.resources.auth_error_invalid_credential
+import com.toolly.shared.resources.auth_error_network
+import com.toolly.shared.resources.auth_error_not_supported
+import com.toolly.shared.resources.auth_error_rate_limited
+import com.toolly.shared.resources.auth_error_requires_recent_login
+import com.toolly.shared.resources.auth_error_unknown
 import com.toolly.shared.resources.back
 import com.toolly.shared.resources.back_to_sign_in
 import com.toolly.shared.resources.change_phone_number
@@ -87,10 +100,15 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Auth detail screens (`2.x`/`3.x`/`4.x` wireframes) completing the account journey started by
- * [ToollyApp]'s `SignInScreen`/`CreateProfileScreen`. None of these call a real identity provider
- * -- Firebase Authentication stays behind the authentication port until its Phase 4 gate is
- * approved (README architecture principles, issue #52). Submitting a step here only advances the
- * local, presentation-only [ToollyUiState] state machine.
+ * [ToollyApp]'s `SignInScreen`/`CreateProfileScreen`.
+ *
+ * Email/password and pure-phone sign-in now call a real [ToollyUiActions] implementation, which
+ * on Android goes through `FirebaseAccountAuthenticator` behind the `AccountAuthenticator` port
+ * (ADR-0004) -- these screens show [state.authBusy]/[state.authError] while that's in flight.
+ * Google/Apple sign-in and the phone-verification step that follows creating an email/password
+ * account (linking a credential to an already-authenticated user, not a fresh sign-in) remain
+ * local-only: Google/Apple need a provider consent-UI adapter that doesn't exist yet, and account
+ * linking is exactly the work ADR-0004 point 9 defers pending its own spike.
  */
 
 private const val PHONE_DIGIT_COUNT = 10
@@ -118,9 +136,11 @@ internal fun PhoneEntryScreen(state: ToollyUiState, actions: ToollyUiActions) {
             supportingText = if (phoneNumber.isEmpty()) stringResource(Res.string.phone_number_hint) else null,
             keyboardType = KeyboardType.Phone,
         )
+        AuthErrorText(state.authError)
         PrimaryButtonText(
             label = stringResource(Res.string.send_verification_code),
-            enabled = phoneNumber.length == PHONE_DIGIT_COUNT,
+            enabled = phoneNumber.length == PHONE_DIGIT_COUNT && !state.authBusy,
+            busy = state.authBusy,
             onClick = { actions.submitPhoneNumber(phoneNumber) },
         )
         Text(
@@ -162,10 +182,12 @@ internal fun OtpVerificationScreen(state: ToollyUiState, actions: ToollyUiAction
             length = ToollyUiState.OTP_LENGTH,
             label = stringResource(Res.string.otp_field_description),
         )
+        AuthErrorText(state.authError)
         PrimaryButtonText(
             label = stringResource(Res.string.verify_and_continue),
-            enabled = otp.length == ToollyUiState.OTP_LENGTH,
-            onClick = actions::verifyOtp,
+            enabled = otp.length == ToollyUiState.OTP_LENGTH && !state.authBusy,
+            busy = state.authBusy,
+            onClick = { actions.verifyOtp(otp) },
         )
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             if (secondsRemaining > 0) {
@@ -218,10 +240,12 @@ internal fun EmailSignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
                 Text(stringResource(Res.string.forgot_password))
             }
         }
+        AuthErrorText(state.authError)
         PrimaryButtonText(
             label = stringResource(Res.string.sign_in),
-            enabled = email.isNotBlank() && password.isNotBlank(),
-            onClick = actions::completeAuthentication,
+            enabled = email.isNotBlank() && password.isNotBlank() && !state.authBusy,
+            busy = state.authBusy,
+            onClick = { actions.completeAuthentication(email, password) },
         )
         HorizontalDivider()
         SecondaryButton(Res.string.google_sign_in) { actions.authenticate(ToollyAuthenticationMethod.GOOGLE) }
@@ -248,7 +272,7 @@ internal fun EmailSignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
 }
 
 @Composable
-internal fun CreateAccountScreen(actions: ToollyUiActions) {
+internal fun CreateAccountScreen(state: ToollyUiState, actions: ToollyUiActions) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -280,10 +304,12 @@ internal fun CreateAccountScreen(actions: ToollyUiActions) {
             supportingText = if (mismatch) stringResource(Res.string.password_mismatch) else null,
         )
         Spacer(modifier = Modifier.weight(1f))
+        AuthErrorText(state.authError)
         PrimaryButtonText(
             label = stringResource(Res.string.create_account),
-            enabled = email.isNotBlank() && password.isNotBlank() && password == confirmPassword,
-            onClick = { actions.createAccount(email) },
+            enabled = email.isNotBlank() && password.isNotBlank() && password == confirmPassword && !state.authBusy,
+            busy = state.authBusy,
+            onClick = { actions.createAccount(email, password) },
         )
         TextButton(
             onClick = actions::authStepBack,
@@ -408,7 +434,7 @@ internal fun SessionRoutingScreen(actions: ToollyUiActions) {
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButtonText(
             label = stringResource(Res.string.go_to_home),
-            onClick = actions::completeAuthentication,
+            onClick = actions::finishOnboarding,
         )
     }
 }
@@ -416,16 +442,61 @@ internal fun SessionRoutingScreen(actions: ToollyUiActions) {
 /** [PrimaryButton] takes a [org.jetbrains.compose.resources.StringResource]; these screens build
  * their label text dynamically (interpolated strings), so this variant takes a resolved [String]. */
 @Composable
-private fun PrimaryButtonText(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+private fun PrimaryButtonText(
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    busy: Boolean = false,
+) {
     Button(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.PrimaryActionHeight),
         shape = MaterialTheme.shapes.small,
     ) {
-        Text(label)
+        if (busy) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp,
+            )
+        } else {
+            Text(label)
+        }
     }
 }
+
+/** Shows nothing when [error] is `null` -- callers place this where an error should appear. */
+@Composable
+private fun AuthErrorText(error: AuthError?) {
+    if (error == null) return
+    Text(
+        authErrorMessage(error),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(top = ToollySpacing.Small),
+    )
+}
+
+/**
+ * Maps an allowlisted [AuthError] (ADR-0004 point 8 -- never a raw provider message) to a
+ * localized, user-facing string.
+ */
+@Composable
+private fun authErrorMessage(error: AuthError): String = stringResource(
+    when (error) {
+        AuthError.NetworkUnavailable -> Res.string.auth_error_network
+        AuthError.InvalidCredential -> Res.string.auth_error_invalid_credential
+        AuthError.IncorrectCode -> Res.string.auth_error_incorrect_code
+        AuthError.ExpiredCode -> Res.string.auth_error_expired_code
+        AuthError.AccountAlreadyExists -> Res.string.auth_error_account_exists
+        AuthError.AccountNotFound -> Res.string.auth_error_account_not_found
+        AuthError.RateLimited -> Res.string.auth_error_rate_limited
+        AuthError.RequiresRecentLogin -> Res.string.auth_error_requires_recent_login
+        AuthError.NotSupportedOnPlatform -> Res.string.auth_error_not_supported
+        AuthError.Unknown -> Res.string.auth_error_unknown
+    },
+)
 
 @Composable
 private fun TermsNotice() {

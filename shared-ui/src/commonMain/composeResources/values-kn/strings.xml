@@ -79,6 +79,16 @@
     <string name="phone_number_hint">10-ಅಂಕಿಯ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ</string>
     <string name="send_verification_code">ಪರಿಶೀಲನಾ ಕೋಡ್ ಕಳುಹಿಸಿ</string>
     <string name="otp_rate_notice">ಕೋಡ್ ವಿನಂತಿಗಳು ಕೂಲ್‌ಡೌನ್‌ನಿಂದ ಸುರಕ್ಷಿತವಾಗಿವೆ. ಪ್ರಮಾಣಿತ SMS ದರಗಳು ಅನ್ವಯಿಸಬಹುದು.</string>
+    <string name="auth_error_network">ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಇಲ್ಲ. ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="auth_error_invalid_credential">ಆ ಇಮೇಲ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಸರಿಯಾಗಿಲ್ಲ.</string>
+    <string name="auth_error_incorrect_code">ಆ ಕೋಡ್ ಸರಿಯಾಗಿಲ್ಲ. ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="auth_error_expired_code">ಈ ಕೋಡ್‌ನ ಅವಧಿ ಮುಗಿದಿದೆ. ಹೊಸ ಕೋಡ್ ಕೇಳಿ.</string>
+    <string name="auth_error_account_exists">ಈ ಇಮೇಲ್‌ನೊಂದಿಗೆ ಈಗಾಗಲೇ ಖಾತೆ ಇದೆ.</string>
+    <string name="auth_error_account_not_found">ಈ ವಿವರಗಳೊಂದಿಗೆ ನಮಗೆ ಯಾವುದೇ ಖಾತೆ ಕಂಡುಬಂದಿಲ್ಲ.</string>
+    <string name="auth_error_rate_limited">ಹಲವು ಪ್ರಯತ್ನಗಳು. ಸ್ವಲ್ಪ ಸಮಯ ಕಾದು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="auth_error_requires_recent_login">ನಿಮ್ಮ ಸುರಕ್ಷತೆಗಾಗಿ, ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.</string>
+    <string name="auth_error_not_supported">ಈ ಸೈನ್-ಇನ್ ವಿಧಾನ ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ.</string>
+    <string name="auth_error_unknown">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="use_another_sign_in_method">ಬೇರೆ ಸೈನ್-ಇನ್ ವಿಧಾನ ಬಳಸಿ</string>
     <string name="terms_privacy_notice">ಮುಂದುವರಿಸುವ ಮೂಲಕ, ನೀವು ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಯನ್ನು ಒಪ್ಪುತ್ತೀರಿ.</string>
     <string name="otp_title">6-ಅಂಕಿಯ ಕೋಡ್ ನಮೂದಿಸಿ</string>

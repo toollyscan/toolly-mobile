@@ -114,12 +114,21 @@ matrix and block beta/release approval.*
 
 **Goal:** Approved multi-provider authentication with canonical account identity.
 
-*Blocked until Production Gate is approved.*
+*Connecting any build to the `production` Firebase project, or processing real user documents
+through Phase 4 code, remains blocked until Production Gate is approved. Dev-environment (
+`toollyscan-dev`) implementation work is not blocked by that gate and has started -- see D-050.*
 
-- [ ] `ToollyAccountId` generation at registration
-- [ ] Firebase Authentication integration behind the canonical authentication port
-- [ ] Phone OTP, email/password, Google and Apple Sign In on iOS
-- [ ] Provider-account linking and canonical-ID contract tests
+- [ ] `ToollyAccountId` generation at registration -- interim only: a device-local placeholder is
+  minted per Firebase UID (`FirebaseAccountAuthenticator`); not yet the server-assigned,
+  cross-device-portable identity this item requires (see D-050)
+- [ ] Firebase Authentication integration behind the canonical authentication port -- Android
+  adapter implemented for email/password and pure-phone sign-in, bound to `toollyscan-dev`; not
+  yet reviewed/approved as complete
+- [ ] Phone OTP, email/password, Google and Apple Sign In on iOS -- Android has phone OTP and
+  email/password; Google/Apple are no-ops pending a provider consent-UI adapter; iOS has no
+  `AccountAuthenticator` adapter at all yet
+- [ ] Provider-account linking and canonical-ID contract tests -- not implemented; the post-signup
+  phone-verification-as-linking step is still local-only pending this
 - [ ] OTP abuse controls validated in staging
 - [ ] Trusted-device, identity recovery and encrypted-backup recovery implementation evidence approved under TLY-005
 - [ ] Provider identity processing, Toolly persistence, retention and deletion reviewed

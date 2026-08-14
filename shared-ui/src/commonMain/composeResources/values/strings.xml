@@ -79,6 +79,16 @@
     <string name="phone_number_hint">Enter 10-digit number</string>
     <string name="send_verification_code">Send verification code</string>
     <string name="otp_rate_notice">Code requests are protected by a cooldown. Standard SMS rates may apply.</string>
+    <string name="auth_error_network">No internet connection. Check your network and try again.</string>
+    <string name="auth_error_invalid_credential">That email or password isn\'t correct.</string>
+    <string name="auth_error_incorrect_code">That code isn\'t correct. Check it and try again.</string>
+    <string name="auth_error_expired_code">This code has expired. Request a new one.</string>
+    <string name="auth_error_account_exists">An account with this email already exists.</string>
+    <string name="auth_error_account_not_found">We couldn\'t find an account with those details.</string>
+    <string name="auth_error_rate_limited">Too many attempts. Wait a moment and try again.</string>
+    <string name="auth_error_requires_recent_login">For your security, please sign in again.</string>
+    <string name="auth_error_not_supported">This sign-in method isn\'t available yet.</string>
+    <string name="auth_error_unknown">Something went wrong. Please try again.</string>
     <string name="use_another_sign_in_method">Use another sign-in method</string>
     <string name="terms_privacy_notice">By continuing, you agree to the Terms and Privacy Policy.</string>
     <string name="otp_title">Enter the 6-digit code</string>
