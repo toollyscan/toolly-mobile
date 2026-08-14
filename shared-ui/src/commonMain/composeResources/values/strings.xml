@@ -22,11 +22,10 @@
     <string name="get_started">Get started</string>
     <string name="welcome_title">Welcome to Toolly</string>
     <string name="welcome_description">Choose a local action or open optional account setup.</string>
-    <string name="available_offline">Scan privately — no account required</string>
+    <string name="search_subtitle">Search titles and categories</string>
+    <string name="welcome_sign_in_prompt">Sign in to start scanning securely</string>
     <string name="welcome_headline">Your phone becomes a private scanner</string>
     <string name="welcome_body">Capture, clean, organize, and export documents even without internet.</string>
-    <string name="scan_first_document">Scan my first document</string>
-    <string name="explore_library">Explore library</string>
     <string name="account_and_backup">Account and backup</string>
     <string name="account_description">Sign in only when you enable encrypted backup, sync, or recovery.</string>
     <string name="local_documents_notice">Your documents remain on this device unless you enable backup.</string>

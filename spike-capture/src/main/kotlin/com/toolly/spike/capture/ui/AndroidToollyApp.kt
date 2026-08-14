@@ -12,7 +12,6 @@ import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyDestination
-import com.toolly.shared.model.ToollySessionState
 import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiEvent
 import com.toolly.shared.model.ToollyUiState
@@ -64,9 +63,6 @@ internal fun AndroidToollyApp(
                 override fun showSignIn() = dispatch(ToollyUiEvent.SignInSelected)
                 override fun showCreateProfile() = dispatch(ToollyUiEvent.CreateProfileSelected)
                 override fun backToWelcome() = dispatch(ToollyUiEvent.BackToWelcome)
-                override fun continueLocally(destination: ToollyDestination) {
-                    dispatch(ToollyUiEvent.LocalSessionStarted(destination))
-                }
                 override fun authenticate(method: ToollyAuthenticationMethod) =
                     dispatch(ToollyUiEvent.AuthenticationMethodSelected(method))
                 override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
@@ -75,12 +71,10 @@ internal fun AndroidToollyApp(
                 override fun openSearch() = select(ToollyDestination.SEARCH)
                 override fun openProfile() = select(ToollyDestination.PROFILE)
                 override fun signOut() = dispatch(ToollyUiEvent.SignedOut)
+                // The Scan action only renders inside the authenticated main shell, itself
+                // unreachable while signed out (D-049) -- no signed-out branch needed here.
                 override fun scanDocument() {
-                    if (state.sessionState == ToollySessionState.SIGNED_OUT) {
-                        dispatch(ToollyUiEvent.LocalSessionStarted(ToollyDestination.LIBRARY))
-                    } else {
-                        select(ToollyDestination.LIBRARY)
-                    }
+                    select(ToollyDestination.LIBRARY)
                     captureRequested = true
                 }
                 override fun openDocument(id: DocumentUiId) = Unit

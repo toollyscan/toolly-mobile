@@ -10,9 +10,13 @@ data class DocumentListItem(
     val pageCount: Int,
 )
 
+/**
+ * [DEVELOPMENT] is the debug-only local authentication adapter (D-047) -- release-disabled,
+ * never a substitute for real authentication. There is no guest/local-without-account session:
+ * D-049 reaffirms D-021/ADR-0004 -- sign-in is required before the first scan.
+ */
 enum class ToollySessionState {
     SIGNED_OUT,
-    LOCAL,
     DEVELOPMENT,
     AUTHENTICATED,
 }
@@ -71,7 +75,6 @@ sealed interface ToollyUiEvent {
     data object SignInSelected : ToollyUiEvent
     data object CreateProfileSelected : ToollyUiEvent
     data object BackToWelcome : ToollyUiEvent
-    data class LocalSessionStarted(val destination: ToollyDestination) : ToollyUiEvent
     data object AuthenticationSucceeded : ToollyUiEvent
     data object DevelopmentAccessGranted : ToollyUiEvent
     data class MainDestinationSelected(val destination: ToollyDestination) : ToollyUiEvent
@@ -218,13 +221,7 @@ fun reduceToollyUiState(
     }
 
     ToollyUiEvent.SignInSelected -> {
-        if (
-            state.destination !in setOf(ToollyDestination.WELCOME, ToollyDestination.PROFILE) ||
-            state.sessionState in setOf(
-                ToollySessionState.AUTHENTICATED,
-                ToollySessionState.DEVELOPMENT,
-            )
-        ) state
+        if (state.destination != ToollyDestination.WELCOME) state
         else state.copy(destination = ToollyDestination.SIGN_IN)
     }
 
@@ -233,11 +230,6 @@ fun reduceToollyUiState(
             state.destination !in setOf(
                 ToollyDestination.WELCOME,
                 ToollyDestination.SIGN_IN,
-                ToollyDestination.PROFILE,
-            ) ||
-            state.sessionState in setOf(
-                ToollySessionState.AUTHENTICATED,
-                ToollySessionState.DEVELOPMENT,
             )
         ) state
         else state.copy(destination = ToollyDestination.CREATE_PROFILE)
@@ -251,29 +243,11 @@ fun reduceToollyUiState(
             )
         ) state
         else state.copy(
-            destination = if (state.sessionState == ToollySessionState.LOCAL) {
-                ToollyDestination.PROFILE
-            } else {
-                ToollyDestination.WELCOME
-            },
+            destination = ToollyDestination.WELCOME,
             authOrigin = null,
             pendingPhoneNumber = null,
             pendingEmail = null,
         )
-    }
-
-    is ToollyUiEvent.LocalSessionStarted -> {
-        if (
-            state.destination != ToollyDestination.WELCOME ||
-            event.destination !in setOf(ToollyDestination.HOME, ToollyDestination.LIBRARY)
-        ) {
-            state
-        } else {
-            state.copy(
-                destination = event.destination,
-                sessionState = ToollySessionState.LOCAL,
-            )
-        }
     }
 
     ToollyUiEvent.AuthenticationSucceeded -> {
@@ -326,7 +300,7 @@ fun reduceToollyUiState(
     }
 
     ToollyUiEvent.SignedOut -> {
-        if (state.sessionState == ToollySessionState.LOCAL) {
+        if (state.sessionState == ToollySessionState.SIGNED_OUT) {
             state
         } else {
             state.copy(
@@ -519,7 +493,6 @@ interface ToollyUiActions {
     fun showSignIn()
     fun showCreateProfile()
     fun backToWelcome()
-    fun continueLocally(destination: ToollyDestination)
     fun authenticate(method: ToollyAuthenticationMethod)
     fun useDevelopmentAccess()
     fun openHome()

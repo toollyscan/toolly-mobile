@@ -22,11 +22,10 @@
     <string name="get_started">ಪ್ರಾರಂಭಿಸಿ</string>
     <string name="welcome_title">Toollyಗೆ ಸ್ವಾಗತ</string>
     <string name="welcome_description">ಸ್ಥಳೀಯ ಕಾರ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಐಚ್ಛಿಕ ಖಾತೆ ಸೆಟಪ್ ತೆರೆಯಿರಿ.</string>
-    <string name="available_offline">ಖಾಸಗಿಯಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ — ಖಾತೆ ಅಗತ್ಯವಿಲ್ಲ</string>
+    <string name="search_subtitle">ಹೆಸರು ಮತ್ತು ವರ್ಗದಿಂದ ಹುಡುಕಿ</string>
+    <string name="welcome_sign_in_prompt">ಸುರಕ್ಷಿತವಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ</string>
     <string name="welcome_headline">ನಿಮ್ಮ ಫೋನ್ ಖಾಸಗಿ ಸ್ಕ್ಯಾನರ್ ಆಗುತ್ತದೆ</string>
     <string name="welcome_body">ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆಯೂ ದಾಖಲೆಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ, ಸ್ವಚ್ಛಗೊಳಿಸಿ, ವ್ಯವಸ್ಥೆಗೊಳಿಸಿ ಮತ್ತು ರಫ್ತು ಮಾಡಿ.</string>
-    <string name="scan_first_document">ನನ್ನ ಮೊದಲ ದಾಖಲೆಯನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
-    <string name="explore_library">ಲೈಬ್ರರಿ ನೋಡಿ</string>
     <string name="account_and_backup">ಖಾತೆ ಮತ್ತು ಬ್ಯಾಕಪ್</string>
     <string name="account_description">ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಬ್ಯಾಕಪ್, ಸಿಂಕ್ ಅಥವಾ ಮರುಪಡೆಯುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಮಾತ್ರ ಸೈನ್ ಇನ್ ಮಾಡಿ.</string>
     <string name="local_documents_notice">ನೀವು ಬ್ಯಾಕಪ್ ಸಕ್ರಿಯಗೊಳಿಸುವವರೆಗೆ ದಾಖಲೆಗಳು ಈ ಸಾಧನದಲ್ಲೇ ಇರುತ್ತವೆ.</string>
