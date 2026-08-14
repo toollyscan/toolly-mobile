@@ -1,0 +1,45 @@
+name: ZZ Diag3
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  hello:
+    name: Hello
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Cache Gradle dependencies and build cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts', '**/gradle.lockfile') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Provision Firebase Android config (dev)
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
+            cat > /tmp/decode_google_services.py <<'PYEOF'
+import base64, os
+path = 'spike-capture/google-services.json'
+raw = ''.join(os.environ['GOOGLE_SERVICES_JSON_B64'].split())
+with open(path, 'wb') as f:
+    f.write(base64.b64decode(raw))
+PYEOF
+            python3 /tmp/decode_google_services.py
+          else
+            echo "::warning::FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV secret is not set; Firebase-dependent build steps will fail."
+          fi
+
+      - run: echo "hello"
