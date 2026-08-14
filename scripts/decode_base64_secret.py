@@ -41,6 +41,9 @@ def main() -> int:
         return 0
 
     cleaned = "".join(raw.split())
+    # Restore any trailing '=' padding lost in transit (e.g. a copy/paste step that
+    # trimmed trailing characters it mistook for insignificant whitespace).
+    cleaned += "=" * (-len(cleaned) % 4)
     with open(output_path, "wb") as handle:
         handle.write(base64.b64decode(cleaned))
     return 0
