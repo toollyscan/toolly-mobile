@@ -29,17 +29,6 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV }}
         run: |
-          if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
-            cat > /tmp/decode_google_services.py <<'PYEOF'
-import base64, os
-path = 'spike-capture/google-services.json'
-raw = ''.join(os.environ['GOOGLE_SERVICES_JSON_B64'].split())
-with open(path, 'wb') as f:
-    f.write(base64.b64decode(raw))
-PYEOF
-            python3 /tmp/decode_google_services.py
-          else
-            echo "::warning::FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_DEV secret is not set; Firebase-dependent build steps will fail."
-          fi
+          echo "secret length check only"
 
       - run: echo "hello"
