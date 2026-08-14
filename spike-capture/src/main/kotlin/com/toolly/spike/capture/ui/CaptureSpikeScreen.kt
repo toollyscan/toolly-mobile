@@ -567,6 +567,27 @@ private fun DocumentSummary.matchesFilter(filter: LibraryFilter): Boolean = when
     LibraryFilter.UNTAGGED -> category == null
 }
 
+/**
+ * "N pages · Saved today/yesterday/N days ago" (wireframe 4.1's card subtitle). Uses
+ * [document]'s own `updatedAtEpochMillis` against wall-clock time at composition -- a plain
+ * display label, not something that needs to tick live, so recomposing only when the card itself
+ * recomposes is fine.
+ */
+@Composable
+private fun documentCardSubtitle(document: DocumentSummary): String {
+    val pageCount = pluralStringResource(R.plurals.page_count, document.pageCount, document.pageCount)
+    val elapsedDays = ((System.currentTimeMillis() - document.updatedAtEpochMillis) / DAY_MILLIS)
+        .coerceAtLeast(0L)
+    val saved = when (elapsedDays) {
+        0L -> stringResource(R.string.saved_today)
+        1L -> stringResource(R.string.saved_yesterday)
+        else -> stringResource(R.string.saved_days_ago, elapsedDays)
+    }
+    return stringResource(R.string.document_card_subtitle, pageCount, saved)
+}
+
+private const val DAY_MILLIS = 24L * 60L * 60L * 1000L
+
 @StringRes
 private fun LibraryFilter.labelRes(): Int = when (this) {
     LibraryFilter.ALL -> R.string.category_all
@@ -686,11 +707,7 @@ private fun LibraryScreen(
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(
-                                        pluralStringResource(
-                                            R.plurals.page_count,
-                                            document.pageCount,
-                                            document.pageCount,
-                                        ),
+                                        documentCardSubtitle(document),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
