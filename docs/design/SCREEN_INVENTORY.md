@@ -41,9 +41,34 @@ Each screen must exist in at least two variants: **phone** and **tablet**. Table
 > category chips on the document viewer. This covers LI-02's filtering intent and a name-based
 > subset of SE-01/02/03 (title matching only, per `USER_FLOW_MATRIX.md` PT-04 — OCR-text search
 > stays premium/deferred). It is reachable only through Library's own search field, not as a
-> separate SEARCH tab destination — shared-ui's `SearchScreen()` stub is unchanged; wiring a real
-> SEARCH tab would need the document list state lifted out of `ToollyDocumentApp` so both
-> destinations can share it, left as further follow-up rather than rushed into this pass.
+> separate SEARCH tab destination.
+>
+> **Search-tab fallback made real (follow-up to the above).** A direct audit against the live
+> Figma file (`4.2 Search`, page "01 Product Flows") found shared-ui's `SEARCH`-destination
+> fallback `SearchScreen()` -- used by any host that doesn't supply its own `searchContent` slot,
+> which today means iOS, since `MainViewController.kt` never wires one -- never actually filtered
+> anything; it toggled between static "all documents"/"no documents" text regardless of query.
+> `DocumentListItem` now carries an optional `title`, and `SearchScreen()` does real title-only
+> substring filtering (`filterDocumentsByTitle()`, unit tested) with the same three states as
+> Android's `SearchDocumentsScreen`: type-to-search prompt, no-results, and result cards. Still
+> title-only, not OCR -- see the `USER_FLOW_MATRIX.md` PT-04 note above, unchanged. This does not
+> give iOS real search data (no document vault exists there yet -- see the Apple-capture note
+> below) -- it makes the fallback component itself correct for whenever that data exists, rather
+> than leaving it permanently non-functional. The document-list-state-lifting follow-up mentioned
+> above is unaffected and still outstanding.
+>
+> **Capture screen intentionally uses ML Kit's own UI, not a custom one (checked against Figma
+> this session).** The Figma wireframe's `1.2 Capture` / `1.3 Correct crop` / `1.4 Clean and save`
+> frames (page "01 Product Flows") show a custom Toolly-branded live-guidance camera screen with
+> real-time edge detection. The actual Android capture experience is Google's own ML Kit scanner
+> activity (`MlKitDocumentScannerAdapter` configures `GmsDocumentScannerOptions.SCANNER_MODE_FULL`)
+> -- this is not a gap to close, it is issue #52's own explicit instruction: "Connect Android Scan
+> to the existing ML Kit adapter **without copying Google scanner UI**." The Figma frames predate
+> or were never reconciled with that decision. Confirmed with the repo owner (2026-08-15): keep
+> ML Kit's UI as-is; these three frames are superseded by the #52 decision, not evidence-pending
+> work to build. SC-06/07/15/16/18 below should be read the same way -- their "Evidence pending"
+> Figma-frame-tracking status is unaffected (this table tracks Figma evidence, not code, per the
+> note at the top of this section), but no custom Compose capture screen is planned against them.
 >
 > **Apple capture wired into a real Swift host (#48).** `AppleCaptureSessionImpl.swift`
 > (`iosApp/ToollyApp/`) implements the `AppleCaptureSession` boundary using VisionKit's

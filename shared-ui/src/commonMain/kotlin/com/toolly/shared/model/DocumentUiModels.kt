@@ -9,7 +9,25 @@ value class DocumentUiId(val value: String)
 data class DocumentListItem(
     val id: DocumentUiId,
     val pageCount: Int,
+    val title: String? = null,
 )
+
+/**
+ * Title-only substring match against [documents], mirroring the real Android search
+ * implementation's behavior exactly (`SearchDocumentsScreen`'s `displayName?.contains(query,
+ * ignoreCase = true)`): a blank [query] returns no results (the caller shows a "type to search"
+ * prompt instead, per wireframe `4.2 Search`'s empty-query state), never "all documents". Search
+ * is deliberately title-only -- recognized-text (OCR) matching shown in the wireframe is a Phase 5+
+ * capability that does not exist yet (see `docs/product/ENTITLEMENTS.md`), so this never claims to
+ * match on content it hasn't actually read. Untitled documents ([DocumentListItem.title] null)
+ * can't match a non-blank query and are correctly excluded.
+ */
+fun filterDocumentsByTitle(documents: List<DocumentListItem>, query: String): List<DocumentListItem> =
+    if (query.isBlank()) {
+        emptyList()
+    } else {
+        documents.filter { it.title?.contains(query, ignoreCase = true) == true }
+    }
 
 /**
  * [DEVELOPMENT] is the debug-only local authentication adapter (D-047) -- release-disabled,

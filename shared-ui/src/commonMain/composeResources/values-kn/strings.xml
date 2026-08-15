@@ -47,7 +47,9 @@
     <string name="scan">ಸ್ಕ್ಯಾನ್</string>
     <string name="search">ಹುಡುಕಿ</string>
     <string name="search_documents">ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ</string>
-    <string name="all_documents">ಎಲ್ಲಾ ಸ್ಥಳೀಯ ದಾಖಲೆಗಳು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ಲಭ್ಯ.</string>
+    <string name="search_prompt">ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಟೈಪ್ ಮಾಡಿ</string>
+    <string name="no_search_results">ಯಾವುದೇ ದಾಖಲೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ</string>
+    <string name="search_result_matched_title">ಹೆಸರು ಹೊಂದಿಕೆಯಾಗಿದೆ</string>
     <string name="you">ನೀವು</string>
     <string name="tools">ಪರಿಕರಗಳು</string>
     <string name="tools_description">ಸುರಕ್ಷಿತ ಆಫ್‌ಲೈನ್ ಅನುಷ್ಠಾನಗಳು ಸಿದ್ಧವಾದಾಗ ದಾಖಲೆ ಪರಿಕರಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.</string>
