@@ -120,7 +120,7 @@ fun ExportPrivacyCheckScreen(
         )
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButton(label = Res.string.save_to_device, onClick = onSaveToDevice, enabled = !busy)
-        SecondaryButton(Res.string.share, onShare)
+        SecondaryButton(Res.string.share, onClick = onShare)
         TextButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),

@@ -523,17 +523,20 @@ private fun AccountScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(ToollySpacing.Small))
-        PrimaryButton(label = Res.string.phone_sign_in, onClick = {
-            actions.authenticate(ToollyAuthenticationMethod.PHONE)
-        })
-        SecondaryButton(Res.string.email_sign_in) {
+        AuthErrorText(state.authError)
+        PrimaryButton(
+            label = Res.string.phone_sign_in,
+            enabled = !state.authBusy,
+            onClick = { actions.authenticate(ToollyAuthenticationMethod.PHONE) },
+        )
+        SecondaryButton(Res.string.email_sign_in, enabled = !state.authBusy) {
             actions.authenticate(ToollyAuthenticationMethod.EMAIL)
         }
-        SecondaryButton(Res.string.google_sign_in) {
+        SecondaryButton(Res.string.google_sign_in, enabled = !state.authBusy) {
             actions.authenticate(ToollyAuthenticationMethod.GOOGLE)
         }
         if (state.appleSignInAvailable) {
-            SecondaryButton(Res.string.apple_sign_in) {
+            SecondaryButton(Res.string.apple_sign_in, enabled = !state.authBusy) {
                 actions.authenticate(ToollyAuthenticationMethod.APPLE)
             }
         }
@@ -1062,9 +1065,10 @@ internal fun PrimaryButton(
 }
 
 @Composable
-internal fun SecondaryButton(label: StringResource, onClick: () -> Unit) {
+internal fun SecondaryButton(label: StringResource, enabled: Boolean = true, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.PrimaryActionHeight),
         shape = MaterialTheme.shapes.small,
     ) {
