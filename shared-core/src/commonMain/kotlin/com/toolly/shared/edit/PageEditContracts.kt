@@ -49,12 +49,15 @@ enum class EnhancementMode {
  * One page edit request.
  *
  * [crop] is `null` when the user accepts the page as-is with only an enhancement mode applied.
+ * [rotationQuarterTurns] (default 0, normalized mod 4 by [ImageRotation.rotate90]) is applied
+ * before [crop] -- see that object's doc for why the ordering matters.
  */
 data class PageEditRequest(
     val assetId: TemporaryAssetId,
     val crop: CropRegion?,
     val mode: EnhancementMode,
     val intensity: Float,
+    val rotationQuarterTurns: Int = 0,
 ) {
     init {
         require(intensity in 0f..1f) { "intensity must be between 0 and 1" }

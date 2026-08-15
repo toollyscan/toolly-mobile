@@ -209,7 +209,9 @@ internal class EncryptedDocumentRepository(
      * import). [pageId] must belong to [documentId].
      *
      * The source page is decrypted straight to memory (same plaintext-stays-in-memory boundary
-     * `loadAssetBitmap` already uses -- never staged as a plaintext file), warped/adjusted with
+     * `loadAssetBitmap` already uses -- never staged as a plaintext file), rotated (if
+     * [rotationQuarterTurns] is non-zero -- shared `ImageRotation.rotate90`, applied before crop
+     * so [crop]'s corners land on the orientation the user actually saw), warped/adjusted with
      * the shared `commonMain` pixel math via [AndroidPageEditor.applyToBuffer], then its JPEG
      * output (staged only in that class's own bounded cache directory, mirroring how newly
      * captured pages are staged before their first encryption) is encrypted into the vault under
@@ -227,6 +229,7 @@ internal class EncryptedDocumentRepository(
         mode: EnhancementMode,
         intensity: Float,
         updatedAtEpochMillis: Long,
+        rotationQuarterTurns: Int = 0,
     ): ToollyResult<DocumentDetails> = withContext(Dispatchers.IO) {
         synchronized(lock) {
             if (legacyMigrationBlocked) return@withContext migrationFailure()
@@ -264,7 +267,8 @@ internal class EncryptedDocumentRepository(
                         bitmap.recycle()
                     }
                 }
-                val editResult = pageEditor.applyToBuffer(sourceBuffer, crop, mode, intensity)
+                val editResult =
+                    pageEditor.applyToBuffer(sourceBuffer, crop, mode, intensity, rotationQuarterTurns)
                 val editedAssetId = when (editResult) {
                     is PageEditResult.Success -> editResult.assetId
                     is PageEditResult.Failure -> throw when (editResult.error) {
