@@ -1,5 +1,7 @@
 package com.toolly.domain.model
 
+import kotlin.jvm.JvmInline
+
 private val LOWER_UUID =
     Regex("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 

@@ -13,14 +13,13 @@ import com.toolly.domain.model.TemporaryAssetId
 import com.toolly.foundation.OpaqueIdGenerator
 import com.toolly.foundation.ToollyClock
 import com.toolly.foundation.ToollyResult
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SaveCapturedDocumentUseCaseTest {
     @Test
-    fun `builds stable canonical command and preserves page order`() = runTest {
+    fun buildsStableCanonicalCommandAndPreservesPageOrder() = runImmediate {
         val repository = RecordingRepository()
         val ids = sequenceOf(
             "00000000-0000-4000-8000-000000000001",
@@ -49,7 +48,7 @@ class SaveCapturedDocumentUseCaseTest {
     }
 
     @Test
-    fun `rejects duplicate temporary assets before repository write`() = runTest {
+    fun rejectsDuplicateTemporaryAssetsBeforeRepositoryWrite() = runImmediate {
         val repository = RecordingRepository()
         val useCase = SaveCapturedDocumentUseCase(
             repository = repository,
