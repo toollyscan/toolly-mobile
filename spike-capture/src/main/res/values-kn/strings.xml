@@ -53,6 +53,7 @@
     <string name="category_other">ಇತರೆ</string>
     <string name="category_untagged">ವರ್ಗವಿಲ್ಲದ</string>
     <string name="document_category_label">ವರ್ಗ</string>
+    <string name="tap_page_to_edit">ಕ್ರಾಪ್ ಅಥವಾ ಸುಧಾರಿಸಲು ಪುಟವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ</string>
     <string name="rename_document">ಹೆಸರು ಬದಲಿಸಿ</string>
     <string name="rename_document_title">ದಾಖಲೆಯ ಹೆಸರು</string>
     <string name="rename_document_hint">ಉದಾ. ವಿದ್ಯುತ್ ಬಿಲ್</string>

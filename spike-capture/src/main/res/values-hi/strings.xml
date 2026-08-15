@@ -53,6 +53,7 @@
     <string name="category_other">अन्य</string>
     <string name="category_untagged">बिना श्रेणी</string>
     <string name="document_category_label">श्रेणी</string>
+    <string name="tap_page_to_edit">क्रॉप या सुधार करने के लिए किसी पेज पर टैप करें</string>
     <string name="rename_document">नाम बदलें</string>
     <string name="rename_document_title">दस्तावेज़ का नाम</string>
     <string name="rename_document_hint">जैसे बिजली का बिल</string>
