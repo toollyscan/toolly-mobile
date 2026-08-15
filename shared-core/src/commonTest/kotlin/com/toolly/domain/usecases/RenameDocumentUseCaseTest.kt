@@ -1,23 +1,26 @@
 package com.toolly.domain.usecases
 
 import com.toolly.domain.contracts.DocumentRepository
+import com.toolly.domain.contracts.SaveCapturedDocumentCommand
+import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.DocumentLifecycle
+import com.toolly.domain.model.DocumentPage
 import com.toolly.domain.model.DocumentSummary
+import com.toolly.domain.model.PageId
 import com.toolly.foundation.ToollyClock
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class RenameDocumentUseCaseTest {
     @Test
-    fun `trims the name and stamps the clock's time before writing`() = runTest {
+    fun trimsTheNameAndStampsTheClocksTimeBeforeWriting() = runImmediate {
         val repository = RecordingRepository()
         val useCase = RenameDocumentUseCase(repository, clock = ToollyClock { 99L })
 
@@ -29,7 +32,7 @@ class RenameDocumentUseCaseTest {
     }
 
     @Test
-    fun `blank name clears the title instead of storing whitespace`() = runTest {
+    fun blankNameClearsTheTitleInsteadOfStoringWhitespace() = runImmediate {
         val repository = RecordingRepository()
         val useCase = RenameDocumentUseCase(repository, clock = ToollyClock { 1L })
 
@@ -40,7 +43,7 @@ class RenameDocumentUseCaseTest {
     }
 
     @Test
-    fun `null clears the title`() = runTest {
+    fun nullClearsTheTitle() = runImmediate {
         val repository = RecordingRepository()
         val useCase = RenameDocumentUseCase(repository, clock = ToollyClock { 1L })
 
@@ -51,7 +54,7 @@ class RenameDocumentUseCaseTest {
     }
 
     @Test
-    fun `rejects a name over the supported length without calling the repository`() = runTest {
+    fun rejectsANameOverTheSupportedLengthWithoutCallingTheRepository() = runImmediate {
         val repository = RecordingRepository()
         val useCase = RenameDocumentUseCase(repository, clock = ToollyClock { 1L })
 
@@ -74,7 +77,7 @@ class RenameDocumentUseCaseTest {
             error("Not used")
 
         override suspend fun saveCapturedDocument(
-            command: com.toolly.domain.contracts.SaveCapturedDocumentCommand,
+            command: SaveCapturedDocumentCommand,
         ): ToollyResult<DocumentDetails> = error("Not used")
 
         override suspend fun renameDocument(
@@ -96,9 +99,9 @@ class RenameDocumentUseCaseTest {
                         displayName = displayName,
                     ),
                     pages = listOf(
-                        com.toolly.domain.model.DocumentPage(
-                            id = com.toolly.domain.model.PageId(SAMPLE_PAGE_ID),
-                            sourceAssetId = com.toolly.domain.model.AssetId(SAMPLE_ASSET_ID),
+                        DocumentPage(
+                            id = PageId(SAMPLE_PAGE_ID),
+                            sourceAssetId = AssetId(SAMPLE_ASSET_ID),
                             ordinal = 0,
                             widthPixels = null,
                             heightPixels = null,

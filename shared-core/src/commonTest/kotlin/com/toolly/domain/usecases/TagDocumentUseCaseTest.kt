@@ -1,6 +1,7 @@
 package com.toolly.domain.usecases
 
 import com.toolly.domain.contracts.DocumentRepository
+import com.toolly.domain.contracts.SaveCapturedDocumentCommand
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentCategory
 import com.toolly.domain.model.DocumentDetails
@@ -11,14 +12,13 @@ import com.toolly.domain.model.DocumentSummary
 import com.toolly.domain.model.PageId
 import com.toolly.foundation.ToollyClock
 import com.toolly.foundation.ToollyResult
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class TagDocumentUseCaseTest {
     @Test
-    fun `forwards the chosen category and the clock's time`() = runTest {
+    fun forwardsTheChosenCategoryAndTheClocksTime() = runImmediate {
         val repository = RecordingRepository()
         val useCase = TagDocumentUseCase(repository, clock = ToollyClock { 55L })
 
@@ -29,7 +29,7 @@ class TagDocumentUseCaseTest {
     }
 
     @Test
-    fun `null clears the category`() = runTest {
+    fun nullClearsTheCategory() = runImmediate {
         val repository = RecordingRepository()
         val useCase = TagDocumentUseCase(repository, clock = ToollyClock { 1L })
 
@@ -49,7 +49,7 @@ class TagDocumentUseCaseTest {
             error("Not used")
 
         override suspend fun saveCapturedDocument(
-            command: com.toolly.domain.contracts.SaveCapturedDocumentCommand,
+            command: SaveCapturedDocumentCommand,
         ): ToollyResult<DocumentDetails> = error("Not used")
 
         override suspend fun renameDocument(
