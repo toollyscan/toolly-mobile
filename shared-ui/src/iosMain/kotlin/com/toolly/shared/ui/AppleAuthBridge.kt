@@ -135,5 +135,6 @@ private fun String.toAuthError(): AuthError = when (this) {
     "rate_limited" -> AuthError.RateLimited
     "requires_recent_login" -> AuthError.RequiresRecentLogin
     "not_supported_on_platform" -> AuthError.NotSupportedOnPlatform
+    "cancelled" -> AuthError.Cancelled
     else -> AuthError.Unknown
 }

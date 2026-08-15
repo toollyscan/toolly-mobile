@@ -103,13 +103,11 @@ internal fun AndroidToollyApp(
                                         dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
                                 }
                             }
-                            // Neither AuthError nor AuthResult has a dedicated "cancelled" case
-                            // (unlike ScanResult's own Cancelled/Failure split) -- a user
-                            // dismissing the account picker surfaces the same generic error
-                            // message as a real failure. Minor UX rough edge, not a correctness
-                            // gap; a real fix needs a shared-core change affecting both platforms.
+                            // Dismissing the account picker is a deliberate user action, not a
+                            // failure -- AuthError.Cancelled gets its own neutral message instead
+                            // of the generic "something went wrong" a real failure shows.
                             GoogleIdTokenProvider.Result.Cancelled ->
-                                dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.Unknown))
+                                dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.Cancelled))
                             GoogleIdTokenProvider.Result.Failure ->
                                 dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.Unknown))
                         }
