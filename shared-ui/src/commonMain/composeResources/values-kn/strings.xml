@@ -91,6 +91,7 @@
     <string name="auth_error_rate_limited">ಹಲವು ಪ್ರಯತ್ನಗಳು. ಸ್ವಲ್ಪ ಸಮಯ ಕಾದು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="auth_error_requires_recent_login">ನಿಮ್ಮ ಸುರಕ್ಷತೆಗಾಗಿ, ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.</string>
     <string name="auth_error_not_supported">ಈ ಸೈನ್-ಇನ್ ವಿಧಾನ ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ.</string>
+    <string name="auth_error_cancelled">ಸೈನ್-ಇನ್ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ.</string>
     <string name="auth_error_unknown">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="use_another_sign_in_method">ಬೇರೆ ಸೈನ್-ಇನ್ ವಿಧಾನ ಬಳಸಿ</string>
     <string name="terms_privacy_notice">ಮುಂದುವರಿಸುವ ಮೂಲಕ, ನೀವು ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಯನ್ನು ಒಪ್ಪುತ್ತೀರಿ.</string>

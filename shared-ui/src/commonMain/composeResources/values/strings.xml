@@ -91,6 +91,7 @@
     <string name="auth_error_rate_limited">Too many attempts. Wait a moment and try again.</string>
     <string name="auth_error_requires_recent_login">For your security, please sign in again.</string>
     <string name="auth_error_not_supported">This sign-in method isn\'t available yet.</string>
+    <string name="auth_error_cancelled">Sign-in cancelled.</string>
     <string name="auth_error_unknown">Something went wrong. Please try again.</string>
     <string name="use_another_sign_in_method">Use another sign-in method</string>
     <string name="terms_privacy_notice">By continuing, you agree to the Terms and Privacy Policy.</string>

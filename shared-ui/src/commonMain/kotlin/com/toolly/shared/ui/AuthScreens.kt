@@ -38,6 +38,7 @@ import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.apple_sign_in
 import com.toolly.shared.resources.auth_error_account_exists
 import com.toolly.shared.resources.auth_error_account_not_found
+import com.toolly.shared.resources.auth_error_cancelled
 import com.toolly.shared.resources.auth_error_expired_code
 import com.toolly.shared.resources.auth_error_incorrect_code
 import com.toolly.shared.resources.auth_error_invalid_credential
@@ -495,6 +496,7 @@ internal fun authErrorMessage(error: AuthError): String = stringResource(
         AuthError.RateLimited -> Res.string.auth_error_rate_limited
         AuthError.RequiresRecentLogin -> Res.string.auth_error_requires_recent_login
         AuthError.NotSupportedOnPlatform -> Res.string.auth_error_not_supported
+        AuthError.Cancelled -> Res.string.auth_error_cancelled
         AuthError.Unknown -> Res.string.auth_error_unknown
     },
 )

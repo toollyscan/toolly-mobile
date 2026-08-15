@@ -98,5 +98,13 @@ sealed class AuthError {
     data object RateLimited : AuthError()
     data object RequiresRecentLogin : AuthError()
     data object NotSupportedOnPlatform : AuthError()
+
+    /**
+     * The user dismissed a provider's own consent/account-picker UI (e.g. Android's Credential
+     * Manager sheet) without completing sign-in. Distinct from [Unknown] so the UI can show a
+     * neutral "cancelled" message instead of a scary generic failure -- the user took a deliberate
+     * action, not something went wrong.
+     */
+    data object Cancelled : AuthError()
     data object Unknown : AuthError()
 }
