@@ -7,6 +7,7 @@ import com.toolly.shared.capture.TemporaryAssetId
 import com.toolly.shared.edit.ColorAdjust
 import com.toolly.shared.edit.CropRegion
 import com.toolly.shared.edit.EnhancementMode
+import com.toolly.shared.edit.ImageRotation
 import com.toolly.shared.edit.PageEditError
 import com.toolly.shared.edit.PageEditRequest
 import com.toolly.shared.edit.PageEditResult
@@ -46,7 +47,13 @@ internal class AndroidPageEditor(
             ?: return PageEditResult.Failure(PageEditError.StorageFailure)
         val sourceBuffer = decodeToPixelBuffer(sourceFile)
             ?: return PageEditResult.Failure(PageEditError.ProcessingFailed)
-        return applyToBuffer(sourceBuffer, request.crop, request.mode, request.intensity)
+        return applyToBuffer(
+            sourceBuffer,
+            request.crop,
+            request.mode,
+            request.intensity,
+            request.rotationQuarterTurns,
+        )
     }
 
     /**
@@ -64,11 +71,17 @@ internal class AndroidPageEditor(
         crop: CropRegion?,
         mode: EnhancementMode,
         intensity: Float,
+        rotationQuarterTurns: Int = 0,
     ): PageEditResult = try {
+        val rotated = if (rotationQuarterTurns % 4 == 0) {
+            source
+        } else {
+            ImageRotation.rotate90(source, rotationQuarterTurns)
+        }
         val cropped = crop?.let { region ->
-            val (outputWidth, outputHeight) = outputDimensions(source, region)
-            PerspectiveWarp.warp(source, region, outputWidth, outputHeight)
-        } ?: source
+            val (outputWidth, outputHeight) = outputDimensions(rotated, region)
+            PerspectiveWarp.warp(rotated, region, outputWidth, outputHeight)
+        } ?: rotated
         val adjusted = ColorAdjust.apply(cropped, mode, intensity)
 
         val assetId = TemporaryAssetId(UUID.randomUUID().toString().replace("-", "").lowercase())

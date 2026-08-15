@@ -119,4 +119,57 @@ class PageEditTest {
             PageEditRequest(assetId, crop = null, mode = EnhancementMode.AUTO, intensity = 1.1f)
         }
     }
+
+    @Test
+    fun pageEditRequestDefaultsToNoRotation() {
+        val assetId = TemporaryAssetId("0123456789abcdef0123456789abcdef")
+        val request = PageEditRequest(assetId, crop = null, mode = EnhancementMode.AUTO, intensity = 0f)
+        assertEquals(0, request.rotationQuarterTurns)
+    }
+
+    @Test
+    fun rotate90SwapsWidthAndHeight() {
+        val source = PixelBuffer(width = 3, height = 2, argb = IntArray(6) { it })
+
+        val rotated = ImageRotation.rotate90(source, quarterTurns = 1)
+
+        assertEquals(2, rotated.width)
+        assertEquals(3, rotated.height)
+    }
+
+    @Test
+    fun rotate90MovesTopLeftPixelToTopRight() {
+        // 2x2 source: 0 1
+        //             2 3
+        val source = PixelBuffer(width = 2, height = 2, argb = intArrayOf(0, 1, 2, 3))
+
+        val rotated = ImageRotation.rotate90(source, quarterTurns = 1)
+
+        // A 90-degree clockwise rotation of:
+        //   0 1        2 0
+        //   2 3   ->   3 1
+        assertEquals(2, rotated[0, 0])
+        assertEquals(0, rotated[1, 0])
+        assertEquals(3, rotated[0, 1])
+        assertEquals(1, rotated[1, 1])
+    }
+
+    @Test
+    fun rotate90FourTimesIsIdentity() {
+        val source = PixelBuffer(width = 4, height = 3, argb = IntArray(12) { it * 17 })
+
+        val rotated = ImageRotation.rotate90(source, quarterTurns = 4)
+
+        assertEquals(source, rotated)
+    }
+
+    @Test
+    fun rotate90NegativeQuarterTurnsNormalizesModulo4() {
+        val source = PixelBuffer(width = 4, height = 3, argb = IntArray(12) { it * 5 })
+
+        val clockwiseThree = ImageRotation.rotate90(source, quarterTurns = 3)
+        val counterClockwiseOne = ImageRotation.rotate90(source, quarterTurns = -1)
+
+        assertEquals(clockwiseThree, counterClockwiseOne)
+    }
 }

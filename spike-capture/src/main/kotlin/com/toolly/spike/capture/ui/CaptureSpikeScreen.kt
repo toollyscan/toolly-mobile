@@ -1,6 +1,7 @@
 package com.toolly.spike.capture.ui
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -34,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -106,6 +108,7 @@ fun ToollyDocumentApp(
         CropRegion?,
         EnhancementMode,
         Float,
+        Int,
         onResult: (ToollyResult<DocumentDetails>) -> Unit,
     ) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
@@ -256,8 +259,15 @@ fun ToollyDocumentApp(
                     message = null
                     screen = AppScreen.ExportBuilder(current.details)
                 },
-                onReplacePage = { pageId, crop, mode, intensity ->
-                    onReplacePageAsset(current.details.summary.id, pageId, crop, mode, intensity) { result ->
+                onReplacePage = { pageId, crop, mode, intensity, rotationQuarterTurns ->
+                    onReplacePageAsset(
+                        current.details.summary.id,
+                        pageId,
+                        crop,
+                        mode,
+                        intensity,
+                        rotationQuarterTurns,
+                    ) { result ->
                         when (result) {
                             is ToollyResult.Success -> {
                                 screen = AppScreen.Document(result.value)
@@ -376,6 +386,7 @@ fun SearchDocumentsScreen(
         CropRegion?,
         EnhancementMode,
         Float,
+        Int,
         onResult: (ToollyResult<DocumentDetails>) -> Unit,
     ) -> Unit,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
@@ -452,8 +463,15 @@ fun SearchDocumentsScreen(
                     message = null
                     screen = SearchResultScreen.ExportBuilder(current.details)
                 },
-                onReplacePage = { pageId, crop, mode, intensity ->
-                    onReplacePageAsset(current.details.summary.id, pageId, crop, mode, intensity) { result ->
+                onReplacePage = { pageId, crop, mode, intensity, rotationQuarterTurns ->
+                    onReplacePageAsset(
+                        current.details.summary.id,
+                        pageId,
+                        crop,
+                        mode,
+                        intensity,
+                        rotationQuarterTurns,
+                    ) { result ->
                         when (result) {
                             is ToollyResult.Success -> {
                                 screen = SearchResultScreen.Document(result.value)
@@ -874,7 +892,7 @@ private fun DocumentScreen(
     onRename: (String?) -> Unit,
     onTag: (DocumentCategory?) -> Unit,
     onStartExport: () -> Unit,
-    onReplacePage: (PageId, CropRegion?, EnhancementMode, Float) -> Unit,
+    onReplacePage: (PageId, CropRegion?, EnhancementMode, Float, Int) -> Unit,
     onBack: () -> Unit,
 ) {
     var renaming by remember { mutableStateOf(false) }
@@ -886,9 +904,9 @@ private fun DocumentScreen(
             page = page,
             loadAssetBitmap = loadAssetBitmap,
             onCancel = { editingPage = null },
-            onSave = { crop, mode, intensity ->
+            onSave = { crop, mode, intensity, rotationQuarterTurns ->
                 editingPage = null
-                onReplacePage(page.id, crop, mode, intensity)
+                onReplacePage(page.id, crop, mode, intensity, rotationQuarterTurns)
             },
         )
         return
@@ -998,22 +1016,32 @@ private val FULL_PAGE_CROP_REGION = CropRegion(
  * [onSave] fires optimistically (same fire-and-forget pattern as [DocumentScreen]'s onRename/
  * onTag); the caller performs the actual vault write and surfaces any failure through the shared
  * `message`/[StatusMessage] mechanism, not through this composable's own state.
+ *
+ * Rotation rotates the *displayed* bitmap (a cheap, display-only [Bitmap] transform, matching
+ * `1.3`/`3.1`'s Rotate action) and resets [region] to full-frame each time -- corner positions
+ * from before a rotation don't mean anything in the new orientation, and asking the user to
+ * re-drag four corners after every rotation is the honest cost of not having a corner-remapping
+ * algorithm, not a shortcut. The actual pixel rotation (shared `ImageRotation.rotate90`, applied
+ * before crop) only runs once, in [AndroidPageEditor.applyToBuffer], on save.
  */
 @Composable
 private fun PageEditFlow(
     page: DocumentPage,
     loadAssetBitmap: suspend (AssetId) -> Bitmap?,
     onCancel: () -> Unit,
-    onSave: (CropRegion?, EnhancementMode, Float) -> Unit,
+    onSave: (CropRegion?, EnhancementMode, Float, Int) -> Unit,
 ) {
     var step by remember(page.id) { mutableStateOf(PageEditStep.CROP) }
     var region by remember(page.id) { mutableStateOf(FULL_PAGE_CROP_REGION) }
     var mode by remember(page.id) { mutableStateOf(EnhancementMode.AUTO) }
     var intensity by remember(page.id) { mutableFloatStateOf(0.5f) }
+    var rotationQuarterTurns by remember(page.id) { mutableIntStateOf(0) }
+    var sourceBitmap by remember(page.id) { mutableStateOf<Bitmap?>(null) }
     var image by remember(page.id) { mutableStateOf<ImageBitmap?>(null) }
 
     LaunchedEffect(page.id) {
-        image = loadAssetBitmap(page.sourceAssetId)?.asImageBitmap()
+        sourceBitmap = loadAssetBitmap(page.sourceAssetId)
+        image = sourceBitmap?.asImageBitmap()
     }
 
     when (step) {
@@ -1022,11 +1050,19 @@ private fun PageEditFlow(
             region = region,
             onRegionChange = { region = it },
             onAutoCrop = { region = FULL_PAGE_CROP_REGION },
-            // No image-rotation primitive exists in shared-core yet (only crop warp + color
-            // adjust) -- rotating just the CropRegion's corners without rotating the underlying
-            // pixels would misalign the selection against what's on screen, which is worse than
-            // this being a no-op. Flagged as a known gap, not silently faked.
-            onRotate = {},
+            onRotate = {
+                val newRotation = (rotationQuarterTurns + 1) % 4
+                rotationQuarterTurns = newRotation
+                region = FULL_PAGE_CROP_REGION
+                // Always rotate from the untouched original, by the full accumulated angle -- not
+                // the already-displayed bitmap -- so repeated taps don't compound past 90 degrees
+                // per tap (createBitmap+Matrix is cheap enough to redo from source each time).
+                sourceBitmap?.let { original ->
+                    val matrix = Matrix().apply { postRotate(newRotation * 90f) }
+                    image = Bitmap.createBitmap(original, 0, 0, original.width, original.height, matrix, true)
+                        .asImageBitmap()
+                }
+            },
             onRetake = onCancel,
             onContinue = { step = PageEditStep.ENHANCE },
         )
@@ -1039,7 +1075,9 @@ private fun PageEditFlow(
             // Only send a crop if the user actually moved a corner -- an untouched full-frame
             // region is "accept the page as-is" per PageEditRequest's own doc, so this skips an
             // unnecessary resample (and matching quality loss) rather than warping a no-op shape.
-            onSave = { onSave(region.takeIf { it != FULL_PAGE_CROP_REGION }, mode, intensity) },
+            onSave = {
+                onSave(region.takeIf { it != FULL_PAGE_CROP_REGION }, mode, intensity, rotationQuarterTurns)
+            },
         )
     }
 }

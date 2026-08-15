@@ -162,7 +162,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                                     onResult(tagDocument(documentId, category))
                                 }
                             },
-                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, onResult ->
+                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, rotation, onResult ->
                                 lifecycleScope.launch {
                                     onResult(
                                         documentRepository.replacePageWithEdit(
@@ -172,6 +172,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                                             mode = mode,
                                             intensity = intensity,
                                             updatedAtEpochMillis = System.currentTimeMillis(),
+                                            rotationQuarterTurns = rotation,
                                         ),
                                     )
                                 }
@@ -204,7 +205,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                                     onResult(tagDocument(documentId, category))
                                 }
                             },
-                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, onResult ->
+                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, rotation, onResult ->
                                 lifecycleScope.launch {
                                     onResult(
                                         documentRepository.replacePageWithEdit(
@@ -214,6 +215,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                                             mode = mode,
                                             intensity = intensity,
                                             updatedAtEpochMillis = System.currentTimeMillis(),
+                                            rotationQuarterTurns = rotation,
                                         ),
                                     )
                                 }
