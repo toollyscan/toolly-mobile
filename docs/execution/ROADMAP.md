@@ -85,7 +85,8 @@ matrix and block beta/release approval.*
 
 - [ ] Native capture adapters behind the shared Toolly scanner port
 - [ ] Shared page review, ordering, cropping and enhancement behavior
-- [ ] Encrypted vault persistence and recovery on both platforms
+- [ ] Encrypted vault persistence and recovery on both platforms (Android implemented, pending
+  ADR-0012's qualified-review gate; iOS not started -- scoped in TLY-014 / #82)
 - [ ] Shared document library and viewer UI
 - [ ] Local PDF/JPEG export through platform adapters
 - [ ] English, Hindi and Kannada UI strings
@@ -196,8 +197,9 @@ If a provider migration is ever approved, see [FIREBASE_TO_AWS_RUNBOOK.md](../op
   preserved, force-stop/restart/offline reopen all PASS (build SHA `3ae3d7b`, PR #55 comment, 2026-08-05).
 - [ ] Release application shell and platform-host integration incomplete (TLY-013 / #52) — the Android shell,
   auth journey, crop/enhance port, export/share, backup/privacy UI and document naming/search are now merged
-  to `main` (PR #55). Still incomplete: Apple capture is a tested port with no Swift host or iOS vault wired
-  up yet (#48), so iOS remains capture-stubbed; and physical-device evidence for everything landed in PR #55
-  beyond the original walking slice is still outstanding.
+  to `main` (PR #55). Still incomplete: Apple capture is now wired to a real Swift host (#48, merged) but
+  `saveCapture()` remains an intentional no-op with no iOS vault behind it -- scoped as its own phased effort
+  in TLY-014 / #82; and physical-device evidence for everything landed in PR #55 beyond the original walking
+  slice is still outstanding.
 
 See [PRODUCTION_GATE.md](PRODUCTION_GATE.md) and [docs/security/SECURITY_BASELINE.md](../security/SECURITY_BASELINE.md).
