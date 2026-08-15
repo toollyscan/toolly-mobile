@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import com.toolly.shared.capture.TemporaryAssetId
 import com.toolly.shared.edit.ColorAdjust
 import com.toolly.shared.edit.CropRegion
+import com.toolly.shared.edit.EnhancementMode
 import com.toolly.shared.edit.PageEditError
 import com.toolly.shared.edit.PageEditRequest
 import com.toolly.shared.edit.PageEditResult
@@ -43,28 +44,43 @@ internal class AndroidPageEditor(
     override suspend fun apply(request: PageEditRequest): PageEditResult {
         val sourceFile = resolveAsset(request.assetId)
             ?: return PageEditResult.Failure(PageEditError.StorageFailure)
+        val sourceBuffer = decodeToPixelBuffer(sourceFile)
+            ?: return PageEditResult.Failure(PageEditError.ProcessingFailed)
+        return applyToBuffer(sourceBuffer, request.crop, request.mode, request.intensity)
+    }
 
-        return try {
-            val sourceBuffer = decodeToPixelBuffer(sourceFile)
-                ?: return PageEditResult.Failure(PageEditError.ProcessingFailed)
+    /**
+     * Same crop/enhance/encode pipeline as [apply], entry point for callers that already have a
+     * decoded [PixelBuffer] and no [TemporaryAssetId] to resolve -- used by
+     * [com.toolly.spike.capture.vault.EncryptedDocumentRepository]'s re-crop-a-saved-page flow,
+     * which decrypts the source page straight to memory (matching `loadAssetBitmap`'s existing
+     * plaintext-stays-in-memory boundary) rather than staging it as a plaintext file first. The
+     * *output* still lands in this class's own bounded cache directory, same as [apply] -- that
+     * matches the accepted plaintext boundary for newly-captured pages before vault encryption
+     * (`TemporaryScanStore`'s staging directory), not a new exposure.
+     */
+    fun applyToBuffer(
+        source: PixelBuffer,
+        crop: CropRegion?,
+        mode: EnhancementMode,
+        intensity: Float,
+    ): PageEditResult = try {
+        val cropped = crop?.let { region ->
+            val (outputWidth, outputHeight) = outputDimensions(source, region)
+            PerspectiveWarp.warp(source, region, outputWidth, outputHeight)
+        } ?: source
+        val adjusted = ColorAdjust.apply(cropped, mode, intensity)
 
-            val cropped = request.crop?.let { region ->
-                val (outputWidth, outputHeight) = outputDimensions(sourceBuffer, region)
-                PerspectiveWarp.warp(sourceBuffer, region, outputWidth, outputHeight)
-            } ?: sourceBuffer
-            val adjusted = ColorAdjust.apply(cropped, request.mode, request.intensity)
-
-            val assetId = TemporaryAssetId(UUID.randomUUID().toString().replace("-", "").lowercase())
-            writeJpeg(adjusted, File(directory, "${assetId.value}.jpg"))
-            PageEditResult.Success(assetId)
-        } catch (_: IllegalArgumentException) {
-            // A degenerate CropRegion is the only expected source of this from shared PerspectiveWarp.
-            PageEditResult.Failure(PageEditError.InvalidRegion)
-        } catch (_: IOException) {
-            PageEditResult.Failure(PageEditError.StorageFailure)
-        } catch (_: OutOfMemoryError) {
-            PageEditResult.Failure(PageEditError.ProcessingFailed)
-        }
+        val assetId = TemporaryAssetId(UUID.randomUUID().toString().replace("-", "").lowercase())
+        writeJpeg(adjusted, File(directory, "${assetId.value}.jpg"))
+        PageEditResult.Success(assetId)
+    } catch (_: IllegalArgumentException) {
+        // A degenerate CropRegion is the only expected source of this from shared PerspectiveWarp.
+        PageEditResult.Failure(PageEditError.InvalidRegion)
+    } catch (_: IOException) {
+        PageEditResult.Failure(PageEditError.StorageFailure)
+    } catch (_: OutOfMemoryError) {
+        PageEditResult.Failure(PageEditError.ProcessingFailed)
     }
 
     /** Resolves an asset previously produced by [apply]; matches [TemporaryScanStore]'s `resolve` shape. */

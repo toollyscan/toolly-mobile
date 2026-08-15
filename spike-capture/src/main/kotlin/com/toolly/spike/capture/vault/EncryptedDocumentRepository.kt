@@ -17,6 +17,11 @@ import com.toolly.domain.model.PageId
 import com.toolly.foundation.ToollyError
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
+import com.toolly.shared.edit.CropRegion
+import com.toolly.shared.edit.EnhancementMode
+import com.toolly.shared.edit.PageEditError
+import com.toolly.shared.edit.PageEditResult
+import com.toolly.shared.edit.PixelBuffer
 import com.toolly.spike.capture.vault.crypto.AndroidAssetCipher
 import com.toolly.spike.capture.vault.crypto.AndroidMetadataCipher
 import com.toolly.spike.capture.vault.crypto.AssetAssociatedData
@@ -24,6 +29,7 @@ import com.toolly.spike.capture.vault.crypto.AssetObjectKind
 import com.toolly.spike.capture.vault.crypto.MetadataAssociatedData
 import com.toolly.spike.capture.vault.crypto.RecordKind
 import com.toolly.spike.capture.vault.crypto.VaultCryptoException
+import com.toolly.spike.capture.vault.edit.AndroidPageEditor
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -73,6 +79,10 @@ internal class EncryptedDocumentRepository(
     private val lock = Any()
     private val vaultScopeId: String
     private var legacyMigrationBlocked = false
+
+    // Only replacePageWithEdit's applyToBuffer() call is used -- resolveAsset is irrelevant here
+    // (the source is decrypted straight to memory below, never staged as a file), so it's a no-op.
+    private val pageEditor = AndroidPageEditor(applicationContext) { null }
 
     init {
         check(root.mkdirs() || root.isDirectory)
@@ -189,6 +199,119 @@ internal class EncryptedDocumentRepository(
         updatedAtEpochMillis: Long,
     ): ToollyResult<DocumentDetails> = updateMetadata(documentId) { existing ->
         existing.copy(category = category, updatedAtEpochMillis = updatedAtEpochMillis)
+    }
+
+    /**
+     * Re-crops/enhances one page of an already-saved document and re-persists the result, per
+     * wireframe `3.1 Manual corners`'s "fix a page after the fact" intent -- distinct from, and
+     * deliberately not wired into, the live ML Kit capture path (issue #52: "without copying
+     * Google scanner UI"; ML Kit's own scanner already handles crop for capture and gallery
+     * import). [pageId] must belong to [documentId].
+     *
+     * The source page is decrypted straight to memory (same plaintext-stays-in-memory boundary
+     * `loadAssetBitmap` already uses -- never staged as a plaintext file), warped/adjusted with
+     * the shared `commonMain` pixel math via [AndroidPageEditor.applyToBuffer], then its JPEG
+     * output (staged only in that class's own bounded cache directory, mirroring how newly
+     * captured pages are staged before their first encryption) is encrypted into the vault under
+     * a *new* [AssetId] -- the original encrypted asset file is never overwritten in place, so a
+     * crash mid-write can only orphan a stray file, never corrupt a readable one. The manifest
+     * swap itself reuses [updateCommittedManifest]'s same decrypt-verify-in-memory-before-disk,
+     * same-directory-atomic-rename discipline. The old asset file is deleted only after the
+     * manifest promotion that stops referencing it succeeds, and failure to delete it is not
+     * treated as a save failure -- it would just be wasted ciphertext, never a correctness issue.
+     */
+    suspend fun replacePageWithEdit(
+        documentId: DocumentId,
+        pageId: PageId,
+        crop: CropRegion?,
+        mode: EnhancementMode,
+        intensity: Float,
+        updatedAtEpochMillis: Long,
+    ): ToollyResult<DocumentDetails> = withContext(Dispatchers.IO) {
+        synchronized(lock) {
+            if (legacyMigrationBlocked) return@withContext migrationFailure()
+            val destination = documentDirectory(documentId)
+            if (!destination.isDirectory || !File(destination, COMMITTED_MARKER).isFile) {
+                return@withContext unavailableFailure()
+            }
+            runSafely {
+                val manifestFile = File(destination, MANIFEST_FILE)
+                if (!manifestFile.isFile || manifestFile.length() !in 1..MAX_MANIFEST_ENVELOPE_BYTES) {
+                    throw IOException()
+                }
+                val existingPlaintext = metadataCipher.decrypt(
+                    manifestFile.readBytes(),
+                    metadataAssociatedData(documentId),
+                )
+                val existingRecord = try {
+                    parseManifestPlaintext(existingPlaintext, documentId)
+                } finally {
+                    existingPlaintext.fill(0)
+                }
+                require(updatedAtEpochMillis >= existingRecord.createdAtEpochMillis)
+                val existingPage = existingRecord.pages.find { it.pageId == pageId } ?: throw IOException()
+                val oldAssetFile = File(destination, assetFileName(existingPage.assetId))
+                val oldAssociatedData = assetAssociatedData(existingPage.assetId)
+                assetCipher.verify(oldAssetFile, oldAssociatedData)
+
+                val sourceBuffer = assetCipher.openDecrypted(oldAssetFile, oldAssociatedData).use { input ->
+                    val bitmap = BitmapFactory.decodeStream(input) ?: throw IOException()
+                    try {
+                        val pixels = IntArray(bitmap.width * bitmap.height)
+                        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+                        PixelBuffer(bitmap.width, bitmap.height, pixels)
+                    } finally {
+                        bitmap.recycle()
+                    }
+                }
+                val editResult = pageEditor.applyToBuffer(sourceBuffer, crop, mode, intensity)
+                val editedAssetId = when (editResult) {
+                    is PageEditResult.Success -> editResult.assetId
+                    is PageEditResult.Failure -> throw when (editResult.error) {
+                        PageEditError.InvalidRegion -> IllegalArgumentException()
+                        PageEditError.ProcessingFailed, PageEditError.StorageFailure -> IOException()
+                    }
+                }
+                val editedFile = pageEditor.resolveEditedAsset(editedAssetId) ?: throw IOException()
+                try {
+                    requireCompleteJpeg(editedFile)
+                    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    BitmapFactory.decodeFile(editedFile.path, bounds)
+                    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException()
+
+                    val newAssetId = AssetId(UUID.randomUUID().toString())
+                    val newAssetTarget = File(destination, assetFileName(newAssetId))
+                    val newAssociatedData = assetAssociatedData(newAssetId)
+                    assetCipher.encrypt(editedFile, newAssetTarget, newAssociatedData)
+                    try {
+                        assetCipher.verify(newAssetTarget, newAssociatedData)
+                    } catch (failure: Exception) {
+                        newAssetTarget.delete()
+                        throw failure
+                    }
+
+                    val updatedPages = existingRecord.pages.map { page ->
+                        if (page.pageId == pageId) {
+                            page.copy(
+                                assetId = newAssetId,
+                                widthPixels = bounds.outWidth,
+                                heightPixels = bounds.outHeight,
+                            )
+                        } else {
+                            page
+                        }
+                    }
+                    updateCommittedManifest(
+                        destination,
+                        existingRecord.copy(pages = updatedPages, updatedAtEpochMillis = updatedAtEpochMillis),
+                    )
+                    oldAssetFile.delete()
+                    readDocument(destination).getOrThrow()
+                } finally {
+                    pageEditor.release(listOf(editedAssetId))
+                }
+            }
+        }
     }
 
     /**

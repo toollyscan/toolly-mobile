@@ -33,11 +33,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -53,7 +56,9 @@ import com.toolly.domain.model.DocumentExportDelivery
 import com.toolly.domain.model.DocumentExportFormat
 import com.toolly.domain.model.DocumentExportOutcome
 import com.toolly.domain.model.DocumentId
+import com.toolly.domain.model.DocumentPage
 import com.toolly.domain.model.DocumentSummary
+import com.toolly.domain.model.PageId
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
 import com.toolly.spike.capture.R
@@ -62,6 +67,11 @@ import com.toolly.shared.capture.ScanError
 import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId
+import com.toolly.shared.edit.CropRegion
+import com.toolly.shared.edit.EnhancementMode
+import com.toolly.shared.edit.NormalizedPoint
+import com.toolly.shared.ui.CropPageScreen
+import com.toolly.shared.ui.EnhancePageScreen
 import com.toolly.shared.ui.ExportBuilderScreen
 import com.toolly.shared.ui.ExportPrivacyCheckScreen
 import com.toolly.shared.ui.ToollyBackIcon
@@ -90,6 +100,14 @@ fun ToollyDocumentApp(
     ) -> Unit,
     onRenameDocument: (DocumentId, String?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onTagDocument: (DocumentId, DocumentCategory?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onReplacePageAsset: (
+        DocumentId,
+        PageId,
+        CropRegion?,
+        EnhancementMode,
+        Float,
+        onResult: (ToollyResult<DocumentDetails>) -> Unit,
+    ) -> Unit,
     resolveTemporaryAsset: (TemporaryAssetId) -> File?,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
     onReleaseAssets: (Collection<TemporaryAssetId>) -> Unit,
@@ -238,6 +256,19 @@ fun ToollyDocumentApp(
                     message = null
                     screen = AppScreen.ExportBuilder(current.details)
                 },
+                onReplacePage = { pageId, crop, mode, intensity ->
+                    onReplacePageAsset(current.details.summary.id, pageId, crop, mode, intensity) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = AppScreen.Document(result.value)
+                                message = null
+                                refreshLibrary()
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
+                },
                 onBack = {
                     message = null
                     screen = AppScreen.Library
@@ -339,6 +370,14 @@ fun SearchDocumentsScreen(
     ) -> Unit,
     onRenameDocument: (DocumentId, String?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onTagDocument: (DocumentId, DocumentCategory?, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
+    onReplacePageAsset: (
+        DocumentId,
+        PageId,
+        CropRegion?,
+        EnhancementMode,
+        Float,
+        onResult: (ToollyResult<DocumentDetails>) -> Unit,
+    ) -> Unit,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
 ) {
     var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
@@ -412,6 +451,18 @@ fun SearchDocumentsScreen(
                 onStartExport = {
                     message = null
                     screen = SearchResultScreen.ExportBuilder(current.details)
+                },
+                onReplacePage = { pageId, crop, mode, intensity ->
+                    onReplacePageAsset(current.details.summary.id, pageId, crop, mode, intensity) { result ->
+                        when (result) {
+                            is ToollyResult.Success -> {
+                                screen = SearchResultScreen.Document(result.value)
+                                message = null
+                            }
+                            is ToollyResult.Failure ->
+                                message = UiMessage(toollyErrorMessage(result.error.code))
+                        }
+                    }
                 },
                 onBack = {
                     message = null
@@ -823,9 +874,26 @@ private fun DocumentScreen(
     onRename: (String?) -> Unit,
     onTag: (DocumentCategory?) -> Unit,
     onStartExport: () -> Unit,
+    onReplacePage: (PageId, CropRegion?, EnhancementMode, Float) -> Unit,
     onBack: () -> Unit,
 ) {
     var renaming by remember { mutableStateOf(false) }
+    var editingPage by remember { mutableStateOf<DocumentPage?>(null) }
+
+    val page = editingPage
+    if (page != null) {
+        PageEditFlow(
+            page = page,
+            loadAssetBitmap = loadAssetBitmap,
+            onCancel = { editingPage = null },
+            onSave = { crop, mode, intensity ->
+                editingPage = null
+                onReplacePage(page.id, crop, mode, intensity)
+            },
+        )
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -880,10 +948,16 @@ private fun DocumentScreen(
                 }
             }
         }
+        Text(
+            stringResource(R.string.tap_page_to_edit),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         DocumentPageGrid(
             pages = document.pages,
             loadAssetBitmap = loadAssetBitmap,
             modifier = Modifier.weight(1f),
+            onToggle = { tapped -> editingPage = tapped },
         )
         StatusMessage(message)
         Button(
@@ -901,6 +975,71 @@ private fun DocumentScreen(
                 onRename(name)
             },
             onDismiss = { renaming = false },
+        )
+    }
+}
+
+/** Steps of the "re-crop/enhance an already-saved page" flow (wireframe `3.1`/`1.4`). */
+private enum class PageEditStep { CROP, ENHANCE }
+
+private val FULL_PAGE_CROP_REGION = CropRegion(
+    topLeft = NormalizedPoint(0f, 0f),
+    topRight = NormalizedPoint(1f, 0f),
+    bottomRight = NormalizedPoint(1f, 1f),
+    bottomLeft = NormalizedPoint(0f, 1f),
+)
+
+/**
+ * Crop then enhance a single already-saved page, mirroring wireframes `3.1 Manual corners`/
+ * `1.4 Clean and save`. Deliberately reachable only from a saved document's own page grid, not
+ * inserted into live capture -- ML Kit's own scanner UI already covers crop during capture and
+ * gallery import (issue #52: "without copying Google scanner UI").
+ *
+ * [onSave] fires optimistically (same fire-and-forget pattern as [DocumentScreen]'s onRename/
+ * onTag); the caller performs the actual vault write and surfaces any failure through the shared
+ * `message`/[StatusMessage] mechanism, not through this composable's own state.
+ */
+@Composable
+private fun PageEditFlow(
+    page: DocumentPage,
+    loadAssetBitmap: suspend (AssetId) -> Bitmap?,
+    onCancel: () -> Unit,
+    onSave: (CropRegion?, EnhancementMode, Float) -> Unit,
+) {
+    var step by remember(page.id) { mutableStateOf(PageEditStep.CROP) }
+    var region by remember(page.id) { mutableStateOf(FULL_PAGE_CROP_REGION) }
+    var mode by remember(page.id) { mutableStateOf(EnhancementMode.AUTO) }
+    var intensity by remember(page.id) { mutableFloatStateOf(0.5f) }
+    var image by remember(page.id) { mutableStateOf<ImageBitmap?>(null) }
+
+    LaunchedEffect(page.id) {
+        image = loadAssetBitmap(page.sourceAssetId)?.asImageBitmap()
+    }
+
+    when (step) {
+        PageEditStep.CROP -> CropPageScreen(
+            image = image,
+            region = region,
+            onRegionChange = { region = it },
+            onAutoCrop = { region = FULL_PAGE_CROP_REGION },
+            // No image-rotation primitive exists in shared-core yet (only crop warp + color
+            // adjust) -- rotating just the CropRegion's corners without rotating the underlying
+            // pixels would misalign the selection against what's on screen, which is worse than
+            // this being a no-op. Flagged as a known gap, not silently faked.
+            onRotate = {},
+            onRetake = onCancel,
+            onContinue = { step = PageEditStep.ENHANCE },
+        )
+        PageEditStep.ENHANCE -> EnhancePageScreen(
+            image = image,
+            mode = mode,
+            intensity = intensity,
+            onModeChange = { mode = it },
+            onIntensityChange = { intensity = it },
+            // Only send a crop if the user actually moved a corner -- an untouched full-frame
+            // region is "accept the page as-is" per PageEditRequest's own doc, so this skips an
+            // unnecessary resample (and matching quality loss) rather than warping a no-op shape.
+            onSave = { onSave(region.takeIf { it != FULL_PAGE_CROP_REGION }, mode, intensity) },
         )
     }
 }

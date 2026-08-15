@@ -55,6 +55,7 @@
     <string name="category_other">Other</string>
     <string name="category_untagged">Untagged</string>
     <string name="document_category_label">Category</string>
+    <string name="tap_page_to_edit">Tap a page to crop or enhance it</string>
     <string name="rename_document">Rename</string>
     <string name="rename_document_title">Document name</string>
     <string name="rename_document_hint">e.g. Electricity bill</string>

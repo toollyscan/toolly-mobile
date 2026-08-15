@@ -162,6 +162,20 @@ class CaptureSpikeActivity : ComponentActivity() {
                                     onResult(tagDocument(documentId, category))
                                 }
                             },
+                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, onResult ->
+                                lifecycleScope.launch {
+                                    onResult(
+                                        documentRepository.replacePageWithEdit(
+                                            documentId = documentId,
+                                            pageId = pageId,
+                                            crop = crop,
+                                            mode = mode,
+                                            intensity = intensity,
+                                            updatedAtEpochMillis = System.currentTimeMillis(),
+                                        ),
+                                    )
+                                }
+                            },
                             resolveTemporaryAsset = temporaryStore::resolve,
                             loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
                             onReleaseAssets = temporaryStore::release,
@@ -188,6 +202,20 @@ class CaptureSpikeActivity : ComponentActivity() {
                             onTagDocument = { documentId, category, onResult ->
                                 lifecycleScope.launch {
                                     onResult(tagDocument(documentId, category))
+                                }
+                            },
+                            onReplacePageAsset = { documentId, pageId, crop, mode, intensity, onResult ->
+                                lifecycleScope.launch {
+                                    onResult(
+                                        documentRepository.replacePageWithEdit(
+                                            documentId = documentId,
+                                            pageId = pageId,
+                                            crop = crop,
+                                            mode = mode,
+                                            intensity = intensity,
+                                            updatedAtEpochMillis = System.currentTimeMillis(),
+                                        ),
+                                    )
                                 }
                             },
                             loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
