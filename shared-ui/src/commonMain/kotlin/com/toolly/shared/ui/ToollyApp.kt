@@ -72,10 +72,10 @@ import com.toolly.shared.model.ToollyDestination
 import com.toolly.shared.model.ToollySessionState
 import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiState
+import com.toolly.shared.model.filterDocumentsByTitle
 import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.account_and_backup
 import com.toolly.shared.resources.account_description
-import com.toolly.shared.resources.all_documents
 import com.toolly.shared.resources.app_name
 import com.toolly.shared.resources.apple_sign_in
 import com.toolly.shared.resources.back
@@ -95,6 +95,7 @@ import com.toolly.shared.resources.home_description
 import com.toolly.shared.resources.library_subtitle
 import com.toolly.shared.resources.local_documents_notice
 import com.toolly.shared.resources.no_documents
+import com.toolly.shared.resources.no_search_results
 import com.toolly.shared.resources.phone_sign_in
 import com.toolly.shared.resources.profile_description
 import com.toolly.shared.resources.product_name
@@ -106,6 +107,8 @@ import com.toolly.shared.resources.scan_document
 import com.toolly.shared.resources.scanned_document
 import com.toolly.shared.resources.search
 import com.toolly.shared.resources.search_documents
+import com.toolly.shared.resources.search_prompt
+import com.toolly.shared.resources.search_result_matched_title
 import com.toolly.shared.resources.search_subtitle
 import com.toolly.shared.resources.sign_in
 import com.toolly.shared.resources.sign_in_description
@@ -624,7 +627,7 @@ private fun MainDestinationContent(
             else documentsContent()
         }
         ToollyDestination.SEARCH -> {
-            if (searchContent == null) SearchScreen()
+            if (searchContent == null) SearchScreen(state, actions)
             else searchContent()
         }
         ToollyDestination.PROFILE -> ProfileScreen(state, actions)
@@ -706,9 +709,16 @@ private fun LibraryScreen(state: ToollyUiState, actions: ToollyUiActions) {
     }
 }
 
+/**
+ * Fallback search (wireframe `4.2 Search`), used only when the platform host doesn't supply its
+ * own [ToollyApp]'s `searchContent` slot -- the real, vault-backed implementation is
+ * `SearchDocumentsScreen` in spike-capture on Android. Filtering matches that real implementation
+ * exactly (see [filterDocumentsByTitle]'s doc): title-only, no fabricated OCR matching.
+ */
 @Composable
-private fun SearchScreen() {
+private fun SearchScreen(state: ToollyUiState, actions: ToollyUiActions) {
     var query by remember { mutableStateOf("") }
+    val results = remember(state.documents, query) { filterDocumentsByTitle(state.documents, query) }
     ScreenColumn(applySafeInsets = false) {
         Text(stringResource(Res.string.product_name), style = MaterialTheme.typography.headlineMedium)
         Text(
@@ -724,21 +734,44 @@ private fun SearchScreen() {
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.PrimaryActionHeight),
         )
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        ) {
-            Text(
-                if (query.isBlank()) {
-                    stringResource(Res.string.all_documents)
-                } else {
-                    stringResource(Res.string.no_documents)
-                },
-                modifier = Modifier.padding(ToollySpacing.Large),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        when {
+            query.isBlank() -> Box(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(stringResource(Res.string.search_prompt), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            results.isEmpty() -> Box(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(stringResource(Res.string.no_search_results), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(ToollySpacing.Medium),
+            ) {
+                items(results, key = { it.id.value }) { document ->
+                    ToollyCard(onClick = { actions.openDocument(document.id) }) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(ToollySpacing.Medium),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            ToollyDocumentIcon(iconSize = 28.dp)
+                            Column(verticalArrangement = Arrangement.spacedBy(ToollySpacing.ExtraSmall)) {
+                                Text(
+                                    document.title ?: stringResource(Res.string.scanned_document),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Text(
+                                    stringResource(Res.string.search_result_matched_title),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -954,7 +987,7 @@ private fun ColumnScope.DocumentList(documents: List<DocumentListItem>, actions:
                     verticalArrangement = Arrangement.spacedBy(ToollySpacing.ExtraSmall),
                 ) {
                     Text(
-                        stringResource(Res.string.scanned_document),
+                        document.title ?: stringResource(Res.string.scanned_document),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Text(

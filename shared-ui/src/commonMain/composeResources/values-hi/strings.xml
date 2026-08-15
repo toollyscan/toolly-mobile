@@ -47,7 +47,9 @@
     <string name="scan">स्कैन</string>
     <string name="search">खोजें</string>
     <string name="search_documents">दस्तावेज़ खोजें</string>
-    <string name="all_documents">सभी स्थानीय दस्तावेज़ ऑफ़लाइन उपलब्ध हैं।</string>
+    <string name="search_prompt">अपने दस्तावेज़ खोजने के लिए टाइप करें</string>
+    <string name="no_search_results">कोई दस्तावेज़ मेल नहीं खाता</string>
+    <string name="search_result_matched_title">नाम मेल खाया</string>
     <string name="you">आप</string>
     <string name="tools">टूल्स</string>
     <string name="tools_description">सुरक्षित ऑफ़लाइन कार्यान्वयन तैयार होने पर दस्तावेज़ टूल यहाँ दिखाई देंगे।</string>

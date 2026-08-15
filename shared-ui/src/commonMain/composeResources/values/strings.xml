@@ -47,7 +47,9 @@
     <string name="scan">Scan</string>
     <string name="search">Search</string>
     <string name="search_documents">Search documents</string>
-    <string name="all_documents">All local documents are available offline.</string>
+    <string name="search_prompt">Type to search your documents</string>
+    <string name="no_search_results">No documents match</string>
+    <string name="search_result_matched_title">Matched title</string>
     <string name="you">You</string>
     <string name="tools">Tools</string>
     <string name="tools_description">Document tools will appear here when their secure offline implementations are ready.</string>
