@@ -31,7 +31,8 @@
     <string name="local_documents_notice">Your documents remain on this device unless you enable backup.</string>
     <string name="backup_optional">Backup is optional</string>
     <string name="sign_in">Sign in</string>
-    <string name="sign_in_description">Choose a sign-in method for optional account features.</string>
+    <string name="sign_in_description">Sign in to protect your library and enable optional backup.</string>
+    <string name="sign_in_new_here">New here? The same options create your account.</string>
     <string name="create_profile">Create profile</string>
     <string name="create_account">Create account</string>
     <string name="create_profile_description">Choose a secure method to create your Toolly account. Phone verification and profile setup come next.</string>

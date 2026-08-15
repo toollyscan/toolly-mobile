@@ -110,8 +110,8 @@ import com.toolly.shared.resources.search_documents
 import com.toolly.shared.resources.search_prompt
 import com.toolly.shared.resources.search_result_matched_title
 import com.toolly.shared.resources.search_subtitle
-import com.toolly.shared.resources.sign_in
 import com.toolly.shared.resources.sign_in_description
+import com.toolly.shared.resources.sign_in_new_here
 import com.toolly.shared.resources.sign_out
 import com.toolly.shared.resources.skip
 import com.toolly.shared.resources.splash_tagline
@@ -126,6 +126,7 @@ import com.toolly.shared.resources.tutorial_scan_title
 import com.toolly.shared.resources.welcome_body
 import com.toolly.shared.resources.welcome_headline
 import com.toolly.shared.resources.welcome_sign_in_prompt
+import com.toolly.shared.resources.welcome_title
 import com.toolly.shared.resources.working
 import com.toolly.shared.resources.you
 import kotlinx.coroutines.delay
@@ -484,9 +485,13 @@ private fun WelcomeScreen(state: ToollyUiState, actions: ToollyUiActions) {
 
 @Composable
 private fun SignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
+    // Title/subtitle and the "New here?" caption match wireframe 2.1 "Choose sign-in method"
+    // verbatim -- confirmed against the live Figma file. Toolly still routes sign-in and account
+    // creation to separate destinations (unlike the wireframe's single combined screen), so this
+    // stays a navigation link to CREATE_PROFILE rather than collapsing the two screens.
     AccountScreen(
         state = state,
-        title = Res.string.sign_in,
+        title = Res.string.welcome_title,
         description = Res.string.sign_in_description,
         actions = actions,
         footer = {
@@ -494,7 +499,7 @@ private fun SignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
                 onClick = actions::showCreateProfile,
                 modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
             ) {
-                Text(stringResource(Res.string.create_account))
+                Text(stringResource(Res.string.sign_in_new_here))
             }
         },
     )

@@ -31,7 +31,8 @@
     <string name="local_documents_notice">बैकअप चालू करने तक आपके दस्तावेज़ इसी डिवाइस पर रहते हैं।</string>
     <string name="backup_optional">बैकअप वैकल्पिक है</string>
     <string name="sign_in">साइन इन करें</string>
-    <string name="sign_in_description">वैकल्पिक अकाउंट सुविधाओं के लिए साइन-इन विधि चुनें।</string>
+    <string name="sign_in_description">अपनी लाइब्रेरी को सुरक्षित रखने और वैकल्पिक बैकअप चालू करने के लिए साइन इन करें।</string>
+    <string name="sign_in_new_here">नए हैं? यही विकल्प आपका अकाउंट भी बना देते हैं।</string>
     <string name="create_profile">प्रोफ़ाइल बनाएँ</string>
     <string name="create_account">अकाउंट बनाएँ</string>
     <string name="create_profile_description">Toolly अकाउंट बनाने का सुरक्षित तरीका चुनें। फ़ोन सत्यापन और प्रोफ़ाइल सेटअप इसके बाद होंगे।</string>
