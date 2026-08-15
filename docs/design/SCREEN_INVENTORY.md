@@ -70,6 +70,22 @@ Each screen must exist in at least two variants: **phone** and **tablet**. Table
 > Figma-frame-tracking status is unaffected (this table tracks Figma evidence, not code, per the
 > note at the top of this section), but no custom Compose capture screen is planned against them.
 >
+> **Welcome screen intentionally requires sign-in, not Figma's no-account scan/library entry
+> (checked against Figma this session).** The Figma wireframe's `1.1 Welcome` frame (page "01
+> Product Flows") shows two no-account actions -- "Scan my first document" and "Explore library"
+> -- matching the "Offline before account" foundation principle and issue #52's own canonical flow
+> (`Welcome -> Scan first document | Explore local library | Account`). The actual `WelcomeScreen`
+> composable (`ToollyApp.kt`) shows a single "Get started" button routing straight to sign-in, with
+> no local-only path at all. This is not a gap: `docs/product/DECISION_REGISTER.md` records D-021
+> (login required before first scan) superseded by D-048 ("Offline before account", 2026-08-03),
+> which was itself superseded by **D-049** (2026-08-10, Accepted) reaffirming login-required-before-
+> first-scan and explicitly ruling out any guest/local-only session. D-049 postdates the Figma
+> wireframe's "Offline before account" framing and is the active decision. Confirmed with the repo
+> owner (2026-08-15): leave `WelcomeScreen` as-is; `1.1 Welcome`'s no-account buttons are superseded
+> by D-049, not evidence-pending work to build. AU-02 and any other Welcome/entry-flow rows below
+> should be read the same way -- their Figma-frame-tracking status is unaffected, but no no-account
+> scan/library entry point is planned against them.
+>
 > **Apple capture wired into a real Swift host (#48).** `AppleCaptureSessionImpl.swift`
 > (`iosApp/ToollyApp/`) implements the `AppleCaptureSession` boundary using VisionKit's
 > `VNDocumentCameraViewController` -- the first real capture adapter on iOS, staging captured
