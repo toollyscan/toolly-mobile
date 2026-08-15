@@ -73,7 +73,7 @@ fun PrivacyCenterScreen(onOpenBackupSettings: () -> Unit, onBack: () -> Unit) {
             title = stringResource(Res.string.privacy_center_needs_attention_title),
             description = stringResource(Res.string.privacy_center_needs_attention_description_empty),
         )
-        SecondaryButton(Res.string.backup_settings_button, onOpenBackupSettings)
+        SecondaryButton(Res.string.backup_settings_button, onClick = onOpenBackupSettings)
         TextButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),

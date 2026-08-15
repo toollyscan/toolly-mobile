@@ -245,6 +245,23 @@ class ToollyUiStateTest {
     }
 
     @Test
+    fun authenticationStartedWorksFromSignInAndCreateProfileForGoogleSignIn() {
+        // Google's SecondaryButton lives on both SignInScreen and CreateProfileScreen (no
+        // PHONE/EMAIL-style dedicated entry screen), so AuthenticationStarted must accept both.
+        val signIn = atSignIn()
+        val createProfile = reduceToollyUiState(
+            reduceToollyUiState(ToollyUiState.returningSignedOut(), ToollyUiEvent.SplashFinished),
+            ToollyUiEvent.CreateProfileSelected,
+        )
+
+        val busyFromSignIn = reduceToollyUiState(signIn, ToollyUiEvent.AuthenticationStarted)
+        val busyFromCreateProfile = reduceToollyUiState(createProfile, ToollyUiEvent.AuthenticationStarted)
+
+        assertTrue(busyFromSignIn.authBusy)
+        assertTrue(busyFromCreateProfile.authBusy)
+    }
+
+    @Test
     fun authenticationFailedSetsErrorAndClearsBusyOnlyWhenBusy() {
         val emailSignIn = reduceToollyUiState(
             atSignIn(),

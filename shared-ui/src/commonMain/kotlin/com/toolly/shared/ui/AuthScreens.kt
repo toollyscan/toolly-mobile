@@ -102,13 +102,14 @@ import org.jetbrains.compose.resources.stringResource
  * Auth detail screens (`2.x`/`3.x`/`4.x` wireframes) completing the account journey started by
  * [ToollyApp]'s `SignInScreen`/`CreateProfileScreen`.
  *
- * Email/password and pure-phone sign-in now call a real [ToollyUiActions] implementation, which
- * on Android goes through `FirebaseAccountAuthenticator` behind the `AccountAuthenticator` port
- * (ADR-0004) -- these screens show [state.authBusy]/[state.authError] while that's in flight.
- * Google/Apple sign-in and the phone-verification step that follows creating an email/password
- * account (linking a credential to an already-authenticated user, not a fresh sign-in) remain
- * local-only: Google/Apple need a provider consent-UI adapter that doesn't exist yet, and account
- * linking is exactly the work ADR-0004 point 9 defers pending its own spike.
+ * Email/password, pure-phone sign-in, and (on Android) Google sign-in now call a real
+ * [ToollyUiActions] implementation, which on Android goes through `FirebaseAccountAuthenticator`
+ * behind the `AccountAuthenticator` port (ADR-0004) -- these screens show
+ * [state.authBusy]/[state.authError] while that's in flight. Apple sign-in and the
+ * phone-verification step that follows creating an email/password account (linking a credential
+ * to an already-authenticated user, not a fresh sign-in) remain local-only: Apple needs a real
+ * `ASAuthorizationController` consent-UI flow that doesn't exist yet, and account linking is
+ * exactly the work ADR-0004 point 9 defers pending its own spike.
  */
 
 private const val PHONE_DIGIT_COUNT = 10
@@ -335,7 +336,7 @@ internal fun ResetPasswordScreen(actions: ToollyUiActions) {
         if (submitted) {
             Text(stringResource(Res.string.reset_link_sent))
             Spacer(modifier = Modifier.weight(1f))
-            SecondaryButton(Res.string.back_to_sign_in, actions::authStepBack)
+            SecondaryButton(Res.string.back_to_sign_in, onClick = actions::authStepBack)
         } else {
             ToollyTextField(
                 value = email,
@@ -468,7 +469,7 @@ private fun PrimaryButtonText(
 
 /** Shows nothing when [error] is `null` -- callers place this where an error should appear. */
 @Composable
-private fun AuthErrorText(error: AuthError?) {
+internal fun AuthErrorText(error: AuthError?) {
     if (error == null) return
     Text(
         authErrorMessage(error),
@@ -483,7 +484,7 @@ private fun AuthErrorText(error: AuthError?) {
  * localized, user-facing string.
  */
 @Composable
-private fun authErrorMessage(error: AuthError): String = stringResource(
+internal fun authErrorMessage(error: AuthError): String = stringResource(
     when (error) {
         AuthError.NetworkUnavailable -> Res.string.auth_error_network
         AuthError.InvalidCredential -> Res.string.auth_error_invalid_credential

@@ -72,6 +72,14 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
 
+    // Google ID-token acquisition (Credential Manager) for Google Sign-In. Already present as a
+    // transitive dependency of firebase-auth at these exact versions (see spike-capture/gradle.lockfile);
+    // declared explicitly here because this module imports them directly, not just Firebase's own
+    // internal use of them.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     // Unit tests — JVM only, no Robolectric required for domain and mapper tests
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)

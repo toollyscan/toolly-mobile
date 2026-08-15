@@ -25,6 +25,7 @@ import com.toolly.shared.model.reduceToollyUiState
 import com.toolly.shared.ui.ToollyApp
 import com.toolly.spike.capture.BuildConfig
 import com.toolly.spike.capture.firebase.FirebaseAccountAuthenticator
+import com.toolly.spike.capture.google.GoogleIdTokenProvider
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,6 +51,7 @@ internal fun AndroidToollyApp(
     // Real ADR-0004 authentication, bound to toollyscan-dev. Constructed once per composition;
     // FirebaseAccountAuthenticator itself needs an Activity for phone-auth's reCAPTCHA fallback.
     val authenticator = remember { FirebaseAccountAuthenticator(context as Activity) }
+    val googleIdTokenProvider = remember { GoogleIdTokenProvider(context as Activity) }
     val coroutineScope = rememberCoroutineScope()
 
     // Host-local, not reducer-shared: the in-flight phone verification handed back by
@@ -81,8 +83,38 @@ internal fun AndroidToollyApp(
                 override fun showSignIn() = dispatch(ToollyUiEvent.SignInSelected)
                 override fun showCreateProfile() = dispatch(ToollyUiEvent.CreateProfileSelected)
                 override fun backToWelcome() = dispatch(ToollyUiEvent.BackToWelcome)
-                override fun authenticate(method: ToollyAuthenticationMethod) =
-                    dispatch(ToollyUiEvent.AuthenticationMethodSelected(method))
+                override fun authenticate(method: ToollyAuthenticationMethod) {
+                    if (method != ToollyAuthenticationMethod.GOOGLE) {
+                        dispatch(ToollyUiEvent.AuthenticationMethodSelected(method))
+                        return
+                    }
+                    // Google's own consent UI (Credential Manager) is a separate platform concern
+                    // from exchanging the resulting ID token for a Firebase session -- see
+                    // AccountAuthenticator.signInWithGoogle's doc comment. This doesn't need the
+                    // AuthenticationMethodSelected event at all (unlike PHONE/EMAIL, there's no
+                    // dedicated entry screen to navigate to first).
+                    dispatch(ToollyUiEvent.AuthenticationStarted)
+                    coroutineScope.launch {
+                        when (val tokenResult = googleIdTokenProvider.requestIdToken()) {
+                            is GoogleIdTokenProvider.Result.Success -> {
+                                when (val result = authenticator.signInWithGoogle(tokenResult.idToken)) {
+                                    is AuthResult.Success -> dispatch(ToollyUiEvent.AuthenticationSucceeded)
+                                    is AuthResult.Failure ->
+                                        dispatch(ToollyUiEvent.AuthenticationFailed(result.error))
+                                }
+                            }
+                            // Neither AuthError nor AuthResult has a dedicated "cancelled" case
+                            // (unlike ScanResult's own Cancelled/Failure split) -- a user
+                            // dismissing the account picker surfaces the same generic error
+                            // message as a real failure. Minor UX rough edge, not a correctness
+                            // gap; a real fix needs a shared-core change affecting both platforms.
+                            GoogleIdTokenProvider.Result.Cancelled ->
+                                dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.Unknown))
+                            GoogleIdTokenProvider.Result.Failure ->
+                                dispatch(ToollyUiEvent.AuthenticationFailed(AuthError.Unknown))
+                        }
+                    }
+                }
                 override fun useDevelopmentAccess() = dispatch(ToollyUiEvent.DevelopmentAccessGranted)
                 override fun openHome() = select(ToollyDestination.HOME)
                 override fun openLibrary() = select(ToollyDestination.LIBRARY)

@@ -992,6 +992,138 @@
         "Hand-rolled OTP/OAuth server and client — rejected per D-049/ADR-0004's decision to use Firebase as the identity-provider layer beneath the canonical ToollyAccountId."
       ],
       "removal_plan": "Replace the Firebase-backed AccountAuthenticator adapter with an alternative provider behind the same port; no shared/UI code depends on this coordinate directly."
+    },
+    {
+      "id": "gradle-lib-androidx-credentials",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.credentials:credentials",
+      "requested_version": "1.2.0-rc01",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Jetpack Credential Manager — obtains a Google ID token via the platform sign-in UI, which is then exchanged for a Firebase session by AccountAuthenticator.signInWithGoogle. Was already present as a transitive dependency of firebase-auth at this exact version; declared explicitly because spike-capture imports it directly.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/credentials",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-14",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-14",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/credentials",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Legacy GoogleSignInClient API — deprecated by Google in favor of Credential Manager."
+      ],
+      "removal_plan": "Removed alongside Google Sign-In support if that provider method is ever dropped."
+    },
+    {
+      "id": "gradle-lib-androidx-credentials-play-services-auth",
+      "ecosystem": "gradle-library",
+      "coordinate": "androidx.credentials:credentials-play-services-auth",
+      "requested_version": "1.2.0-rc01",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Play Services backend for Credential Manager on devices below the Android version with native Credential Manager support. Already present as a transitive dependency of firebase-auth at this exact version; declared explicitly for the same reason as androidx.credentials:credentials.",
+      "owner": "shivayogih",
+      "upstream": "https://developer.android.com/jetpack/androidx/releases/credentials",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-14",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-14",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developer.android.com/jetpack/androidx/releases/credentials",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Legacy GoogleSignInClient API — deprecated by Google in favor of Credential Manager."
+      ],
+      "removal_plan": "Removed alongside androidx.credentials:credentials."
+    },
+    {
+      "id": "gradle-lib-googleid",
+      "ecosystem": "gradle-library",
+      "coordinate": "com.google.android.libraries.identity.googleid:googleid",
+      "requested_version": "1.1.0",
+      "immutable_ref": "gradle/verification-metadata.xml+spike-capture/gradle.lockfile",
+      "scope": "runtime",
+      "purpose": "Parses the Google ID token credential Credential Manager returns (GoogleIdTokenCredential). Already present as a transitive dependency of firebase-auth at this exact version; declared explicitly because spike-capture imports it directly.",
+      "owner": "shivayogih",
+      "upstream": "https://developers.google.com/identity/android-credential-manager",
+      "licence_spdx": "Apache-2.0",
+      "licence_evidence": "https://developers.google.com/identity/android-credential-manager",
+      "approval_status": "conditional",
+      "approval_issue": 15,
+      "approved_by": null,
+      "approved_at": null,
+      "review_due_at": "2026-11-14",
+      "cve_review": {
+        "status": "manual_baseline",
+        "last_reviewed_at": "2026-08-14",
+        "result": "no_known_critical_high",
+        "sources": [
+          "https://developers.google.com/identity/android-credential-manager",
+          "https://ossindex.sonatype.org/"
+        ]
+      },
+      "transitives": {
+        "status": "locked_and_checksum_verified",
+        "count": null
+      },
+      "size": {
+        "status": "pending_device_measurement",
+        "delta_bytes": null
+      },
+      "data_processing": {
+        "processes_user_documents": false,
+        "network_hosts": [],
+        "permissions": []
+      },
+      "alternatives": [
+        "Legacy GoogleSignInClient API — deprecated by Google in favor of Credential Manager."
+      ],
+      "removal_plan": "Removed alongside Google Sign-In support if that provider method is ever dropped."
     }
   ]
 }

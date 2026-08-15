@@ -286,6 +286,10 @@ fun reduceToollyUiState(
     ToollyUiEvent.AuthenticationStarted -> {
         if (
             state.destination !in setOf(
+                // SIGN_IN/CREATE_PROFILE: Google's SecondaryButton lives on both (AccountScreen),
+                // so a Google sign-in attempt can start from either without a PHONE/EMAIL detour.
+                ToollyDestination.SIGN_IN,
+                ToollyDestination.CREATE_PROFILE,
                 ToollyDestination.PHONE_ENTRY,
                 ToollyDestination.OTP_VERIFICATION,
                 ToollyDestination.EMAIL_SIGN_IN,
