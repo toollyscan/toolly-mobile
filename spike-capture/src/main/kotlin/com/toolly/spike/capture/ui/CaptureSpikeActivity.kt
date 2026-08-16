@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.CapturedPageDraft
 import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentExportDelivery
@@ -162,6 +163,11 @@ class CaptureSpikeActivity : ComponentActivity() {
                             onMergeDocuments = { documentIds, onResult ->
                                 lifecycleScope.launch {
                                     onResult(mergeDocuments(documentIds, openDocument))
+                                }
+                            },
+                            onSplitPages = { assetIds, onResult ->
+                                lifecycleScope.launch {
+                                    onResult(splitPages(assetIds))
                                 }
                             },
                             onLoadDocuments = { onResult ->
@@ -418,6 +424,23 @@ class CaptureSpikeActivity : ComponentActivity() {
                 }
             }
         }
+        if (bitmaps.isEmpty()) {
+            return ScanResult.Failure(ScanError.InvalidResult)
+        }
+        val outcome = temporaryStore.importBitmaps(bitmaps)
+        bitmaps.forEach { it.recycle() }
+        return outcome.toScanResult()
+    }
+
+    /**
+     * Extracts [assetIds] (already known to the caller -- the document detail screen already has
+     * the full page list) into a new document via the same decrypt/re-stage pipeline
+     * [mergeDocuments] uses. The source document is untouched: this is "copy these pages out",
+     * not a destructive split, since there's no page-deletion capability in
+     * `EncryptedDocumentRepository` yet to remove them from the original.
+     */
+    private suspend fun splitPages(assetIds: List<AssetId>): ScanResult {
+        val bitmaps = assetIds.mapNotNull { documentRepository.loadAssetBitmap(it) }
         if (bitmaps.isEmpty()) {
             return ScanResult.Failure(ScanError.InvalidResult)
         }

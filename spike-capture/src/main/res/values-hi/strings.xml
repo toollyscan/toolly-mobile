@@ -69,6 +69,13 @@
     <string name="document_category_label">श्रेणी</string>
     <string name="tap_page_to_edit">क्रॉप या सुधार करने के लिए किसी पेज पर टैप करें</string>
     <string name="rename_document">नाम बदलें</string>
+    <string name="split_document">विभाजित करें</string>
+    <string name="tap_pages_to_split">नए दस्तावेज़ में विभाजित करने के लिए पृष्ठों पर टैप करें</string>
+    <string name="split_failed">वह दस्तावेज़ विभाजित नहीं हो सका। फिर से प्रयास करें।</string>
+    <plurals name="split_selected_count">
+        <item quantity="one">विभाजित करें (%1$d)</item>
+        <item quantity="other">विभाजित करें (%1$d)</item>
+    </plurals>
     <string name="rename_document_title">दस्तावेज़ का नाम</string>
     <string name="rename_document_hint">जैसे बिजली का बिल</string>
     <string name="dialog_cancel">रद्द करें</string>
