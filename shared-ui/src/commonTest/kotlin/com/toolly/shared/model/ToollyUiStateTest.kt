@@ -547,4 +547,33 @@ class ToollyUiStateTest {
 
         assertEquals(library, unchanged)
     }
+
+    @Test
+    fun captureSavedReturnsToLibraryFromReview() {
+        val review = reduceToollyUiState(atLibrary(), ToollyUiEvent.CaptureReviewStarted(2))
+
+        val saved = reduceToollyUiState(review, ToollyUiEvent.CaptureSaved)
+
+        assertEquals(ToollyDestination.LIBRARY, saved.destination)
+        assertEquals(0, saved.reviewPageCount)
+    }
+
+    @Test
+    fun captureSavedIsANoOpOutsideCaptureReview() {
+        val library = atLibrary()
+        val unchanged = reduceToollyUiState(library, ToollyUiEvent.CaptureSaved)
+
+        assertEquals(library, unchanged)
+    }
+
+    @Test
+    fun documentsLoadedReplacesTheDocumentListFromAnyDestination() {
+        val library = atLibrary()
+        val documents = listOf(DocumentListItem(DocumentUiId("1"), pageCount = 2, title = "Invoice"))
+
+        val loaded = reduceToollyUiState(library, ToollyUiEvent.DocumentsLoaded(documents))
+
+        assertEquals(documents, loaded.documents)
+        assertEquals(library.destination, loaded.destination)
+    }
 }

@@ -1,11 +1,19 @@
 package com.toolly.shared.ui
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
+import com.toolly.domain.model.CapturedPageDraft
+import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
+import com.toolly.domain.usecases.ListDocumentsUseCase
+import com.toolly.domain.usecases.SaveCapturedDocumentUseCase
+import com.toolly.foundation.OpaqueIdGenerator
+import com.toolly.foundation.ToollyClock
+import com.toolly.foundation.ToollyResult
 import com.toolly.shared.auth.AuthError
 import com.toolly.shared.auth.AuthResult
 import com.toolly.shared.auth.PhoneVerificationId
@@ -15,6 +23,7 @@ import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.BackupProvider
+import com.toolly.shared.model.DocumentListItem
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyDestination
@@ -23,17 +32,21 @@ import com.toolly.shared.model.ToollyUiEvent
 import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.model.reduceToollyUiState
 import kotlinx.coroutines.launch
+import platform.Foundation.NSDate
 import platform.Foundation.NSLocale
+import platform.Foundation.NSUUID
 import platform.Foundation.NSUserDefaults
 import platform.Foundation.currentLocale
 import platform.Foundation.languageCode
 import platform.Foundation.localizedStringForLanguageCode
+import platform.Foundation.timeIntervalSince1970
 
 @Suppress("FunctionName")
 fun MainViewController() = MainViewController(
     developmentAccessAvailable = false,
     captureSession = null,
     accountAuthenticatorSession = null,
+    documentVaultSession = null,
 )
 
 @Suppress("FunctionName")
@@ -41,6 +54,7 @@ fun MainViewController(developmentAccessAvailable: Boolean) = MainViewController
     developmentAccessAvailable = developmentAccessAvailable,
     captureSession = null,
     accountAuthenticatorSession = null,
+    documentVaultSession = null,
 )
 
 @Suppress("FunctionName")
@@ -51,22 +65,39 @@ fun MainViewController(
     developmentAccessAvailable = developmentAccessAvailable,
     captureSession = captureSession,
     accountAuthenticatorSession = null,
+    documentVaultSession = null,
+)
+
+@Suppress("FunctionName")
+fun MainViewController(
+    developmentAccessAvailable: Boolean,
+    captureSession: AppleCaptureSession?,
+    accountAuthenticatorSession: AppleAccountAuthenticatorSession?,
+) = MainViewController(
+    developmentAccessAvailable = developmentAccessAvailable,
+    captureSession = captureSession,
+    accountAuthenticatorSession = accountAuthenticatorSession,
+    documentVaultSession = null,
 )
 
 /**
  * [captureSession] is the first-party Swift VisionKit implementation of [AppleCaptureSession]
- * (see `AppleCaptureBridge.kt`), and [accountAuthenticatorSession] is the first-party Swift
- * Firebase implementation of [AppleAccountAuthenticatorSession] (see `AppleAuthBridge.kt`), both
- * supplied by the host app. Both are nullable so existing/test callers that don't care about
- * capture or real authentication keep compiling unchanged -- with `null`, `scanDocument()` falls
- * back to its original library-navigation-only behavior, and the auth actions stay local-only/
- * mock (matching the pre-existing behavior before either adapter existed).
+ * (see `AppleCaptureBridge.kt`), [accountAuthenticatorSession] is the first-party Swift Firebase
+ * implementation of [AppleAccountAuthenticatorSession] (see `AppleAuthBridge.kt`), and
+ * [documentVaultSession] is the first-party Swift local-document-store implementation of
+ * [AppleDocumentVaultSession] (see `AppleDocumentVaultBridge.kt`, TLY-014 Phase 2/#82 -- no
+ * cryptography behind it yet). All three are nullable so existing/test callers that don't care
+ * about capture, real authentication or persistence keep compiling unchanged -- with `null`,
+ * `scanDocument()` falls back to its original library-navigation-only behavior, auth actions stay
+ * local-only/mock, and `saveCapture()` stays the no-op it always was (matching the pre-existing
+ * behavior before any adapter existed).
  */
 @Suppress("FunctionName")
 fun MainViewController(
     developmentAccessAvailable: Boolean,
     captureSession: AppleCaptureSession?,
     accountAuthenticatorSession: AppleAccountAuthenticatorSession?,
+    documentVaultSession: AppleDocumentVaultSession?,
 ) = ComposeUIViewController {
     val preferences = remember { NSUserDefaults.standardUserDefaults }
     var state by remember {
@@ -88,6 +119,22 @@ fun MainViewController(
     // Host-local, not reducer-shared -- see AndroidToollyApp.kt's identical field for why.
     var pendingPhoneVerificationId by remember { mutableStateOf<PhoneVerificationId?>(null) }
 
+    // clock/idGenerator use Foundation directly (NSDate/NSUUID) rather than a shared-core
+    // implementation -- these are two-line platform primitives, not worth an expect/actual.
+    val vaultRepository = remember(documentVaultSession) {
+        documentVaultSession?.let(::AppleDocumentRepository)
+    }
+    val saveCapturedDocument = remember(vaultRepository) {
+        vaultRepository?.let {
+            SaveCapturedDocumentUseCase(
+                repository = it,
+                clock = ToollyClock { (NSDate().timeIntervalSince1970 * 1000).toLong() },
+                idGenerator = OpaqueIdGenerator { NSUUID().UUIDString().lowercase() },
+            )
+        }
+    }
+    val listDocuments = remember(vaultRepository) { vaultRepository?.let(::ListDocumentsUseCase) }
+
     fun dispatch(event: ToollyUiEvent) {
         state = reduceToollyUiState(state, event)
     }
@@ -95,6 +142,24 @@ fun MainViewController(
         preferences.setBool(true, forKey = TUTORIAL_COMPLETED_KEY)
         dispatch(event)
     }
+    suspend fun refreshDocuments() {
+        val activeListDocuments = listDocuments ?: return
+        val result = activeListDocuments()
+        if (result is ToollyResult.Success) {
+            dispatch(
+                ToollyUiEvent.DocumentsLoaded(
+                    result.value.map { summary ->
+                        DocumentListItem(
+                            id = DocumentUiId(summary.id.value),
+                            pageCount = summary.pageCount,
+                            title = summary.displayName,
+                        )
+                    },
+                ),
+            )
+        }
+    }
+    LaunchedEffect(vaultRepository) { refreshDocuments() }
 
     ToollyApp(
         state = state,
@@ -154,10 +219,38 @@ fun MainViewController(
                 dispatch(ToollyUiEvent.CaptureDiscarded)
             }
 
-            // No iOS equivalent of EncryptedDocumentRepository exists yet, so there is nowhere to
-            // persist a capture to. Deliberately left unimplemented rather than faking a save --
-            // see issue #48 for scope and the follow-up this needs (a real iOS vault).
-            override fun saveCapture() = Unit
+            // With no real [documentVaultSession] wired, stays the no-op it always was (issue #48;
+            // a real vault is TLY-014/#82, in progress). With one wired, mirrors
+            // AndroidToollyApp.kt's save flow: persist, release the now-redundant staged temp
+            // files, return to the library and refresh it with the newly-saved document.
+            override fun saveCapture() {
+                val activeUseCase = saveCapturedDocument ?: return
+                if (state.busy) return
+                state = state.copy(busy = true)
+                coroutineScope.launch {
+                    val drafts = capturedPages.map { page ->
+                        CapturedPageDraft(
+                            temporaryAssetId = DomainTemporaryAssetId(page.assetId.value),
+                            ordinal = page.index,
+                            widthPixels = null,
+                            heightPixels = null,
+                        )
+                    }
+                    when (activeUseCase(drafts)) {
+                        is ToollyResult.Success -> {
+                            scanner?.release(capturedPages)
+                            capturedPages = emptyList()
+                            state = state.copy(busy = false)
+                            dispatch(ToollyUiEvent.CaptureSaved)
+                            refreshDocuments()
+                        }
+                        // No error-message slot in shared state for the iOS host yet (same gap
+                        // scanDocument() already has, above) -- stays on the review screen with
+                        // the captured pages intact so the user can retry.
+                        is ToollyResult.Failure -> state = state.copy(busy = false)
+                    }
+                }
+            }
 
             override fun navigateBack() = dispatch(ToollyUiEvent.NavigateBack)
             // When no real [authenticator] is wired (Swift host didn't supply a session), these
