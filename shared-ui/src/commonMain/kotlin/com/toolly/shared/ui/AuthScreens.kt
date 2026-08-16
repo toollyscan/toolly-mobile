@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,14 +48,17 @@ import com.toolly.shared.resources.auth_error_not_supported
 import com.toolly.shared.resources.auth_error_rate_limited
 import com.toolly.shared.resources.auth_error_requires_recent_login
 import com.toolly.shared.resources.auth_error_unknown
+import com.toolly.shared.resources.already_have_account
 import com.toolly.shared.resources.back
 import com.toolly.shared.resources.back_to_sign_in
 import com.toolly.shared.resources.change_phone_number
 import com.toolly.shared.resources.checkmark_glyph
+import com.toolly.shared.resources.confirm_password_hint
 import com.toolly.shared.resources.confirm_password_label
 import com.toolly.shared.resources.create_account
 import com.toolly.shared.resources.create_account_description
 import com.toolly.shared.resources.create_account_title
+import com.toolly.shared.resources.create_account_verification_notice
 import com.toolly.shared.resources.create_an_account
 import com.toolly.shared.resources.email_hint
 import com.toolly.shared.resources.email_label
@@ -69,6 +73,7 @@ import com.toolly.shared.resources.otp_field_description
 import com.toolly.shared.resources.otp_rate_notice
 import com.toolly.shared.resources.otp_sent_to
 import com.toolly.shared.resources.otp_title
+import com.toolly.shared.resources.password_hint
 import com.toolly.shared.resources.password_label
 import com.toolly.shared.resources.password_mismatch
 import com.toolly.shared.resources.phone_country_label
@@ -82,7 +87,8 @@ import com.toolly.shared.resources.profile_complete
 import com.toolly.shared.resources.profile_complete_description
 import com.toolly.shared.resources.profile_completion_description
 import com.toolly.shared.resources.profile_completion_title
-import com.toolly.shared.resources.reset_link_sent
+import com.toolly.shared.resources.reset_check_inbox_body
+import com.toolly.shared.resources.reset_check_inbox_title
 import com.toolly.shared.resources.reset_password_description
 import com.toolly.shared.resources.reset_password_title
 import com.toolly.shared.resources.resend_code
@@ -90,6 +96,10 @@ import com.toolly.shared.resources.resend_code_in
 import com.toolly.shared.resources.save_profile
 import com.toolly.shared.resources.send_reset_link
 import com.toolly.shared.resources.send_verification_code
+import com.toolly.shared.resources.session_next_launch_body
+import com.toolly.shared.resources.session_next_launch_result
+import com.toolly.shared.resources.session_next_launch_title
+import com.toolly.shared.resources.session_offline_note
 import com.toolly.shared.resources.session_routing_description
 import com.toolly.shared.resources.session_routing_title
 import com.toolly.shared.resources.sign_in
@@ -135,7 +145,7 @@ internal fun PhoneEntryScreen(state: ToollyUiState, actions: ToollyUiActions) {
             value = phoneNumber,
             onValueChange = { phoneNumber = it.filter(Char::isDigit).take(PHONE_DIGIT_COUNT) },
             label = stringResource(Res.string.phone_number_label),
-            supportingText = if (phoneNumber.isEmpty()) stringResource(Res.string.phone_number_hint) else null,
+            placeholder = stringResource(Res.string.phone_number_hint),
             keyboardType = KeyboardType.Phone,
         )
         AuthErrorText(state.authError)
@@ -228,7 +238,7 @@ internal fun EmailSignInScreen(state: ToollyUiState, actions: ToollyUiActions) {
             value = email,
             onValueChange = { email = it },
             label = stringResource(Res.string.email_label),
-            supportingText = stringResource(Res.string.email_hint),
+            placeholder = stringResource(Res.string.email_hint),
             keyboardType = KeyboardType.Email,
         )
         ToollyTextField(
@@ -289,18 +299,21 @@ internal fun CreateAccountScreen(state: ToollyUiState, actions: ToollyUiActions)
             value = email,
             onValueChange = { email = it },
             label = stringResource(Res.string.email_label),
+            placeholder = stringResource(Res.string.email_hint),
             keyboardType = KeyboardType.Email,
         )
         ToollyTextField(
             value = password,
             onValueChange = { password = it },
             label = stringResource(Res.string.password_label),
+            placeholder = stringResource(Res.string.password_hint),
             isPassword = true,
         )
         ToollyTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = stringResource(Res.string.confirm_password_label),
+            placeholder = stringResource(Res.string.confirm_password_hint),
             isPassword = true,
             isError = mismatch,
             supportingText = if (mismatch) stringResource(Res.string.password_mismatch) else null,
@@ -313,13 +326,18 @@ internal fun CreateAccountScreen(state: ToollyUiState, actions: ToollyUiActions)
             busy = state.authBusy,
             onClick = { actions.createAccount(email, password) },
         )
+        Text(
+            stringResource(Res.string.create_account_verification_notice),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
         TextButton(
             onClick = actions::authStepBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
         ) {
-            ToollyBackIcon(iconSize = 18.dp)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(Res.string.back))
+            Text(stringResource(Res.string.already_have_account))
         }
     }
 }
@@ -335,7 +353,13 @@ internal fun ResetPasswordScreen(actions: ToollyUiActions) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (submitted) {
-            Text(stringResource(Res.string.reset_link_sent))
+            ToollyCard {
+                Text(stringResource(Res.string.reset_check_inbox_title), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(Res.string.reset_check_inbox_body),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             SecondaryButton(Res.string.back_to_sign_in, onClick = actions::authStepBack)
         } else {
@@ -343,6 +367,7 @@ internal fun ResetPasswordScreen(actions: ToollyUiActions) {
                 value = email,
                 onValueChange = { email = it },
                 label = stringResource(Res.string.email_label),
+                placeholder = stringResource(Res.string.email_hint),
                 keyboardType = KeyboardType.Email,
             )
             PrimaryButtonText(
@@ -433,10 +458,46 @@ internal fun SessionRoutingScreen(actions: ToollyUiActions) {
                 }
             }
         }
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.inverseSurface,
+        ) {
+            Column(
+                modifier = Modifier.padding(ToollySpacing.Large),
+                verticalArrangement = Arrangement.spacedBy(ToollySpacing.Small),
+            ) {
+                Text(
+                    stringResource(Res.string.session_next_launch_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+                Text(
+                    stringResource(Res.string.session_next_launch_body),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+                Text(
+                    "↓",
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+                Text(
+                    stringResource(Res.string.session_next_launch_result),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+            }
+        }
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButtonText(
             label = stringResource(Res.string.go_to_home),
             onClick = actions::finishOnboarding,
+        )
+        Text(
+            stringResource(Res.string.session_offline_note),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
