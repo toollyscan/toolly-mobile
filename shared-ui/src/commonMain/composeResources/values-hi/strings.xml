@@ -156,8 +156,10 @@
     <string name="enhance_mode_black_and_white">ब्लैक एंड व्हाइट</string>
     <string name="enhance_intensity_label">तीव्रता</string>
     <string name="save_page">पृष्ठ सहेजें</string>
-    <string name="export_builder_title">निर्यात से पहले सटीक फ़ाइल देखें</string>
+    <string name="export_builder_title">निर्यात कॉन्फ़िगरेशन</string>
     <string name="export_builder_description">एक फ़ॉर्मैट चुनें। पुष्टि करने तक आपका दस्तावेज़ एन्क्रिप्टेड रहता है।</string>
+    <string name="export_preview_caption">पूर्वावलोकन निर्यात से पहले सटीक लेआउट और गुणवत्ता दिखाता है।</string>
+    <string name="export_format_label">फ़ॉर्मैट</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">सुरक्षित रूप से निर्यात करें</string>
