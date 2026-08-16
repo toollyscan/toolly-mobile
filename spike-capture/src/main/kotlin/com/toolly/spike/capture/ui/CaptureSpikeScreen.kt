@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -20,11 +22,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,8 +47,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +60,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.toolly.domain.model.AssetId
 import com.toolly.domain.model.DocumentCategory
@@ -81,6 +92,8 @@ import com.toolly.shared.ui.ToollyDocumentIcon
 import com.toolly.shared.ui.ToollyExportFormat
 import com.toolly.shared.ui.ToollySearchIcon
 import java.io.File
+import java.text.DateFormat
+import java.util.Date
 
 /**
  * First production-shaped Toolly Android walking slice.
@@ -912,6 +925,7 @@ private fun DocumentScreen(
         return
     }
 
+    var menuExpanded by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -920,31 +934,112 @@ private fun DocumentScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedButton(onClick = onBack) {
+            IconButton(onClick = onBack) {
                 ToollyBackIcon(iconSize = 18.dp)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.back))
             }
             Text(
-                document.summary.displayName ?: stringResource(R.string.scanned_document),
-                style = MaterialTheme.typography.headlineSmall,
+                stringResource(R.string.document_detail_title),
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
             )
-            TextButton(onClick = { renaming = true }) {
-                Text(stringResource(R.string.rename_document))
+            Box {
+                val optionsDescription = stringResource(R.string.document_options_description)
+                IconButton(onClick = { menuExpanded = true }) {
+                    Text(
+                        "⋮",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.semantics { contentDescription = optionsDescription },
+                    )
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.rename_document)) },
+                        onClick = {
+                            menuExpanded = false
+                            renaming = true
+                        },
+                    )
+                }
             }
         }
-        Text(
-            pluralStringResource(
-                R.plurals.page_count,
-                document.summary.pageCount,
-                document.summary.pageCount,
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+
+        val firstPage = document.pages.minByOrNull { it.ordinal }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(16.dp)),
+        ) {
+            if (firstPage != null) {
+                PrivateBitmapImage(
+                    sourceKey = firstPage.sourceAssetId.value,
+                    loadBitmap = { loadAssetBitmap(firstPage.sourceAssetId) },
+                    contentDescription = document.summary.displayName
+                        ?: stringResource(R.string.scanned_document),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomStart)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.72f)),
+                        ),
+                    )
+                    .padding(16.dp),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        document.summary.displayName ?: stringResource(R.string.scanned_document),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                    )
+                    Text(
+                        stringResource(
+                            R.string.scanned_caption,
+                            DateFormat.getDateInstance(DateFormat.MEDIUM)
+                                .format(Date(document.summary.createdAtEpochMillis)),
+                        ),
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column {
+                Text(
+                    stringResource(R.string.date_scanned_label),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    DateFormat.getDateInstance(DateFormat.MEDIUM)
+                        .format(Date(document.summary.createdAtEpochMillis)),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    stringResource(R.string.pages_label),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(document.summary.pageCount.toString(), style = MaterialTheme.typography.titleMedium)
+            }
+        }
+        // File size isn't tracked anywhere in the domain model yet (no byte-size field on
+        // DocumentSummary/DocumentPage) -- omitted rather than fabricated. A real fix needs a new
+        // repository read path, scoped separately from this screen's own change.
+
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 stringResource(R.string.document_category_label),
@@ -966,24 +1061,38 @@ private fun DocumentScreen(
                 }
             }
         }
-        Text(
-            stringResource(R.string.tap_page_to_edit),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        DocumentPageGrid(
-            pages = document.pages,
-            loadAssetBitmap = loadAssetBitmap,
-            modifier = Modifier.weight(1f),
-            onToggle = { tapped -> editingPage = tapped },
-        )
-        StatusMessage(message)
-        Button(
-            onClick = onStartExport,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(R.string.export_document))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Share and Export both enter the same real export flow (format -> privacy check ->
+            // save/share delivery choice) -- there's no separate one-tap share path today, so
+            // this doesn't invent a second one just to give the buttons different behavior.
+            OutlinedButton(onClick = onStartExport, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.share))
+            }
+            Button(onClick = onStartExport, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.export_document))
+            }
         }
+        // No delete affordance: EncryptedDocumentRepository has no delete capability at all yet
+        // (no tombstone/cleanup path per VAULT_AND_PROCESSING_CONTRACTS.md). Not shown rather
+        // than shown-and-broken; a real implementation is its own scoped, vault-touching change.
+
+        if (document.pages.size > 1) {
+            Text(
+                stringResource(R.string.tap_page_to_edit),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            DocumentPageGrid(
+                pages = document.pages,
+                loadAssetBitmap = loadAssetBitmap,
+                modifier = Modifier.weight(1f),
+                onToggle = { tapped -> editingPage = tapped },
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        StatusMessage(message)
     }
     if (renaming) {
         RenameDocumentDialog(

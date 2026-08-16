@@ -46,6 +46,12 @@
     <string name="export_share_pdf">Export and share PDF</string>
     <string name="export_share_jpeg">Export and share JPEG</string>
     <string name="share_document">Share document</string>
+    <string name="share">Share</string>
+    <string name="document_detail_title">Document</string>
+    <string name="document_options_description">More options</string>
+    <string name="date_scanned_label">Date scanned</string>
+    <string name="pages_label">Pages</string>
+    <string name="scanned_caption">Scanned • %1$s</string>
 
     <string name="library_search_hint">Search by name</string>
     <string name="no_search_results">No documents match</string>
