@@ -121,12 +121,20 @@ internal fun ToollyFilterChip(
     }
 }
 
+/**
+ * [placeholder] renders inside the field itself (Material3's `placeholder` slot) -- this is what
+ * the wireframes use for example text ("name@example.com", "Enter 10-digit number"), distinct
+ * from [supportingText], which renders below the field and is reserved for genuine captions like
+ * error messages. Passing hint text as [supportingText] was a real fidelity bug (fixed 2026-08-16):
+ * it rendered as a caption under the box instead of inside it.
+ */
 @Composable
 internal fun ToollyTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    placeholder: String? = null,
     supportingText: String? = null,
     isError: Boolean = false,
     isPassword: Boolean = false,
@@ -138,6 +146,7 @@ internal fun ToollyTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        placeholder = placeholder?.let { { Text(it) } },
         supportingText = supportingText?.let { { Text(it) } },
         isError = isError,
         readOnly = readOnly,
