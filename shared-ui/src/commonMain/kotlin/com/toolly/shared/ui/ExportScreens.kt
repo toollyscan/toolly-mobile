@@ -29,6 +29,8 @@ import com.toolly.shared.resources.export_quality_best
 import com.toolly.shared.resources.export_quality_label
 import com.toolly.shared.resources.export_quality_small
 import com.toolly.shared.resources.export_securely
+import com.toolly.shared.resources.export_watermark_hint
+import com.toolly.shared.resources.export_watermark_label
 import com.toolly.shared.resources.premium_lock_label
 import com.toolly.shared.resources.privacy_check_description
 import com.toolly.shared.resources.privacy_check_title
@@ -48,7 +50,9 @@ import org.jetbrains.compose.resources.stringResource
  * The wireframe's "Long image" format is still not offered: no exporter support exists for it, and
  * this project's policy is not to show controls that don't do anything real (see
  * docs/product/ENTITLEMENTS.md's own precedent -- premium *lock* affordances are fine to show ahead
- * of billing; a control with literally no backing implementation is not the same thing).
+ * of billing; a control with literally no backing implementation is not the same thing). Watermark
+ * text (not part of any wireframe) is real: a blank field means no watermark; typed text gets
+ * stamped diagonally across every exported page.
  */
 enum class ToollyExportFormat { PDF, JPEG }
 
@@ -71,6 +75,8 @@ fun ExportBuilderScreen(
     onFormatChange: (ToollyExportFormat) -> Unit,
     quality: ToollyExportQuality,
     onQualityChange: (ToollyExportQuality) -> Unit,
+    watermarkText: String,
+    onWatermarkTextChange: (String) -> Unit,
     onContinue: () -> Unit,
     busy: Boolean = false,
     continueEnabled: Boolean = true,
@@ -125,6 +131,12 @@ fun ExportBuilderScreen(
         ToollyChipRow(options = formatOptions, selected = format, onSelected = onFormatChange)
         Text(stringResource(Res.string.export_quality_label), style = MaterialTheme.typography.titleSmall)
         ToollyChipRow(options = qualityOptions, selected = quality, onSelected = onQualityChange)
+        ToollyTextField(
+            value = watermarkText,
+            onValueChange = onWatermarkTextChange,
+            label = stringResource(Res.string.export_watermark_label),
+            placeholder = stringResource(Res.string.export_watermark_hint),
+        )
         ToollyCard {
             Row(
                 modifier = Modifier.fillMaxWidth(),

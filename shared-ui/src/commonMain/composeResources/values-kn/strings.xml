@@ -168,6 +168,8 @@
     <string name="export_quality_small">ಚಿಕ್ಕದು</string>
     <string name="export_quality_balanced">ಸಮತೋಲಿತ</string>
     <string name="export_quality_best">ಅತ್ಯುತ್ತಮ</string>
+    <string name="export_watermark_label">ವಾಟರ್‌ಮಾರ್ಕ್ (ಐಚ್ಛಿಕ)</string>
+    <string name="export_watermark_hint">ಉದಾ. ಗೌಪ್ಯ</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">ಸುರಕ್ಷಿತವಾಗಿ ರಫ್ತು ಮಾಡಿ</string>

@@ -2,6 +2,7 @@ package com.toolly.spike.capture.export
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
@@ -44,6 +45,7 @@ internal class AndroidDocumentExporter(
         document: DocumentDetails,
         destination: OutputStream,
         quality: ExportQuality = ExportQuality.BEST,
+        watermarkText: String? = null,
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
         val pdf = PdfDocument()
         try {
@@ -71,6 +73,14 @@ internal class AndroidDocumentExporter(
                             fittedDestination(bitmap, pageSize),
                             Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
                         )
+                        if (!watermarkText.isNullOrBlank()) {
+                            drawWatermark(
+                                pdfPage.canvas,
+                                watermarkText,
+                                pageSize.width.toFloat(),
+                                pageSize.height.toFloat(),
+                            )
+                        }
                     } finally {
                         pdf.finishPage(pdfPage)
                     }
@@ -124,12 +134,13 @@ internal class AndroidDocumentExporter(
         page: DocumentPage,
         destination: OutputStream,
         quality: ExportQuality = ExportQuality.BEST,
+        watermarkText: String? = null,
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
         val loadedBitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
             is ToollyResult.Success -> loaded.value
             is ToollyResult.Failure -> return@withContext loaded
         }
-        val bitmap = if (quality.downscale < 1f) {
+        val scaled = if (quality.downscale < 1f) {
             val width = (loadedBitmap.width * quality.downscale).toInt().coerceAtLeast(1)
             val height = (loadedBitmap.height * quality.downscale).toInt().coerceAtLeast(1)
             Bitmap.createScaledBitmap(loadedBitmap, width, height, true).also {
@@ -137,6 +148,14 @@ internal class AndroidDocumentExporter(
             }
         } else {
             loadedBitmap
+        }
+        val bitmap = if (watermarkText.isNullOrBlank()) {
+            scaled
+        } else {
+            val mutable = scaled.copy(Bitmap.Config.ARGB_8888, true)
+            scaled.recycle()
+            drawWatermark(Canvas(mutable), watermarkText, mutable.width.toFloat(), mutable.height.toFloat())
+            mutable
         }
         try {
             coroutineContext.ensureActive()
@@ -152,6 +171,23 @@ internal class AndroidDocumentExporter(
         } finally {
             bitmap.recycle()
         }
+    }
+
+    /**
+     * Draws [text] once, centered, rotated 45 degrees, at low opacity -- the common
+     * "CONFIDENTIAL"/"DRAFT"-style diagonal stamp. Font size scales to the page so it reads at
+     * roughly the same relative size regardless of source resolution.
+     */
+    private fun drawWatermark(canvas: Canvas, text: String, width: Float, height: Float) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(WATERMARK_ALPHA, 0, 0, 0)
+            textSize = width * WATERMARK_TEXT_SIZE_FRACTION
+            textAlign = Paint.Align.CENTER
+        }
+        canvas.save()
+        canvas.rotate(WATERMARK_ROTATION_DEGREES, width / 2f, height / 2f)
+        canvas.drawText(text, width / 2f, height / 2f, paint)
+        canvas.restore()
     }
 
     private fun pageSize(bitmap: Bitmap): PdfPageSize =
@@ -188,5 +224,8 @@ internal class AndroidDocumentExporter(
         const val A4_SHORT_EDGE_POINTS = 595
         const val A4_LONG_EDGE_POINTS = 842
         const val PAGE_MARGIN_POINTS = 24f
+        const val WATERMARK_ALPHA = 70
+        const val WATERMARK_TEXT_SIZE_FRACTION = 0.09f
+        const val WATERMARK_ROTATION_DEGREES = -45f
     }
 }
