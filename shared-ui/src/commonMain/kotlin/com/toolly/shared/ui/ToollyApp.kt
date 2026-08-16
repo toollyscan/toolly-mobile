@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -43,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -873,30 +876,21 @@ private fun RowScope.MainNavigationItem(
         onClick = onClick,
         icon = {
             if (primary) {
+                // Raised, unlabeled camera FAB (wireframes' bottom nav shows this on every
+                // screen: a larger filled circle sitting slightly above the other flat icon+label
+                // tabs, camera glyph, no text) -- distinct from the other four items, not another
+                // selectable tab among equals.
                 Surface(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(44.dp).offset(y = (-6).dp),
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primary,
+                    shadowElevation = ToollySpacing.ExtraSmall,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        val plusColor = MaterialTheme.colorScheme.onPrimary
-                        Canvas(modifier = Modifier.size(12.dp)) {
-                            val center = Offset(size.width / 2f, size.height / 2f)
-                            val strokeWidth = 2.dp.toPx()
-                            drawLine(
-                                color = plusColor,
-                                start = Offset(center.x, 0f),
-                                end = Offset(center.x, size.height),
-                                strokeWidth = strokeWidth,
-                                cap = StrokeCap.Round,
-                            )
-                            drawLine(
-                                color = plusColor,
-                                start = Offset(0f, center.y),
-                                end = Offset(size.width, center.y),
-                                strokeWidth = strokeWidth,
-                                cap = StrokeCap.Round,
-                            )
+                        CompositionLocalProvider(
+                            LocalContentColor provides MaterialTheme.colorScheme.onPrimary,
+                        ) {
+                            ToollyCameraIcon(iconSize = 22.dp)
                         }
                     }
                 }
@@ -904,7 +898,7 @@ private fun RowScope.MainNavigationItem(
                 icon()
             }
         },
-        label = { Text(stringResource(label)) },
+        label = if (primary) null else { { Text(stringResource(label)) } },
     )
 }
 
