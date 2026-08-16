@@ -171,9 +171,15 @@ fun ToollyApp(
                     onBack = actions::navigateBack,
                 )
                 ToollyDestination.BACKUP_CHOICE -> BackupChoiceScreen(
+                    selectedProvider = state.backupPreferences.provider,
+                    onProviderSelected = actions::selectBackupProvider,
+                    onContinue = actions::openBackupPolicy,
+                    onBack = actions::navigateBack,
+                )
+                ToollyDestination.BACKUP_POLICY -> BackupPolicyScreen(
                     preferences = state.backupPreferences,
                     onPreferenceChanged = actions::setBackupPreference,
-                    onEnabledChanged = actions::setBackupEnabled,
+                    onConfirm = actions::confirmBackupPolicy,
                     onBack = actions::navigateBack,
                 )
             }
