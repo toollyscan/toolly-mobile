@@ -1,6 +1,7 @@
 package com.toolly.spike.capture.ui
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -11,6 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -69,6 +74,7 @@ class CaptureSpikeActivity : ComponentActivity() {
     private lateinit var temporaryStore: TemporaryScanStore
     private lateinit var documentRepository: EncryptedDocumentRepository
     private lateinit var documentExporter: AndroidDocumentExporter
+    private lateinit var recentSearchesPreferences: SharedPreferences
     private var pendingExport: PendingExport? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,8 +123,15 @@ class CaptureSpikeActivity : ComponentActivity() {
             repository = documentRepository,
             clock = ToollyClock(System::currentTimeMillis),
         )
+        recentSearchesPreferences = getSharedPreferences(RECENT_SEARCHES_PREFS_NAME, MODE_PRIVATE)
+        val initialRecentSearches = recentSearchesPreferences
+            .getString(RECENT_SEARCHES_KEY, null)
+            ?.split(RECENT_SEARCHES_DELIMITER)
+            ?.filter(String::isNotBlank)
+            .orEmpty()
 
         setContent {
+            var recentSearches by remember { mutableStateOf(initialRecentSearches) }
             MaterialTheme {
                 AndroidToollyApp(
                     documentsContent = {
@@ -221,6 +234,13 @@ class CaptureSpikeActivity : ComponentActivity() {
                                 }
                             },
                             loadDocumentAssetBitmap = documentRepository::loadAssetBitmap,
+                            recentSearches = recentSearches,
+                            onRecentSearchesChanged = { updated ->
+                                recentSearches = updated
+                                recentSearchesPreferences.edit()
+                                    .putString(RECENT_SEARCHES_KEY, updated.joinToString(RECENT_SEARCHES_DELIMITER))
+                                    .apply()
+                            },
                         )
                     },
                 )
@@ -409,5 +429,10 @@ class CaptureSpikeActivity : ComponentActivity() {
         const val PDF_MIME_TYPE = "application/pdf"
         const val JPEG_MIME_TYPE = "image/jpeg"
         const val WRITE_TRUNCATE_MODE = "rwt"
+        const val RECENT_SEARCHES_PREFS_NAME = "toolly_search_preferences"
+        const val RECENT_SEARCHES_KEY = "recent_searches"
+        // A real single-line search query can never contain a newline (the field is
+        // singleLine = true), so this is a safe, simple delimiter without needing a JSON dependency.
+        const val RECENT_SEARCHES_DELIMITER = "\n"
     }
 }

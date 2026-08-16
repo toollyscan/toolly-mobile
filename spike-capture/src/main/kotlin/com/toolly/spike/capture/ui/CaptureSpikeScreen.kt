@@ -403,6 +403,8 @@ fun SearchDocumentsScreen(
         onResult: (ToollyResult<DocumentDetails>) -> Unit,
     ) -> Unit,
     loadDocumentAssetBitmap: suspend (AssetId) -> Bitmap?,
+    recentSearches: List<String>,
+    onRecentSearchesChanged: (List<String>) -> Unit,
 ) {
     var documents by remember { mutableStateOf<List<DocumentSummary>>(emptyList()) }
     var query by remember { mutableStateOf("") }
@@ -431,12 +433,27 @@ fun SearchDocumentsScreen(
                 onQueryChange = { query = it },
                 results = results,
                 message = message,
+                recentSearches = recentSearches,
+                onRecentSearchSelected = { query = it },
+                onClearRecentSearches = { onRecentSearchesChanged(emptyList()) },
                 onOpen = { documentId ->
                     isWorking = true
                     onOpenDocument(documentId) { result ->
                         isWorking = false
                         when (result) {
-                            is ToollyResult.Success -> screen = SearchResultScreen.Document(result.value)
+                            is ToollyResult.Success -> {
+                                screen = SearchResultScreen.Document(result.value)
+                                // A search that actually led somewhere is worth remembering --
+                                // matches saving on submit/navigate rather than every keystroke,
+                                // since this search is live-filter-as-you-type with no separate
+                                // submit action.
+                                val trimmed = query.trim()
+                                if (trimmed.isNotEmpty()) {
+                                    val updated = (listOf(trimmed) + recentSearches.filter { it != trimmed })
+                                        .take(MAX_RECENT_SEARCHES)
+                                    onRecentSearchesChanged(updated)
+                                }
+                            }
                             is ToollyResult.Failure ->
                                 message = UiMessage(toollyErrorMessage(result.error.code))
                         }
@@ -583,6 +600,9 @@ private fun SearchResultsScreen(
     onQueryChange: (String) -> Unit,
     results: List<DocumentSummary>,
     message: UiMessage?,
+    recentSearches: List<String>,
+    onRecentSearchSelected: (String) -> Unit,
+    onClearRecentSearches: () -> Unit,
     onOpen: (DocumentId) -> Unit,
 ) {
     val expanded = LocalConfiguration.current.screenWidthDp >= 600
@@ -610,6 +630,44 @@ private fun SearchResultsScreen(
             )
             StatusMessage(message)
             when {
+                // No "Suggested" section here (unlike the wireframe): there's no real signal to
+                // suggest from (no query popularity/trending data exists anywhere) -- showing one
+                // would mean fabricating it. "Search in: Documents/Tags/Dates/Places" facets are
+                // omitted the same way -- only title matching is real; Tags/Dates/Places aren't
+                // tracked metadata at all.
+                query.isBlank() && recentSearches.isNotEmpty() -> Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            stringResource(R.string.recent_searches_label),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                        TextButton(onClick = onClearRecentSearches) {
+                            Text(stringResource(R.string.clear))
+                        }
+                    }
+                    for (recent in recentSearches) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().clickable { onRecentSearchSelected(recent) },
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                ToollySearchIcon(iconSize = 18.dp)
+                                Text(recent)
+                            }
+                        }
+                    }
+                }
                 query.isBlank() -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.search_prompt), style = MaterialTheme.typography.titleMedium)
                 }
@@ -715,6 +773,7 @@ private fun documentCardSubtitle(document: DocumentSummary): String {
 }
 
 private const val DAY_MILLIS = 24L * 60L * 60L * 1000L
+private const val MAX_RECENT_SEARCHES = 5
 
 @StringRes
 private fun LibraryFilter.labelRes(): Int = when (this) {

@@ -68,6 +68,8 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="search_subtitle">Search titles and categories</string>
     <string name="search_prompt">Type to search your documents</string>
+    <string name="recent_searches_label">Recent searches</string>
+    <string name="clear">Clear</string>
     <string name="search_result_matched_title">Matched title</string>
     <string name="document_card_subtitle">%1$s · %2$s</string>
     <string name="saved_today">Saved today</string>
