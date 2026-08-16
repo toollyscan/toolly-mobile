@@ -44,11 +44,15 @@ class FallbackDocumentScanner(
 /**
  * Configuration for a single capture session.
  *
- * This value contains no user data, paths, tokens or credentials.
+ * This value contains no user data, paths, tokens or credentials. [galleryImportEnabled] defaults
+ * to true: on Android this maps straight to ML Kit's own `setGalleryImportAllowed`, so picking an
+ * existing photo still runs through ML Kit's own edge-detection/crop UI (issue #52's "without
+ * copying Google scanner UI" still holds -- nothing Toolly-built stands in for it). iOS's
+ * VisionKit-backed session doesn't read this yet; see AppleCaptureBridge.kt.
  */
 data class ScanConfig(
     val maxPages: Int = 10,
-    val galleryImportEnabled: Boolean = false,
+    val galleryImportEnabled: Boolean = true,
 ) {
     init {
         require(maxPages in MIN_PAGES..MAX_PAGES) {

@@ -15,6 +15,11 @@ class CaptureContractsTest {
     }
 
     @Test
+    fun galleryImportIsEnabledByDefault() {
+        assertEquals(true, ScanConfig().galleryImportEnabled)
+    }
+
+    @Test
     fun pageLimitRejectsUnboundedValues() {
         assertFailsWith<IllegalArgumentException> { ScanConfig(maxPages = 0) }
         assertFailsWith<IllegalArgumentException> { ScanConfig(maxPages = 51) }
