@@ -44,6 +44,12 @@
     <string name="export_share_pdf">PDF ರಫ್ತು ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="export_share_jpeg">JPEG ರಫ್ತು ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="share_document">ದಾಖಲೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="share">ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="document_detail_title">ದಾಖಲೆ</string>
+    <string name="document_options_description">ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳು</string>
+    <string name="date_scanned_label">ಸ್ಕ್ಯಾನ್ ಮಾಡಿದ ದಿನಾಂಕ</string>
+    <string name="pages_label">ಪುಟಗಳು</string>
+    <string name="scanned_caption">ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ • %1$s</string>
 
     <string name="library_search_hint">ಹೆಸರಿನಿಂದ ಹುಡುಕಿ</string>
     <string name="no_search_results">ಯಾವುದೇ ದಾಖಲೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ</string>

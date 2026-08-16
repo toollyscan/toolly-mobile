@@ -44,6 +44,12 @@
     <string name="export_share_pdf">PDF निर्यात करके साझा करें</string>
     <string name="export_share_jpeg">JPEG निर्यात करके साझा करें</string>
     <string name="share_document">दस्तावेज़ साझा करें</string>
+    <string name="share">साझा करें</string>
+    <string name="document_detail_title">दस्तावेज़</string>
+    <string name="document_options_description">और विकल्प</string>
+    <string name="date_scanned_label">स्कैन की तारीख</string>
+    <string name="pages_label">पेज</string>
+    <string name="scanned_caption">स्कैन किया गया • %1$s</string>
 
     <string name="library_search_hint">नाम से खोजें</string>
     <string name="no_search_results">कोई दस्तावेज़ मेल नहीं खाता</string>
