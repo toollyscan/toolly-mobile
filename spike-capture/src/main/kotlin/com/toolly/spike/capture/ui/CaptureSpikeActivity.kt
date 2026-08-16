@@ -46,6 +46,7 @@ import com.toolly.shared.capture.ScanError
 import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId as CaptureTemporaryAssetId
+import com.toolly.shared.edit.SignatureStrokes
 import com.toolly.spike.capture.export.AndroidDocumentExporter
 import com.toolly.spike.capture.export.AndroidShareIntentFactory
 import com.toolly.spike.capture.export.ExportQuality
@@ -287,6 +288,7 @@ class CaptureSpikeActivity : ComponentActivity() {
         format: DocumentExportFormat,
         quality: ExportQuality,
         watermarkText: String?,
+        signature: SignatureStrokes,
         delivery: DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) {
@@ -294,7 +296,7 @@ class CaptureSpikeActivity : ComponentActivity() {
             onResult(DocumentExportOutcome.Failure(ToollyErrorCode.CONFLICT))
             return
         }
-        pendingExport = PendingExport(document, quality, watermarkText, delivery, onResult)
+        pendingExport = PendingExport(document, quality, watermarkText, signature, delivery, onResult)
         when (format) {
             DocumentExportFormat.PDF -> {
                 pdfExportLauncher.launch(getString(R.string.export_pdf_file_name))
@@ -317,7 +319,13 @@ class CaptureSpikeActivity : ComponentActivity() {
                     retryableToollyFailure()
                 } else {
                     ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
-                        documentExporter.writePdf(request.document, output, request.quality, request.watermarkText)
+                        documentExporter.writePdf(
+                            request.document,
+                            output,
+                            request.quality,
+                            request.watermarkText,
+                            request.signature,
+                        )
                     }
                 }
             } catch (cancelled: CancellationException) {
@@ -349,7 +357,13 @@ class CaptureSpikeActivity : ComponentActivity() {
             return
         }
         lifecycleScope.launch {
-            val exported = exportJpegPages(request.document, destinationTree, request.quality, request.watermarkText)
+            val exported = exportJpegPages(
+                request.document,
+                destinationTree,
+                request.quality,
+                request.watermarkText,
+                request.signature,
+            )
             request.onResult(
                 if (
                     exported.outcome == DocumentExportOutcome.Success &&
@@ -442,8 +456,10 @@ class CaptureSpikeActivity : ComponentActivity() {
         destinationTree: Uri,
         quality: ExportQuality,
         watermarkText: String?,
+        signature: SignatureStrokes,
     ): JpegExportResult {
         val createdDocuments = mutableListOf<Uri>()
+        val lastOrdinal = document.pages.maxOfOrNull { it.ordinal }
         return try {
             val parent = DocumentsContract.buildDocumentUriUsingTree(
                 destinationTree,
@@ -469,7 +485,8 @@ class CaptureSpikeActivity : ComponentActivity() {
                         ToollyErrorCode.RETRYABLE,
                     )
                 val result = ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
-                    documentExporter.writeJpeg(page, output, quality, watermarkText)
+                    val pageSignature = if (page.ordinal == lastOrdinal) signature else emptyList()
+                    documentExporter.writeJpeg(page, output, quality, watermarkText, pageSignature)
                 }
                 if (result is ToollyResult.Failure) {
                     return cleanupFailedJpegExport(createdDocuments, result.error.code)
@@ -520,6 +537,7 @@ class CaptureSpikeActivity : ComponentActivity() {
         val document: DocumentDetails,
         val quality: ExportQuality,
         val watermarkText: String?,
+        val signature: SignatureStrokes,
         val delivery: DocumentExportDelivery,
         val onResult: (DocumentExportOutcome) -> Unit,
     )

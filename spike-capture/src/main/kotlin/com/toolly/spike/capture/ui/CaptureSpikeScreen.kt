@@ -84,10 +84,12 @@ import com.toolly.shared.capture.TemporaryAssetId
 import com.toolly.shared.edit.CropRegion
 import com.toolly.shared.edit.EnhancementMode
 import com.toolly.shared.edit.NormalizedPoint
+import com.toolly.shared.edit.SignatureStrokes
 import com.toolly.shared.ui.CropPageScreen
 import com.toolly.shared.ui.EnhancePageScreen
 import com.toolly.shared.ui.ExportBuilderScreen
 import com.toolly.shared.ui.ExportPrivacyCheckScreen
+import com.toolly.shared.ui.SignaturePadScreen
 import com.toolly.shared.ui.ToollyBackIcon
 import com.toolly.shared.ui.ToollyDocumentIcon
 import com.toolly.shared.ui.ToollyExportFormat
@@ -117,6 +119,7 @@ fun ToollyDocumentApp(
         DocumentExportFormat,
         ExportQuality,
         String?,
+        SignatureStrokes,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -341,47 +344,62 @@ fun ToollyDocumentApp(
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
                 var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
                 var watermarkText by remember(current.details) { mutableStateOf("") }
+                var signatureStrokes by remember(current.details) { mutableStateOf<SignatureStrokes>(emptyList()) }
+                var signing by remember(current.details) { mutableStateOf(false) }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
-                ExportBuilderScreen(
-                    format = format,
-                    onFormatChange = { format = it },
-                    quality = quality,
-                    onQualityChange = { quality = it },
-                    watermarkText = watermarkText,
-                    onWatermarkTextChange = { watermarkText = it },
-                    onContinue = {
-                        screen = AppScreen.ExportPrivacyCheck(
-                            current.details.filteredToPages(selectedOrdinals),
-                            format,
-                            quality,
-                            watermarkText.trim().ifBlank { null },
-                        )
-                    },
-                    continueEnabled = selectedOrdinals.isNotEmpty(),
-                    onBack = {
-                        message = null
-                        screen = AppScreen.Document(current.details)
-                    },
-                    documentTitle = current.details.summary.displayName ?: stringResource(R.string.scanned_document),
-                    totalPageCount = current.details.pages.size,
-                    previewContent = {
-                        DocumentPageGrid(
-                            pages = current.details.pages,
-                            loadAssetBitmap = loadDocumentAssetBitmap,
-                            modifier = Modifier.heightIn(max = 240.dp),
-                            selectedOrdinals = selectedOrdinals,
-                            onToggle = { page ->
-                                selectedOrdinals = if (page.ordinal in selectedOrdinals) {
-                                    selectedOrdinals - page.ordinal
-                                } else {
-                                    selectedOrdinals + page.ordinal
-                                }
-                            },
-                        )
-                    },
-                )
+                if (signing) {
+                    SignaturePadScreen(
+                        strokes = signatureStrokes,
+                        onStrokesChange = { signatureStrokes = it },
+                        onClear = { signatureStrokes = emptyList() },
+                        onDone = { signing = false },
+                        onBack = { signing = false },
+                    )
+                } else {
+                    ExportBuilderScreen(
+                        format = format,
+                        onFormatChange = { format = it },
+                        quality = quality,
+                        onQualityChange = { quality = it },
+                        watermarkText = watermarkText,
+                        onWatermarkTextChange = { watermarkText = it },
+                        hasSignature = signatureStrokes.isNotEmpty(),
+                        onSignDocument = { signing = true },
+                        onContinue = {
+                            screen = AppScreen.ExportPrivacyCheck(
+                                current.details.filteredToPages(selectedOrdinals),
+                                format,
+                                quality,
+                                watermarkText.trim().ifBlank { null },
+                                signatureStrokes,
+                            )
+                        },
+                        continueEnabled = selectedOrdinals.isNotEmpty(),
+                        onBack = {
+                            message = null
+                            screen = AppScreen.Document(current.details)
+                        },
+                        documentTitle = current.details.summary.displayName ?: stringResource(R.string.scanned_document),
+                        totalPageCount = current.details.pages.size,
+                        previewContent = {
+                            DocumentPageGrid(
+                                pages = current.details.pages,
+                                loadAssetBitmap = loadDocumentAssetBitmap,
+                                modifier = Modifier.heightIn(max = 240.dp),
+                                selectedOrdinals = selectedOrdinals,
+                                onToggle = { page ->
+                                    selectedOrdinals = if (page.ordinal in selectedOrdinals) {
+                                        selectedOrdinals - page.ordinal
+                                    } else {
+                                        selectedOrdinals + page.ordinal
+                                    }
+                                },
+                            )
+                        },
+                    )
+                }
             }
 
             is AppScreen.ExportPrivacyCheck -> {
@@ -398,6 +416,7 @@ fun ToollyDocumentApp(
                                 domainFormat,
                                 exportQuality,
                                 current.watermarkText,
+                                current.signature,
                                 DocumentExportDelivery.SAVE,
                             ) { outcome ->
                                 isWorking = false
@@ -417,6 +436,7 @@ fun ToollyDocumentApp(
                                 domainFormat,
                                 exportQuality,
                                 current.watermarkText,
+                                current.signature,
                                 DocumentExportDelivery.SHARE,
                             ) { outcome ->
                                 isWorking = false
@@ -452,6 +472,7 @@ fun SearchDocumentsScreen(
         DocumentExportFormat,
         ExportQuality,
         String?,
+        SignatureStrokes,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -586,45 +607,60 @@ fun SearchDocumentsScreen(
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
                 var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
                 var watermarkText by remember(current.details) { mutableStateOf("") }
+                var signatureStrokes by remember(current.details) { mutableStateOf<SignatureStrokes>(emptyList()) }
+                var signing by remember(current.details) { mutableStateOf(false) }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
-                ExportBuilderScreen(
-                    format = format,
-                    onFormatChange = { format = it },
-                    quality = quality,
-                    onQualityChange = { quality = it },
-                    watermarkText = watermarkText,
-                    onWatermarkTextChange = { watermarkText = it },
-                    onContinue = {
-                        screen = SearchResultScreen.ExportPrivacyCheck(
-                            current.details.filteredToPages(selectedOrdinals),
-                            format,
-                            quality,
-                            watermarkText.trim().ifBlank { null },
-                        )
-                    },
-                    continueEnabled = selectedOrdinals.isNotEmpty(),
-                    onBack = {
-                        message = null
-                        screen = SearchResultScreen.Document(current.details)
-                    },
-                    previewContent = {
-                        DocumentPageGrid(
-                            pages = current.details.pages,
-                            loadAssetBitmap = loadDocumentAssetBitmap,
-                            modifier = Modifier.heightIn(max = 240.dp),
-                            selectedOrdinals = selectedOrdinals,
-                            onToggle = { page ->
-                                selectedOrdinals = if (page.ordinal in selectedOrdinals) {
-                                    selectedOrdinals - page.ordinal
-                                } else {
-                                    selectedOrdinals + page.ordinal
-                                }
-                            },
-                        )
-                    },
-                )
+                if (signing) {
+                    SignaturePadScreen(
+                        strokes = signatureStrokes,
+                        onStrokesChange = { signatureStrokes = it },
+                        onClear = { signatureStrokes = emptyList() },
+                        onDone = { signing = false },
+                        onBack = { signing = false },
+                    )
+                } else {
+                    ExportBuilderScreen(
+                        format = format,
+                        onFormatChange = { format = it },
+                        quality = quality,
+                        onQualityChange = { quality = it },
+                        watermarkText = watermarkText,
+                        onWatermarkTextChange = { watermarkText = it },
+                        hasSignature = signatureStrokes.isNotEmpty(),
+                        onSignDocument = { signing = true },
+                        onContinue = {
+                            screen = SearchResultScreen.ExportPrivacyCheck(
+                                current.details.filteredToPages(selectedOrdinals),
+                                format,
+                                quality,
+                                watermarkText.trim().ifBlank { null },
+                                signatureStrokes,
+                            )
+                        },
+                        continueEnabled = selectedOrdinals.isNotEmpty(),
+                        onBack = {
+                            message = null
+                            screen = SearchResultScreen.Document(current.details)
+                        },
+                        previewContent = {
+                            DocumentPageGrid(
+                                pages = current.details.pages,
+                                loadAssetBitmap = loadDocumentAssetBitmap,
+                                modifier = Modifier.heightIn(max = 240.dp),
+                                selectedOrdinals = selectedOrdinals,
+                                onToggle = { page ->
+                                    selectedOrdinals = if (page.ordinal in selectedOrdinals) {
+                                        selectedOrdinals - page.ordinal
+                                    } else {
+                                        selectedOrdinals + page.ordinal
+                                    }
+                                },
+                            )
+                        },
+                    )
+                }
             }
 
             is SearchResultScreen.ExportPrivacyCheck -> {
@@ -641,6 +677,7 @@ fun SearchDocumentsScreen(
                                 domainFormat,
                                 exportQuality,
                                 current.watermarkText,
+                                current.signature,
                                 DocumentExportDelivery.SAVE,
                             ) { outcome ->
                                 isWorking = false
@@ -660,6 +697,7 @@ fun SearchDocumentsScreen(
                                 domainFormat,
                                 exportQuality,
                                 current.watermarkText,
+                                current.signature,
                                 DocumentExportDelivery.SHARE,
                             ) { outcome ->
                                 isWorking = false
@@ -802,6 +840,7 @@ private sealed interface SearchResultScreen {
         val format: ToollyExportFormat,
         val quality: ToollyExportQuality,
         val watermarkText: String?,
+        val signature: SignatureStrokes,
     ) : SearchResultScreen
 }
 
@@ -1525,5 +1564,6 @@ private sealed interface AppScreen {
         val format: ToollyExportFormat,
         val quality: ToollyExportQuality,
         val watermarkText: String?,
+        val signature: SignatureStrokes,
     ) : AppScreen
 }
