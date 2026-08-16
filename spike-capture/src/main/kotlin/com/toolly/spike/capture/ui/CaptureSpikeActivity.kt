@@ -9,6 +9,7 @@ import android.provider.DocumentsContract
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
+import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
 import androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.compose.material3.MaterialTheme
@@ -39,11 +40,16 @@ import com.toolly.spike.capture.R
 import com.toolly.spike.capture.camerax.CameraXDocumentScannerAdapter
 import com.toolly.shared.capture.DocumentScanner
 import com.toolly.shared.capture.FallbackDocumentScanner
+import com.toolly.shared.capture.ScanConfig
+import com.toolly.shared.capture.ScanError
+import com.toolly.shared.capture.ScanResult
+import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.export.AndroidDocumentExporter
 import com.toolly.spike.capture.export.AndroidShareIntentFactory
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
+import com.toolly.spike.capture.pdfimport.PdfPageRasterizer
 import com.toolly.spike.capture.vault.EncryptedDocumentRepository
 import java.util.UUID
 import java.util.concurrent.CancellationException
@@ -70,16 +76,26 @@ class CaptureSpikeActivity : ComponentActivity() {
         completeJpegExport(uri)
     }
 
+    private val pdfImportLauncher = registerForActivityResult(OpenDocument()) { uri ->
+        completePdfImport(uri)
+    }
+
     private lateinit var scanner: DocumentScanner
     private lateinit var temporaryStore: TemporaryScanStore
     private lateinit var documentRepository: EncryptedDocumentRepository
     private lateinit var documentExporter: AndroidDocumentExporter
+    private lateinit var pdfPageRasterizer: PdfPageRasterizer
     private lateinit var recentSearchesPreferences: SharedPreferences
     private var pendingExport: PendingExport? = null
+
+    // Only one PDF import can be in flight (the picker is modal), matching how mlKitAdapter's own
+    // single in-flight result callback works.
+    private var pendingPdfImportResult: ((ScanResult) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         temporaryStore = TemporaryScanStore(applicationContext)
+        pdfPageRasterizer = PdfPageRasterizer(applicationContext)
         documentRepository = EncryptedDocumentRepository(
             context = applicationContext,
             resolveTemporaryAsset = { rawId ->
@@ -141,6 +157,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                                     onResult(scanner.launch(config))
                                 }
                             },
+                            onImportPdf = ::launchPdfImport,
                             onLoadDocuments = { onResult ->
                                 lifecycleScope.launch {
                                     onResult(listDocuments())
@@ -335,6 +352,51 @@ class CaptureSpikeActivity : ComponentActivity() {
                 },
             )
         }
+    }
+
+    /**
+     * Lets a user import an existing PDF (not a Toolly-built scanner UI -- the system document
+     * picker) instead of only capturing live. Once rasterized and staged, an imported PDF's pages
+     * are indistinguishable from a live capture's: same [ScanResult]/[TemporaryAssetId]-based
+     * pipeline, same review/crop/enhance/save screens.
+     */
+    private fun launchPdfImport(onResult: (ScanResult) -> Unit) {
+        if (pendingPdfImportResult != null) {
+            onResult(ScanResult.Failure(ScanError.Busy))
+            return
+        }
+        pendingPdfImportResult = onResult
+        pdfImportLauncher.launch(arrayOf(PDF_MIME_TYPE))
+    }
+
+    private fun completePdfImport(uri: Uri?) {
+        val onResult = pendingPdfImportResult ?: return
+        pendingPdfImportResult = null
+        if (uri == null) {
+            onResult(ScanResult.Cancelled)
+            return
+        }
+        lifecycleScope.launch {
+            val rasterized = pdfPageRasterizer.rasterize(uri, ScanConfig.MAX_PAGES)
+            when (rasterized) {
+                null, is PdfPageRasterizer.RasterizeResult.TooManyPages -> {
+                    onResult(ScanResult.Failure(ScanError.InvalidResult))
+                }
+                is PdfPageRasterizer.RasterizeResult.Pages -> {
+                    val outcome = temporaryStore.importBitmaps(rasterized.bitmaps)
+                    rasterized.bitmaps.forEach { it.recycle() }
+                    onResult(outcome.toScanResult())
+                }
+            }
+        }
+    }
+
+    private fun TemporaryScanStore.ImportOutcome.toScanResult(): ScanResult = when (this) {
+        is TemporaryScanStore.ImportOutcome.Success ->
+            ScanResult.Success(assetIds.mapIndexed { index, assetId -> ScannedPage(index, assetId) })
+        is TemporaryScanStore.ImportOutcome.Partial ->
+            ScanResult.Success(assetIds.mapIndexed { index, assetId -> ScannedPage(index, assetId) })
+        TemporaryScanStore.ImportOutcome.Failure -> ScanResult.Failure(ScanError.StorageFailure)
     }
 
     private suspend fun exportJpegPages(

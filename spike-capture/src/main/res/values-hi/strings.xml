@@ -4,6 +4,8 @@
     <string name="library_subtitle">आपके दस्तावेज़ ऑफ़लाइन उपलब्ध रहते हैं।</string>
     <string name="working">काम जारी है</string>
     <string name="scan_document">दस्तावेज़ स्कैन करें</string>
+    <string name="import_pdf">PDF आयात करें</string>
+    <string name="pdf_import_failed">वह PDF आयात नहीं हो सका। फ़ाइल जाँचें और फिर से प्रयास करें।</string>
     <string name="no_documents">अभी कोई दस्तावेज़ नहीं है</string>
     <string name="scanned_document">स्कैन किया गया दस्तावेज़</string>
     <plurals name="page_count">
