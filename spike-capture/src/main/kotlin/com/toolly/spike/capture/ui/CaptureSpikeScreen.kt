@@ -90,7 +90,9 @@ import com.toolly.shared.ui.ExportPrivacyCheckScreen
 import com.toolly.shared.ui.ToollyBackIcon
 import com.toolly.shared.ui.ToollyDocumentIcon
 import com.toolly.shared.ui.ToollyExportFormat
+import com.toolly.shared.ui.ToollyExportQuality
 import com.toolly.shared.ui.ToollySearchIcon
+import com.toolly.spike.capture.export.ExportQuality
 import java.io.File
 import java.text.DateFormat
 import java.util.Date
@@ -111,6 +113,7 @@ fun ToollyDocumentApp(
     onExportDocument: (
         DocumentDetails,
         DocumentExportFormat,
+        ExportQuality,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -317,16 +320,20 @@ fun ToollyDocumentApp(
 
             is AppScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
                 ExportBuilderScreen(
                     format = format,
                     onFormatChange = { format = it },
+                    quality = quality,
+                    onQualityChange = { quality = it },
                     onContinue = {
                         screen = AppScreen.ExportPrivacyCheck(
                             current.details.filteredToPages(selectedOrdinals),
                             format,
+                            quality,
                         )
                     },
                     continueEnabled = selectedOrdinals.isNotEmpty(),
@@ -356,13 +363,19 @@ fun ToollyDocumentApp(
 
             is AppScreen.ExportPrivacyCheck -> {
                 val domainFormat = current.format.toDomainFormat()
+                val exportQuality = current.quality.toExportQuality()
                 ExportPrivacyCheckScreen(
                     busy = isWorking,
                     onSaveToDevice = {
                         if (!isWorking) {
                             isWorking = true
                             message = null
-                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SAVE) { outcome ->
+                            onExportDocument(
+                                current.details,
+                                domainFormat,
+                                exportQuality,
+                                DocumentExportDelivery.SAVE,
+                            ) { outcome ->
                                 isWorking = false
                                 message = UiMessage(exportOutcomeMessage(outcome))
                                 if (outcome is DocumentExportOutcome.Success) {
@@ -375,7 +388,12 @@ fun ToollyDocumentApp(
                         if (!isWorking) {
                             isWorking = true
                             message = null
-                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SHARE) { outcome ->
+                            onExportDocument(
+                                current.details,
+                                domainFormat,
+                                exportQuality,
+                                DocumentExportDelivery.SHARE,
+                            ) { outcome ->
                                 isWorking = false
                                 message = UiMessage(exportOutcomeMessage(outcome))
                                 if (outcome is DocumentExportOutcome.Success) {
@@ -407,6 +425,7 @@ fun SearchDocumentsScreen(
     onExportDocument: (
         DocumentDetails,
         DocumentExportFormat,
+        ExportQuality,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -539,16 +558,20 @@ fun SearchDocumentsScreen(
 
             is SearchResultScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
+                var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
                 ExportBuilderScreen(
                     format = format,
                     onFormatChange = { format = it },
+                    quality = quality,
+                    onQualityChange = { quality = it },
                     onContinue = {
                         screen = SearchResultScreen.ExportPrivacyCheck(
                             current.details.filteredToPages(selectedOrdinals),
                             format,
+                            quality,
                         )
                     },
                     continueEnabled = selectedOrdinals.isNotEmpty(),
@@ -576,13 +599,19 @@ fun SearchDocumentsScreen(
 
             is SearchResultScreen.ExportPrivacyCheck -> {
                 val domainFormat = current.format.toDomainFormat()
+                val exportQuality = current.quality.toExportQuality()
                 ExportPrivacyCheckScreen(
                     busy = isWorking,
                     onSaveToDevice = {
                         if (!isWorking) {
                             isWorking = true
                             message = null
-                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SAVE) { outcome ->
+                            onExportDocument(
+                                current.details,
+                                domainFormat,
+                                exportQuality,
+                                DocumentExportDelivery.SAVE,
+                            ) { outcome ->
                                 isWorking = false
                                 message = UiMessage(exportOutcomeMessage(outcome))
                                 if (outcome is DocumentExportOutcome.Success) {
@@ -595,7 +624,12 @@ fun SearchDocumentsScreen(
                         if (!isWorking) {
                             isWorking = true
                             message = null
-                            onExportDocument(current.details, domainFormat, DocumentExportDelivery.SHARE) { outcome ->
+                            onExportDocument(
+                                current.details,
+                                domainFormat,
+                                exportQuality,
+                                DocumentExportDelivery.SHARE,
+                            ) { outcome ->
                                 isWorking = false
                                 message = UiMessage(exportOutcomeMessage(outcome))
                                 if (outcome is DocumentExportOutcome.Success) {
@@ -731,12 +765,22 @@ private sealed interface SearchResultScreen {
     data object Results : SearchResultScreen
     data class Document(val details: DocumentDetails) : SearchResultScreen
     data class ExportBuilder(val details: DocumentDetails) : SearchResultScreen
-    data class ExportPrivacyCheck(val details: DocumentDetails, val format: ToollyExportFormat) : SearchResultScreen
+    data class ExportPrivacyCheck(
+        val details: DocumentDetails,
+        val format: ToollyExportFormat,
+        val quality: ToollyExportQuality,
+    ) : SearchResultScreen
 }
 
 private fun ToollyExportFormat.toDomainFormat(): DocumentExportFormat = when (this) {
     ToollyExportFormat.PDF -> DocumentExportFormat.PDF
     ToollyExportFormat.JPEG -> DocumentExportFormat.JPEG
+}
+
+private fun ToollyExportQuality.toExportQuality(): ExportQuality = when (this) {
+    ToollyExportQuality.SMALL -> ExportQuality.SMALL
+    ToollyExportQuality.BALANCED -> ExportQuality.BALANCED
+    ToollyExportQuality.BEST -> ExportQuality.BEST
 }
 
 /**
@@ -1382,5 +1426,9 @@ private sealed interface AppScreen {
     data class CapturePreview(val pages: List<ScannedPage>) : AppScreen
     data class Document(val details: DocumentDetails) : AppScreen
     data class ExportBuilder(val details: DocumentDetails) : AppScreen
-    data class ExportPrivacyCheck(val details: DocumentDetails, val format: ToollyExportFormat) : AppScreen
+    data class ExportPrivacyCheck(
+        val details: DocumentDetails,
+        val format: ToollyExportFormat,
+        val quality: ToollyExportQuality,
+    ) : AppScreen
 }

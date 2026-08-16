@@ -1,6 +1,7 @@
 package com.toolly.spike.capture.export
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
@@ -11,11 +12,24 @@ import com.toolly.domain.model.DocumentPage
 import com.toolly.foundation.ToollyError
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
+import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.util.concurrent.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+
+/**
+ * Export quality tiers (wireframe `5.1`'s Small/Balanced/Best chips). Each tier re-encodes every
+ * page as a JPEG at [jpegQuality] before embedding it -- [PdfDocument]'s canvas draws bitmaps
+ * uncompressed otherwise, so this is the only way "quality" actually changes the output file size.
+ * [downscale] additionally shrinks pixel dimensions for the smaller tiers.
+ */
+internal enum class ExportQuality(val downscale: Float, val jpegQuality: Int) {
+    SMALL(downscale = 0.5f, jpegQuality = 50),
+    BALANCED(downscale = 0.75f, jpegQuality = 75),
+    BEST(downscale = 1f, jpegQuality = 92),
+}
 
 /**
  * Android platform-only PDF/JPEG writer.
@@ -29,15 +43,17 @@ internal class AndroidDocumentExporter(
     suspend fun writePdf(
         document: DocumentDetails,
         destination: OutputStream,
+        quality: ExportQuality = ExportQuality.BEST,
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
         val pdf = PdfDocument()
         try {
             for (page in document.pages.sortedBy { it.ordinal }) {
                 coroutineContext.ensureActive()
-                val bitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
+                val loadedBitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
                     is ToollyResult.Success -> loaded.value
                     is ToollyResult.Failure -> return@withContext loaded
                 }
+                val bitmap = recompress(loadedBitmap, quality)
                 try {
                     val pageSize = pageSize(bitmap)
                     val pdfPage = pdf.startPage(
@@ -75,17 +91,56 @@ internal class AndroidDocumentExporter(
         }
     }
 
+    /**
+     * Downscales (if [ExportQuality.downscale] &lt; 1) then round-trips through a real JPEG
+     * encode/decode at [ExportQuality.jpegQuality] -- genuine lossy compression, not a cosmetic
+     * label. Recycles [source]; the returned bitmap is always a new instance the caller must
+     * recycle itself.
+     */
+    private fun recompress(source: Bitmap, quality: ExportQuality): Bitmap {
+        val scaled = if (quality.downscale < 1f) {
+            val width = (source.width * quality.downscale).toInt().coerceAtLeast(1)
+            val height = (source.height * quality.downscale).toInt().coerceAtLeast(1)
+            Bitmap.createScaledBitmap(source, width, height, true).also {
+                if (it !== source) source.recycle()
+            }
+        } else {
+            source
+        }
+        val encoded = ByteArrayOutputStream().use { buffer ->
+            scaled.compress(Bitmap.CompressFormat.JPEG, quality.jpegQuality, buffer)
+            buffer.toByteArray()
+        }
+        val recompressed = BitmapFactory.decodeByteArray(encoded, 0, encoded.size)
+        return if (recompressed != null) {
+            scaled.recycle()
+            recompressed
+        } else {
+            scaled
+        }
+    }
+
     suspend fun writeJpeg(
         page: DocumentPage,
         destination: OutputStream,
+        quality: ExportQuality = ExportQuality.BEST,
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
-        val bitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
+        val loadedBitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
             is ToollyResult.Success -> loaded.value
             is ToollyResult.Failure -> return@withContext loaded
         }
+        val bitmap = if (quality.downscale < 1f) {
+            val width = (loadedBitmap.width * quality.downscale).toInt().coerceAtLeast(1)
+            val height = (loadedBitmap.height * quality.downscale).toInt().coerceAtLeast(1)
+            Bitmap.createScaledBitmap(loadedBitmap, width, height, true).also {
+                if (it !== loadedBitmap) loadedBitmap.recycle()
+            }
+        } else {
+            loadedBitmap
+        }
         try {
             coroutineContext.ensureActive()
-            if (!bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, destination)) {
+            if (!bitmap.compress(Bitmap.CompressFormat.JPEG, quality.jpegQuality, destination)) {
                 return@withContext retryableFailure()
             }
             destination.flush()
@@ -133,6 +188,5 @@ internal class AndroidDocumentExporter(
         const val A4_SHORT_EDGE_POINTS = 595
         const val A4_LONG_EDGE_POINTS = 842
         const val PAGE_MARGIN_POINTS = 24f
-        const val JPEG_QUALITY = 95
     }
 }

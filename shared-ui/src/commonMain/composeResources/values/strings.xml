@@ -164,6 +164,10 @@
     <string name="export_builder_description">Choose a format. Your document stays encrypted until you confirm.</string>
     <string name="export_preview_caption">Preview shows the exact layout and quality before export.</string>
     <string name="export_format_label">Format</string>
+    <string name="export_quality_label">Quality</string>
+    <string name="export_quality_small">Small</string>
+    <string name="export_quality_balanced">Balanced</string>
+    <string name="export_quality_best">Best</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">Export securely</string>
