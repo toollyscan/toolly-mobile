@@ -4,6 +4,8 @@
     <string name="library_subtitle">Your documents stay available offline.</string>
     <string name="working">Working</string>
     <string name="scan_document">Scan document</string>
+    <string name="import_pdf">Import PDF</string>
+    <string name="pdf_import_failed">Couldn\'t import that PDF. Check the file and try again.</string>
     <string name="no_documents">No documents yet</string>
     <string name="scanned_document">Scanned document</string>
     <plurals name="page_count">

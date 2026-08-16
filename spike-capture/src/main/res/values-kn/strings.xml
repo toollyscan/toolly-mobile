@@ -4,6 +4,8 @@
     <string name="library_subtitle">ನಿಮ್ಮ ದಾಖಲೆಗಳು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿಯೂ ಲಭ್ಯವಿರುತ್ತವೆ.</string>
     <string name="working">ಕೆಲಸ ನಡೆಯುತ್ತಿದೆ</string>
     <string name="scan_document">ದಾಖಲೆಯನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
+    <string name="import_pdf">PDF ಆಮದು ಮಾಡಿ</string>
+    <string name="pdf_import_failed">ಆ PDF ಅನ್ನು ಆಮದು ಮಾಡಲಾಗಲಿಲ್ಲ. ಫೈಲ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="no_documents">ಇನ್ನೂ ಯಾವುದೇ ದಾಖಲೆಗಳಿಲ್ಲ</string>
     <string name="scanned_document">ಸ್ಕ್ಯಾನ್ ಮಾಡಿದ ದಾಖಲೆ</string>
     <plurals name="page_count">

@@ -1,6 +1,7 @@
 package com.toolly.spike.capture.mlkit
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import com.toolly.shared.capture.PartialCaptureReason
 import com.toolly.shared.capture.TemporaryAssetId
@@ -44,6 +45,58 @@ class TemporaryScanStore(context: Context) : AutoCloseable {
             }
         }
         return ImportOutcome.Success(imported)
+    }
+
+    /**
+     * Same staging directory/asset-ID scheme as [importPages], for pages that already exist as
+     * decoded [Bitmap]s rather than a content [Uri] to copy -- used by PDF import, which rasterizes
+     * each PDF page locally before it can be treated like any other captured page (review, crop,
+     * enhance, save all reuse the exact same [TemporaryAssetId]-based pipeline from there).
+     */
+    fun importBitmaps(bitmaps: List<Bitmap>): ImportOutcome {
+        val imported = mutableListOf<TemporaryAssetId>()
+        for (bitmap in bitmaps) {
+            try {
+                imported += importBitmap(bitmap)
+            } catch (failure: PageImportException) {
+                return if (imported.isEmpty()) {
+                    ImportOutcome.Failure
+                } else {
+                    ImportOutcome.Partial(imported, failure.reason)
+                }
+            }
+        }
+        return ImportOutcome.Success(imported)
+    }
+
+    private fun importBitmap(bitmap: Bitmap): TemporaryAssetId {
+        val assetId = TemporaryAssetId(UUID.randomUUID().toString().replace("-", "").lowercase())
+        val pending = File(directory, "${assetId.value}.part")
+        val destination = File(directory, "${assetId.value}.jpg")
+        try {
+            FileOutputStream(pending).use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output)) {
+                    "JPEG encode failed"
+                }
+                output.fd.sync()
+            }
+            if (!pending.renameTo(destination)) {
+                throw PageImportException(PartialCaptureReason.STORAGE_WRITE_FAILED)
+            }
+            return assetId
+        } catch (failure: PageImportException) {
+            pending.delete()
+            destination.delete()
+            throw failure
+        } catch (failure: IllegalStateException) {
+            pending.delete()
+            destination.delete()
+            throw PageImportException(PartialCaptureReason.STORAGE_WRITE_FAILED)
+        } catch (failure: IOException) {
+            pending.delete()
+            destination.delete()
+            throw PageImportException(PartialCaptureReason.STORAGE_WRITE_FAILED)
+        }
     }
 
     fun resolve(assetId: TemporaryAssetId): File? = synchronized(lock) {
@@ -151,6 +204,7 @@ class TemporaryScanStore(context: Context) : AutoCloseable {
         const val COPY_BUFFER_BYTES = 16 * 1024
         const val MAX_PAGE_BYTES = 25L * 1024L * 1024L
         const val MIN_JPEG_BYTES = 4L
+        const val JPEG_QUALITY = 92
         const val JPEG_MARKER = 0xFF
         const val JPEG_SOI = 0xD8
         const val JPEG_EOI = 0xD9

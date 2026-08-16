@@ -104,6 +104,7 @@ import java.util.Date
 @Composable
 fun ToollyDocumentApp(
     onLaunchCapture: (ScanConfig, onResult: (ScanResult) -> Unit) -> Unit,
+    onImportPdf: (onResult: (ScanResult) -> Unit) -> Unit,
     onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
     onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
@@ -173,6 +174,21 @@ fun ToollyDocumentApp(
         }
     }
 
+    fun launchPdfImport() {
+        if (!isWorking && screen == AppScreen.Library) {
+            isWorking = true
+            message = null
+            onImportPdf { result ->
+                isWorking = false
+                when (result) {
+                    is ScanResult.Success -> screen = AppScreen.CapturePreview(result.pages)
+                    ScanResult.Cancelled -> { /* user backed out of the file picker */ }
+                    is ScanResult.Failure -> message = UiMessage(pdfImportErrorMessage(result.error))
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         refreshLibrary()
     }
@@ -194,6 +210,7 @@ fun ToollyDocumentApp(
                 isWorking = isWorking,
                 message = message,
                 onScan = ::launchCapture,
+                onImportPdf = ::launchPdfImport,
                 onOpen = { documentId ->
                     isWorking = true
                     onOpenDocument(documentId) { result ->
@@ -790,6 +807,7 @@ private fun LibraryScreen(
     isWorking: Boolean,
     message: UiMessage?,
     onScan: () -> Unit,
+    onImportPdf: () -> Unit,
     onOpen: (DocumentId) -> Unit,
 ) {
     val expanded = LocalConfiguration.current.screenWidthDp >= 600
@@ -831,6 +849,13 @@ private fun LibraryScreen(
                 } else {
                     Text(stringResource(R.string.scan_document))
                 }
+            }
+            OutlinedButton(
+                onClick = onImportPdf,
+                enabled = !isWorking,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.import_pdf))
             }
             StatusMessage(message)
             if (documents.isNotEmpty()) {
@@ -1308,6 +1333,17 @@ private fun exportOutcomeMessage(outcome: DocumentExportOutcome): Int = when (ou
     DocumentExportOutcome.Success -> R.string.document_exported
     DocumentExportOutcome.Cancelled -> R.string.export_cancelled
     is DocumentExportOutcome.Failure -> toollyErrorMessage(outcome.code)
+}
+
+/**
+ * Deliberately collapses every [ScanResult.Failure] cause (bad file, too many pages, storage
+ * failure) into one message -- matching [captureErrorMessage]'s own coarseness -- rather than
+ * inventing per-cause copy for a picker flow with no equivalent wireframe to match.
+ */
+@StringRes
+private fun pdfImportErrorMessage(error: ScanError): Int = when (error) {
+    is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
+    else -> R.string.pdf_import_failed
 }
 
 @StringRes
