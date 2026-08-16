@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -210,7 +211,31 @@ internal fun ToollyOtpField(
     }
 }
 
-/** Label + description + trailing toggle, used by the backup-preferences list (`6.2 Backup choice`). */
+/** Leading icon/label/description + trailing radio dot, used by the backup-provider picker (`6.2 Backup choice`). */
+@Composable
+internal fun ToollyRadioRow(
+    title: String,
+    description: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ToollyCard(modifier = modifier, onClick = onClick) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ToollySpacing.Medium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RadioButton(selected = selected, onClick = onClick)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(description, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/** Label + description + trailing toggle, used by the backup-policy toggle list (`6.4 Backup policy`). */
 @Composable
 internal fun ToollySwitchRow(
     title: String,

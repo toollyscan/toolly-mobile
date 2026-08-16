@@ -14,6 +14,7 @@ import com.toolly.shared.capture.ScanConfig
 import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.model.BackupPreferenceKind
+import com.toolly.shared.model.BackupProvider
 import com.toolly.shared.model.DocumentUiId
 import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyDestination
@@ -242,10 +243,12 @@ fun MainViewController(
             override fun authStepBack() = dispatch(ToollyUiEvent.AuthStepBackRequested)
             override fun openPrivacyCenter() = dispatch(ToollyUiEvent.PrivacyCenterOpened)
             override fun openBackupSettings() = dispatch(ToollyUiEvent.BackupSettingsOpened)
+            override fun selectBackupProvider(provider: BackupProvider) =
+                dispatch(ToollyUiEvent.BackupProviderSelected(provider))
+            override fun openBackupPolicy() = dispatch(ToollyUiEvent.BackupPolicyOpened)
             override fun setBackupPreference(kind: BackupPreferenceKind, enabled: Boolean) =
                 dispatch(ToollyUiEvent.BackupPreferenceToggled(kind, enabled))
-            override fun setBackupEnabled(enabled: Boolean) =
-                dispatch(ToollyUiEvent.BackupEnabledChanged(enabled))
+            override fun confirmBackupPolicy() = dispatch(ToollyUiEvent.BackupPolicyConfirmed)
 
             private fun select(destination: ToollyDestination) {
                 dispatch(ToollyUiEvent.MainDestinationSelected(destination))

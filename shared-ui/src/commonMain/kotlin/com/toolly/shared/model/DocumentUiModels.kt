@@ -68,22 +68,33 @@ enum class ToollyDestination {
     DOCUMENT_VIEWER,
     PRIVACY_CENTER,
     BACKUP_CHOICE,
+    BACKUP_POLICY,
 }
 
-enum class BackupPreferenceKind { WIFI_ONLY, WHILE_CHARGING, INCLUDE_ORIGINALS, END_TO_END_ENCRYPTION }
+enum class BackupProvider { ICLOUD, LOCAL_ONLY, GOOGLE_DRIVE }
+
+enum class BackupPreferenceKind {
+    AUTO_BACKUP_NEW_SCANS,
+    WIFI_ONLY,
+    END_TO_END_ENCRYPTION,
+    DELETE_CLOUD_COPY_ON_LOCAL_DELETE,
+}
 
 /**
- * Local, presentation-only backup preferences (wireframe `6.2/6.4 Backup choice`). Nothing here is
- * persisted or sent anywhere -- Phase 5 (optional cloud backup) is blocked until Phase 4
- * (authentication) is complete and its own service-processing approvals land (ROADMAP.md). Toggling
- * these only changes what the Backup Choice screen displays.
+ * Local, presentation-only backup preferences, split across two distinct wireframe screens:
+ * `6.2 Backup choice` (which provider would be used) and `6.4 Backup policy` (how backup would
+ * behave). Nothing here is persisted or sent anywhere -- Phase 5 (optional cloud backup) is
+ * blocked until Phase 4 (authentication) is complete and its own service-processing approvals
+ * land (ROADMAP.md). [provider]/the toggles only change what these two screens display; [enabled]
+ * only flips true once the user completes both steps (there is no real backup to enable yet).
  */
 data class BackupPreferences(
     val enabled: Boolean = false,
+    val provider: BackupProvider = BackupProvider.ICLOUD,
+    val autoBackupNewScans: Boolean = true,
     val wifiOnly: Boolean = true,
-    val whileCharging: Boolean = true,
-    val includeOriginals: Boolean = false,
-    val endToEndEncryption: Boolean = false,
+    val endToEndEncryption: Boolean = true,
+    val deleteCloudCopyOnLocalDelete: Boolean = false,
 )
 
 sealed interface ToollyUiEvent {
@@ -117,8 +128,12 @@ sealed interface ToollyUiEvent {
 
     data object PrivacyCenterOpened : ToollyUiEvent
     data object BackupSettingsOpened : ToollyUiEvent
+    data class BackupProviderSelected(val provider: BackupProvider) : ToollyUiEvent
+    data object BackupPolicyOpened : ToollyUiEvent
     data class BackupPreferenceToggled(val kind: BackupPreferenceKind, val enabled: Boolean) : ToollyUiEvent
-    data class BackupEnabledChanged(val enabled: Boolean) : ToollyUiEvent
+
+    /** Dispatched by the `6.4 Backup policy` screen's finishing action; commits [BackupPreferences.enabled]. */
+    data object BackupPolicyConfirmed : ToollyUiEvent
     data object NavigateBack : ToollyUiEvent
 
     /** A real capture just finished with [pageCount] pages; enters the review screen. */
@@ -174,6 +189,7 @@ data class ToollyUiState(
             ToollyDestination.DOCUMENT_VIEWER,
             ToollyDestination.PRIVACY_CENTER,
             ToollyDestination.BACKUP_CHOICE,
+            ToollyDestination.BACKUP_POLICY,
         )
 
         fun firstLaunch(
@@ -501,30 +517,49 @@ fun reduceToollyUiState(
         }
     }
 
-    is ToollyUiEvent.BackupPreferenceToggled -> {
+    is ToollyUiEvent.BackupProviderSelected -> {
         if (state.destination != ToollyDestination.BACKUP_CHOICE) {
+            state
+        } else {
+            state.copy(backupPreferences = state.backupPreferences.copy(provider = event.provider))
+        }
+    }
+
+    ToollyUiEvent.BackupPolicyOpened -> {
+        if (state.destination != ToollyDestination.BACKUP_CHOICE) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.BACKUP_POLICY)
+        }
+    }
+
+    is ToollyUiEvent.BackupPreferenceToggled -> {
+        if (state.destination != ToollyDestination.BACKUP_POLICY) {
             state
         } else {
             state.copy(
                 backupPreferences = when (event.kind) {
+                    BackupPreferenceKind.AUTO_BACKUP_NEW_SCANS ->
+                        state.backupPreferences.copy(autoBackupNewScans = event.enabled)
                     BackupPreferenceKind.WIFI_ONLY ->
                         state.backupPreferences.copy(wifiOnly = event.enabled)
-                    BackupPreferenceKind.WHILE_CHARGING ->
-                        state.backupPreferences.copy(whileCharging = event.enabled)
-                    BackupPreferenceKind.INCLUDE_ORIGINALS ->
-                        state.backupPreferences.copy(includeOriginals = event.enabled)
                     BackupPreferenceKind.END_TO_END_ENCRYPTION ->
                         state.backupPreferences.copy(endToEndEncryption = event.enabled)
+                    BackupPreferenceKind.DELETE_CLOUD_COPY_ON_LOCAL_DELETE ->
+                        state.backupPreferences.copy(deleteCloudCopyOnLocalDelete = event.enabled)
                 },
             )
         }
     }
 
-    is ToollyUiEvent.BackupEnabledChanged -> {
-        if (state.destination != ToollyDestination.BACKUP_CHOICE) {
+    ToollyUiEvent.BackupPolicyConfirmed -> {
+        if (state.destination != ToollyDestination.BACKUP_POLICY) {
             state
         } else {
-            state.copy(backupPreferences = state.backupPreferences.copy(enabled = event.enabled))
+            state.copy(
+                destination = ToollyDestination.PRIVACY_CENTER,
+                backupPreferences = state.backupPreferences.copy(enabled = true),
+            )
         }
     }
 
@@ -532,6 +567,7 @@ fun reduceToollyUiState(
         ToollyDestination.DOCUMENT_VIEWER -> state.copy(destination = ToollyDestination.LIBRARY)
         ToollyDestination.PRIVACY_CENTER -> state.copy(destination = ToollyDestination.PROFILE)
         ToollyDestination.BACKUP_CHOICE -> state.copy(destination = ToollyDestination.PRIVACY_CENTER)
+        ToollyDestination.BACKUP_POLICY -> state.copy(destination = ToollyDestination.BACKUP_CHOICE)
         else -> state
     }
 
@@ -593,6 +629,8 @@ interface ToollyUiActions {
     fun authStepBack()
     fun openPrivacyCenter()
     fun openBackupSettings()
+    fun selectBackupProvider(provider: BackupProvider)
+    fun openBackupPolicy()
     fun setBackupPreference(kind: BackupPreferenceKind, enabled: Boolean)
-    fun setBackupEnabled(enabled: Boolean)
+    fun confirmBackupPolicy()
 }

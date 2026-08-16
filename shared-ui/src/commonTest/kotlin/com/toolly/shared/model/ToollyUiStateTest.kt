@@ -402,17 +402,42 @@ class ToollyUiStateTest {
         reduceToollyUiState(atHome(), ToollyUiEvent.MainDestinationSelected(ToollyDestination.PROFILE))
 
     @Test
-    fun privacyCenterAndBackupChoiceAreReachableFromProfileAndUnwindWithNavigateBack() {
+    fun privacyCenterAndBackupChoiceAndBackupPolicyAreReachableFromProfileAndUnwindWithNavigateBack() {
         val profile = atProfile()
         val privacyCenter = reduceToollyUiState(profile, ToollyUiEvent.PrivacyCenterOpened)
         val backupChoice = reduceToollyUiState(privacyCenter, ToollyUiEvent.BackupSettingsOpened)
-        val backToPrivacyCenter = reduceToollyUiState(backupChoice, ToollyUiEvent.NavigateBack)
+        val backupPolicy = reduceToollyUiState(backupChoice, ToollyUiEvent.BackupPolicyOpened)
+        val backToBackupChoice = reduceToollyUiState(backupPolicy, ToollyUiEvent.NavigateBack)
+        val backToPrivacyCenter = reduceToollyUiState(backToBackupChoice, ToollyUiEvent.NavigateBack)
         val backToProfile = reduceToollyUiState(backToPrivacyCenter, ToollyUiEvent.NavigateBack)
 
         assertEquals(ToollyDestination.PRIVACY_CENTER, privacyCenter.destination)
         assertEquals(ToollyDestination.BACKUP_CHOICE, backupChoice.destination)
+        assertEquals(ToollyDestination.BACKUP_POLICY, backupPolicy.destination)
+        assertEquals(ToollyDestination.BACKUP_CHOICE, backToBackupChoice.destination)
         assertEquals(ToollyDestination.PRIVACY_CENTER, backToPrivacyCenter.destination)
         assertEquals(ToollyDestination.PROFILE, backToProfile.destination)
+    }
+
+    @Test
+    fun selectingABackupProviderOnlyWorksFromBackupChoice() {
+        val backupChoice = reduceToollyUiState(
+            reduceToollyUiState(atProfile(), ToollyUiEvent.PrivacyCenterOpened),
+            ToollyUiEvent.BackupSettingsOpened,
+        )
+
+        val googleDriveSelected = reduceToollyUiState(
+            backupChoice,
+            ToollyUiEvent.BackupProviderSelected(BackupProvider.GOOGLE_DRIVE),
+        )
+        assertEquals(BackupProvider.GOOGLE_DRIVE, googleDriveSelected.backupPreferences.provider)
+
+        val profile = atProfile()
+        val unchanged = reduceToollyUiState(
+            profile,
+            ToollyUiEvent.BackupProviderSelected(BackupProvider.LOCAL_ONLY),
+        )
+        assertEquals(profile, unchanged)
     }
 
     @Test
@@ -432,14 +457,15 @@ class ToollyUiStateTest {
     }
 
     @Test
-    fun backupPreferencesDefaultMatchesWireframeAndOnlyToggleFromBackupChoice() {
+    fun backupPreferencesDefaultMatchesWireframeAndOnlyToggleFromBackupPolicy() {
         val defaults = ToollyUiState.empty().backupPreferences
 
         assertFalse(defaults.enabled)
+        assertEquals(BackupProvider.ICLOUD, defaults.provider)
+        assertTrue(defaults.autoBackupNewScans)
         assertTrue(defaults.wifiOnly)
-        assertTrue(defaults.whileCharging)
-        assertFalse(defaults.includeOriginals)
-        assertFalse(defaults.endToEndEncryption)
+        assertTrue(defaults.endToEndEncryption)
+        assertFalse(defaults.deleteCloudCopyOnLocalDelete)
 
         val profile = atProfile()
         val unchanged = reduceToollyUiState(
@@ -447,30 +473,44 @@ class ToollyUiStateTest {
             ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.WIFI_ONLY, false),
         )
         assertEquals(profile, unchanged)
+
+        // Also a no-op from BACKUP_CHOICE (6.2) -- toggles only apply on BACKUP_POLICY (6.4).
+        val backupChoice = reduceToollyUiState(
+            reduceToollyUiState(profile, ToollyUiEvent.PrivacyCenterOpened),
+            ToollyUiEvent.BackupSettingsOpened,
+        )
+        assertEquals(
+            backupChoice,
+            reduceToollyUiState(backupChoice, ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.WIFI_ONLY, false)),
+        )
     }
 
     @Test
-    fun togglingEachBackupPreferenceOnlyChangesThatPreference() {
-        val backupChoice = reduceToollyUiState(
-            reduceToollyUiState(atProfile(), ToollyUiEvent.PrivacyCenterOpened),
-            ToollyUiEvent.BackupSettingsOpened,
+    fun togglingEachBackupPreferenceOnlyChangesThatPreferenceAndConfirmEnablesBackup() {
+        val backupPolicy = reduceToollyUiState(
+            reduceToollyUiState(
+                reduceToollyUiState(atProfile(), ToollyUiEvent.PrivacyCenterOpened),
+                ToollyUiEvent.BackupSettingsOpened,
+            ),
+            ToollyUiEvent.BackupPolicyOpened,
         )
 
         val wifiOff = reduceToollyUiState(
-            backupChoice,
+            backupPolicy,
             ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.WIFI_ONLY, false),
         )
-        val originalsOn = reduceToollyUiState(
+        val deleteCloudCopyOn = reduceToollyUiState(
             wifiOff,
-            ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.INCLUDE_ORIGINALS, true),
+            ToollyUiEvent.BackupPreferenceToggled(BackupPreferenceKind.DELETE_CLOUD_COPY_ON_LOCAL_DELETE, true),
         )
-        val enabled = reduceToollyUiState(originalsOn, ToollyUiEvent.BackupEnabledChanged(true))
+        val confirmed = reduceToollyUiState(deleteCloudCopyOn, ToollyUiEvent.BackupPolicyConfirmed)
 
-        assertFalse(enabled.backupPreferences.wifiOnly)
-        assertTrue(enabled.backupPreferences.includeOriginals)
-        assertTrue(enabled.backupPreferences.whileCharging)
-        assertFalse(enabled.backupPreferences.endToEndEncryption)
-        assertTrue(enabled.backupPreferences.enabled)
+        assertFalse(confirmed.backupPreferences.wifiOnly)
+        assertTrue(confirmed.backupPreferences.deleteCloudCopyOnLocalDelete)
+        assertTrue(confirmed.backupPreferences.autoBackupNewScans)
+        assertTrue(confirmed.backupPreferences.endToEndEncryption)
+        assertTrue(confirmed.backupPreferences.enabled)
+        assertEquals(ToollyDestination.PRIVACY_CENTER, confirmed.destination)
     }
 
     private fun atLibrary(): ToollyUiState =

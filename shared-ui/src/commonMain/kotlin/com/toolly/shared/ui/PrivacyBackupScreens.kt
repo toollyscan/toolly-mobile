@@ -21,22 +21,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.toolly.shared.model.BackupPreferenceKind
 import com.toolly.shared.model.BackupPreferences
+import com.toolly.shared.model.BackupProvider
 import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.back
+import com.toolly.shared.resources.backup_auto_backup_description
+import com.toolly.shared.resources.backup_auto_backup_label
 import com.toolly.shared.resources.backup_choice_title
+import com.toolly.shared.resources.backup_delete_cloud_copy_description
+import com.toolly.shared.resources.backup_delete_cloud_copy_label
+import com.toolly.shared.resources.backup_e2e_encryption_description
 import com.toolly.shared.resources.backup_e2e_encryption_label
-import com.toolly.shared.resources.backup_include_originals_label
+import com.toolly.shared.resources.backup_policy_title
+import com.toolly.shared.resources.backup_provider_google_drive_description
+import com.toolly.shared.resources.backup_provider_google_drive_label
+import com.toolly.shared.resources.backup_provider_icloud_description
+import com.toolly.shared.resources.backup_provider_icloud_label
+import com.toolly.shared.resources.backup_provider_local_only_badge
+import com.toolly.shared.resources.backup_provider_local_only_description
+import com.toolly.shared.resources.backup_provider_local_only_label
 import com.toolly.shared.resources.backup_settings_button
+import com.toolly.shared.resources.backup_wifi_only_description
 import com.toolly.shared.resources.backup_wifi_only_label
-import com.toolly.shared.resources.backup_while_charging_label
-import com.toolly.shared.resources.disable_backup_button
-import com.toolly.shared.resources.enable_backup_button
-import com.toolly.shared.resources.encrypted_backup_description
-import com.toolly.shared.resources.encrypted_backup_label
-import com.toolly.shared.resources.encrypted_backup_off
-import com.toolly.shared.resources.encrypted_backup_on
-import com.toolly.shared.resources.estimated_cloud_use_label
-import com.toolly.shared.resources.estimated_cloud_use_value
+import com.toolly.shared.resources.continue_button
 import com.toolly.shared.resources.privacy_center_backed_up_description_empty
 import com.toolly.shared.resources.privacy_center_backed_up_title
 import com.toolly.shared.resources.privacy_center_needs_attention_description_empty
@@ -102,59 +108,89 @@ private fun PrivacyStatusRow(dotColor: Color, title: String, description: String
 }
 
 /**
- * Backup preference toggles (wireframe `6.2/6.4 Backup choice`). Every value here is local,
- * presentation-only [BackupPreferences] state -- see that type's doc for why (Phase 5 gate).
+ * Backup provider picker (wireframe `6.2 Backup choice`). Selecting a provider only updates local,
+ * presentation-only [BackupPreferences] state -- see that type's doc for why (Phase 5 gate). No
+ * provider is contacted; "Continue" advances to the `6.4 Backup policy` screen.
  */
 @Composable
 fun BackupChoiceScreen(
-    preferences: BackupPreferences,
-    onPreferenceChanged: (BackupPreferenceKind, Boolean) -> Unit,
-    onEnabledChanged: (Boolean) -> Unit,
+    selectedProvider: BackupProvider,
+    onProviderSelected: (BackupProvider) -> Unit,
+    onContinue: () -> Unit,
     onBack: () -> Unit,
 ) {
     ScreenColumn {
         Text(stringResource(Res.string.backup_choice_title), style = MaterialTheme.typography.headlineMedium)
-        ToollyCard {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(stringResource(Res.string.encrypted_backup_label), style = MaterialTheme.typography.titleMedium)
-                Text(
-                    stringResource(if (preferences.enabled) Res.string.encrypted_backup_on else Res.string.encrypted_backup_off),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(stringResource(Res.string.encrypted_backup_description), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ToollyRadioRow(
+            title = stringResource(Res.string.backup_provider_icloud_label),
+            description = stringResource(Res.string.backup_provider_icloud_description),
+            selected = selectedProvider == BackupProvider.ICLOUD,
+            onClick = { onProviderSelected(BackupProvider.ICLOUD) },
+        )
+        ToollyRadioRow(
+            title = "${stringResource(Res.string.backup_provider_local_only_label)} ${stringResource(Res.string.backup_provider_local_only_badge)}",
+            description = stringResource(Res.string.backup_provider_local_only_description),
+            selected = selectedProvider == BackupProvider.LOCAL_ONLY,
+            onClick = { onProviderSelected(BackupProvider.LOCAL_ONLY) },
+        )
+        ToollyRadioRow(
+            title = stringResource(Res.string.backup_provider_google_drive_label),
+            description = stringResource(Res.string.backup_provider_google_drive_description),
+            selected = selectedProvider == BackupProvider.GOOGLE_DRIVE,
+            onClick = { onProviderSelected(BackupProvider.GOOGLE_DRIVE) },
+        )
+        PrimaryButton(label = Res.string.continue_button, onClick = onContinue)
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
+        ) {
+            ToollyBackIcon(iconSize = 18.dp)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(stringResource(Res.string.back))
         }
+    }
+}
+
+/**
+ * Backup policy toggles (wireframe `6.4 Backup policy`). Every value here is local,
+ * presentation-only [BackupPreferences] state -- see that type's doc for why (Phase 5 gate). The
+ * bottom "Backup settings" action commits [BackupPreferences.enabled] and returns to the privacy
+ * center, matching the wireframe's own button label for this screen's single action.
+ */
+@Composable
+fun BackupPolicyScreen(
+    preferences: BackupPreferences,
+    onPreferenceChanged: (BackupPreferenceKind, Boolean) -> Unit,
+    onConfirm: () -> Unit,
+    onBack: () -> Unit,
+) {
+    ScreenColumn {
+        Text(stringResource(Res.string.backup_policy_title), style = MaterialTheme.typography.headlineMedium)
+        ToollySwitchRow(
+            title = stringResource(Res.string.backup_auto_backup_label),
+            description = stringResource(Res.string.backup_auto_backup_description),
+            checked = preferences.autoBackupNewScans,
+            onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.AUTO_BACKUP_NEW_SCANS, it) },
+        )
         ToollySwitchRow(
             title = stringResource(Res.string.backup_wifi_only_label),
+            description = stringResource(Res.string.backup_wifi_only_description),
             checked = preferences.wifiOnly,
             onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.WIFI_ONLY, it) },
         )
         ToollySwitchRow(
-            title = stringResource(Res.string.backup_while_charging_label),
-            checked = preferences.whileCharging,
-            onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.WHILE_CHARGING, it) },
-        )
-        ToollySwitchRow(
-            title = stringResource(Res.string.backup_include_originals_label),
-            checked = preferences.includeOriginals,
-            onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.INCLUDE_ORIGINALS, it) },
-        )
-        ToollySwitchRow(
             title = stringResource(Res.string.backup_e2e_encryption_label),
+            description = stringResource(Res.string.backup_e2e_encryption_description),
             checked = preferences.endToEndEncryption,
             onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.END_TO_END_ENCRYPTION, it) },
         )
-        ToollyCard {
-            Text(stringResource(Res.string.estimated_cloud_use_label), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(Res.string.estimated_cloud_use_value), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        PrimaryButton(
-            label = if (preferences.enabled) Res.string.disable_backup_button else Res.string.enable_backup_button,
-            onClick = { onEnabledChanged(!preferences.enabled) },
+        ToollySwitchRow(
+            title = stringResource(Res.string.backup_delete_cloud_copy_label),
+            description = stringResource(Res.string.backup_delete_cloud_copy_description),
+            checked = preferences.deleteCloudCopyOnLocalDelete,
+            onCheckedChange = { onPreferenceChanged(BackupPreferenceKind.DELETE_CLOUD_COPY_ON_LOCAL_DELETE, it) },
         )
+        PrimaryButton(label = Res.string.backup_settings_button, onClick = onConfirm)
         TextButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = ToollySpacing.MinimumTarget),
