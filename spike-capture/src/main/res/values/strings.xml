@@ -71,6 +71,13 @@
     <string name="document_category_label">Category</string>
     <string name="tap_page_to_edit">Tap a page to crop or enhance it</string>
     <string name="rename_document">Rename</string>
+    <string name="split_document">Split</string>
+    <string name="tap_pages_to_split">Tap the pages to split into a new document</string>
+    <string name="split_failed">Couldn\'t split that document. Try again.</string>
+    <plurals name="split_selected_count">
+        <item quantity="one">Split (%1$d)</item>
+        <item quantity="other">Split (%1$d)</item>
+    </plurals>
     <string name="rename_document_title">Document name</string>
     <string name="rename_document_hint">e.g. Electricity bill</string>
     <string name="dialog_cancel">Cancel</string>

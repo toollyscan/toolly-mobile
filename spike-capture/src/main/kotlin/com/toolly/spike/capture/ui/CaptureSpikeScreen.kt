@@ -109,6 +109,7 @@ fun ToollyDocumentApp(
     onLaunchCapture: (ScanConfig, onResult: (ScanResult) -> Unit) -> Unit,
     onImportPdf: (onResult: (ScanResult) -> Unit) -> Unit,
     onMergeDocuments: (documentIds: List<DocumentId>, onResult: (ScanResult) -> Unit) -> Unit,
+    onSplitPages: (assetIds: List<AssetId>, onResult: (ScanResult) -> Unit) -> Unit,
     onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
     onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
@@ -204,6 +205,21 @@ fun ToollyDocumentApp(
                     is ScanResult.Success -> screen = AppScreen.CapturePreview(result.pages)
                     ScanResult.Cancelled -> { /* not reachable -- merge has no picker to cancel */ }
                     is ScanResult.Failure -> message = UiMessage(mergeErrorMessage(result.error))
+                }
+            }
+        }
+    }
+
+    fun launchSplit(assetIds: List<AssetId>) {
+        if (!isWorking && assetIds.isNotEmpty()) {
+            isWorking = true
+            message = null
+            onSplitPages(assetIds) { result ->
+                isWorking = false
+                when (result) {
+                    is ScanResult.Success -> screen = AppScreen.CapturePreview(result.pages)
+                    ScanResult.Cancelled -> { /* not reachable -- split has no picker to cancel */ }
+                    is ScanResult.Failure -> message = UiMessage(splitErrorMessage(result.error))
                 }
             }
         }
@@ -330,6 +346,7 @@ fun ToollyDocumentApp(
                         }
                     }
                 },
+                onSplit = ::launchSplit,
                 onBack = {
                     message = null
                     screen = AppScreen.Library
@@ -1108,10 +1125,17 @@ private fun DocumentScreen(
     onTag: (DocumentCategory?) -> Unit,
     onStartExport: () -> Unit,
     onReplacePage: (PageId, CropRegion?, EnhancementMode, Float, Int) -> Unit,
+    // Split creates a brand-new document via the review/save pipeline (AppScreen.CapturePreview),
+    // which SearchDocumentsScreen's own navigation (SearchResultScreen) has no equivalent of --
+    // null here rather than duplicating that whole screen for a secondary entry point. The menu
+    // item itself is hidden when this is null, not shown-and-broken.
+    onSplit: ((List<AssetId>) -> Unit)? = null,
     onBack: () -> Unit,
 ) {
     var renaming by remember { mutableStateOf(false) }
     var editingPage by remember { mutableStateOf<DocumentPage?>(null) }
+    // null = not selecting; a set (possibly empty) = split-selection mode is active.
+    var splitSelection by remember(document.summary.id) { mutableStateOf<Set<Int>?>(null) }
 
     val page = editingPage
     if (page != null) {
@@ -1165,6 +1189,15 @@ private fun DocumentScreen(
                             renaming = true
                         },
                     )
+                    if (document.pages.size > 1 && onSplit != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.split_document)) },
+                            onClick = {
+                                menuExpanded = false
+                                splitSelection = emptySet()
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -1280,17 +1313,65 @@ private fun DocumentScreen(
         // than shown-and-broken; a real implementation is its own scoped, vault-touching change.
 
         if (document.pages.size > 1) {
-            Text(
-                stringResource(R.string.tap_page_to_edit),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            DocumentPageGrid(
-                pages = document.pages,
-                loadAssetBitmap = loadAssetBitmap,
-                modifier = Modifier.weight(1f),
-                onToggle = { tapped -> editingPage = tapped },
-            )
+            val selection = splitSelection
+            if (selection == null) {
+                Text(
+                    stringResource(R.string.tap_page_to_edit),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DocumentPageGrid(
+                    pages = document.pages,
+                    loadAssetBitmap = loadAssetBitmap,
+                    modifier = Modifier.weight(1f),
+                    onToggle = { tapped -> editingPage = tapped },
+                )
+            } else {
+                Text(
+                    stringResource(R.string.tap_pages_to_split),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DocumentPageGrid(
+                    pages = document.pages,
+                    loadAssetBitmap = loadAssetBitmap,
+                    modifier = Modifier.weight(1f),
+                    selectedOrdinals = selection,
+                    onToggle = { tapped ->
+                        splitSelection = if (tapped.ordinal in selection) {
+                            selection - tapped.ordinal
+                        } else {
+                            selection + tapped.ordinal
+                        }
+                    },
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = { splitSelection = null },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.dialog_cancel))
+                    }
+                    Button(
+                        onClick = {
+                            onSplit?.invoke(
+                                document.pages
+                                    .filter { it.ordinal in selection }
+                                    .sortedBy { it.ordinal }
+                                    .map { it.sourceAssetId },
+                            )
+                            splitSelection = null
+                        },
+                        enabled = selection.isNotEmpty() && selection.size < document.pages.size,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(pluralStringResource(R.plurals.split_selected_count, selection.size, selection.size))
+                    }
+                }
+            }
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -1481,6 +1562,13 @@ private fun captureErrorMessage(error: ScanError): Int = when (error) {
 private fun mergeErrorMessage(error: ScanError): Int = when (error) {
     is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
     else -> R.string.merge_failed
+}
+
+/** Collapses every split failure cause into one message -- there's no wireframe to match here. */
+@StringRes
+private fun splitErrorMessage(error: ScanError): Int = when (error) {
+    is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
+    else -> R.string.split_failed
 }
 
 @StringRes
