@@ -6,6 +6,12 @@
     <string name="scan_document">ದಾಖಲೆಯನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
     <string name="import_pdf">PDF ಆಮದು ಮಾಡಿ</string>
     <string name="pdf_import_failed">ಆ PDF ಅನ್ನು ಆಮದು ಮಾಡಲಾಗಲಿಲ್ಲ. ಫೈಲ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="merge_documents">ದಾಖಲೆಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಿ</string>
+    <string name="merge_failed">ಆ ದಾಖಲೆಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <plurals name="merge_selected_count">
+        <item quantity="one">ವಿಲೀನಗೊಳಿಸಿ (%1$d)</item>
+        <item quantity="other">ವಿಲೀನಗೊಳಿಸಿ (%1$d)</item>
+    </plurals>
     <string name="no_documents">ಇನ್ನೂ ಯಾವುದೇ ದಾಖಲೆಗಳಿಲ್ಲ</string>
     <string name="scanned_document">ಸ್ಕ್ಯಾನ್ ಮಾಡಿದ ದಾಖಲೆ</string>
     <plurals name="page_count">
