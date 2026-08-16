@@ -1,6 +1,7 @@
 package com.toolly.shared.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.toolly.shared.resources.Res
 import com.toolly.shared.resources.back
+import com.toolly.shared.resources.document_page_count
 import com.toolly.shared.resources.export_builder_description
 import com.toolly.shared.resources.export_builder_title
 import com.toolly.shared.resources.export_format_jpeg
+import com.toolly.shared.resources.export_format_label
 import com.toolly.shared.resources.export_format_pdf
+import com.toolly.shared.resources.export_preview_caption
 import com.toolly.shared.resources.export_securely
 import com.toolly.shared.resources.premium_lock_label
 import com.toolly.shared.resources.privacy_check_description
@@ -28,6 +32,7 @@ import com.toolly.shared.resources.save_to_device
 import com.toolly.shared.resources.searchable_pdf_label
 import com.toolly.shared.resources.searchable_pdf_premium_notice
 import com.toolly.shared.resources.share
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -58,6 +63,8 @@ fun ExportBuilderScreen(
     continueEnabled: Boolean = true,
     onBack: (() -> Unit)? = null,
     previewContent: (@Composable () -> Unit)? = null,
+    documentTitle: String? = null,
+    totalPageCount: Int? = null,
 ) {
     val formatOptions = listOf(
         ToollyChipOption(ToollyExportFormat.PDF, Res.string.export_format_pdf),
@@ -69,7 +76,34 @@ fun ExportBuilderScreen(
             stringResource(Res.string.export_builder_description),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        previewContent?.invoke()
+        if (documentTitle != null && totalPageCount != null) {
+            ToollyCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column {
+                        Text(documentTitle, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "${pluralStringResource(Res.plurals.document_page_count, totalPageCount, totalPageCount)} • " +
+                                stringResource(if (format == ToollyExportFormat.PDF) Res.string.export_format_pdf else Res.string.export_format_jpeg),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    ToollyBadge(
+                        label = stringResource(if (format == ToollyExportFormat.PDF) Res.string.export_format_pdf else Res.string.export_format_jpeg),
+                    )
+                }
+            }
+        }
+        if (previewContent != null) {
+            previewContent()
+            Text(
+                stringResource(Res.string.export_preview_caption),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(stringResource(Res.string.export_format_label), style = MaterialTheme.typography.titleSmall)
         ToollyChipRow(options = formatOptions, selected = format, onSelected = onFormatChange)
         ToollyCard {
             Row(
@@ -104,6 +138,12 @@ fun ExportBuilderScreen(
  * docs/security/PRIVACY_READINESS.md), matching wireframe `5.3 Privacy check`. Save-to-device and
  * Share (`5.4`) are both one tap from here -- Share invokes the OS share sheet directly
  * (architecture rule ES-12: no custom share UI), so there is no separate "share options" screen.
+ *
+ * The wireframe also shows live per-page "SSN detected on page 2" / "Phone number on page 3" cards
+ * with per-finding Redact buttons. That's not built: it would need on-device text extraction (OCR)
+ * to even see the page content, and this app has none yet (Search's own doc notes the same gap).
+ * Showing static example findings would be fabricated data, not a real detector -- so this screen
+ * stays a general disclosure until real text extraction exists to back it.
  */
 @Composable
 fun ExportPrivacyCheckScreen(
@@ -134,13 +174,19 @@ fun ExportPrivacyCheckScreen(
 
 @Composable
 internal fun PremiumLockBadge(modifier: Modifier = Modifier) {
+    ToollyBadge(label = stringResource(Res.string.premium_lock_label), modifier = modifier)
+}
+
+/** A small pill label -- the export-format badge (`5.1`/`5.2`) reuses [PremiumLockBadge]'s styling. */
+@Composable
+internal fun ToollyBadge(label: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraSmall,
         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
     ) {
         Text(
-            stringResource(Res.string.premium_lock_label),
+            label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = ToollySpacing.Small, vertical = ToollySpacing.ExtraSmall),

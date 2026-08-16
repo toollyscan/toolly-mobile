@@ -317,6 +317,8 @@ fun ToollyDocumentApp(
                         message = null
                         screen = AppScreen.Document(current.details)
                     },
+                    documentTitle = current.details.summary.displayName ?: stringResource(R.string.scanned_document),
+                    totalPageCount = current.details.pages.size,
                     previewContent = {
                         DocumentPageGrid(
                             pages = current.details.pages,

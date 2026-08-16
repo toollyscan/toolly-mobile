@@ -160,8 +160,10 @@
     <string name="enhance_mode_black_and_white">ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ</string>
     <string name="enhance_intensity_label">ತೀವ್ರತೆ</string>
     <string name="save_page">ಪುಟ ಉಳಿಸಿ</string>
-    <string name="export_builder_title">ರಫ್ತು ಮಾಡುವ ಮೊದಲು ನಿಖರವಾದ ಫೈಲ್ ಪೂರ್ವವೀಕ್ಷಿಸಿ</string>
+    <string name="export_builder_title">ರಫ್ತು ಸಂರಚನೆ</string>
     <string name="export_builder_description">ಒಂದು ಫಾರ್ಮ್ಯಾಟ್ ಆಯ್ಕೆಮಾಡಿ. ನೀವು ದೃಢೀಕರಿಸುವವರೆಗೆ ನಿಮ್ಮ ದಾಖಲೆ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಆಗಿರುತ್ತದೆ.</string>
+    <string name="export_preview_caption">ಪೂರ್ವವೀಕ್ಷಣೆ ರಫ್ತು ಮಾಡುವ ಮೊದಲು ನಿಖರವಾದ ವಿನ್ಯಾಸ ಮತ್ತು ಗುಣಮಟ್ಟವನ್ನು ತೋರಿಸುತ್ತದೆ.</string>
+    <string name="export_format_label">ಫಾರ್ಮ್ಯಾಟ್</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">ಸುರಕ್ಷಿತವಾಗಿ ರಫ್ತು ಮಾಡಿ</string>
