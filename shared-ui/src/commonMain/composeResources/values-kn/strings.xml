@@ -124,7 +124,11 @@
     <string name="reset_check_inbox_body">ಗೌಪ್ಯತೆಗಾಗಿ, ಖಾತೆ ಇರಲಿ ಇಲ್ಲದಿರಲಿ ಪುಷ್ಟೀಕರಣ ಒಂದೇ ಆಗಿರುತ್ತದೆ.</string>
     <string name="back_to_sign_in">ಸೈನ್ ಇನ್‌ಗೆ ಹಿಂತಿರುಗಿ</string>
     <string name="profile_completion_title">ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಹೊಂದಿಸಿ</string>
-    <string name="profile_completion_description">ಹೆಸರು ಮತ್ತು ಪರಿಶೀಲಿತ ಫೋನ್ ಅಗತ್ಯವಿದೆ. ಇಮೇಲ್ ಐಚ್ಛಿಕ.</string>
+    <string name="profile_completion_description">ಹೆಸರು ಮತ್ತು ಪರಿಶೀಲಿತ ಫೋನ್ ಅಗತ್ಯವಿದೆ. ಫೋಟೋ ಮತ್ತು ಇಮೇಲ್ ಐಚ್ಛಿಕ.</string>
+    <string name="profile_photo_optional">ಪ್ರೊಫೈಲ್ ಫೋಟೋ · ಐಚ್ಛಿಕ</string>
+    <string name="profile_photo_selected">ಫೋಟೋ ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</string>
+    <string name="edit_profile_photo_description">ಪ್ರೊಫೈಲ್ ಫೋಟೋ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="app_language_label">ಆ್ಯಪ್ ಭಾಷೆ</string>
     <string name="full_name_label">ಪೂರ್ಣ ಹೆಸರು · ಅಗತ್ಯ</string>
     <string name="phone_verified_label">ಫೋನ್ · ಪರಿಶೀಲಿತ</string>
     <string name="email_optional_label">ಇಮೇಲ್ · ಐಚ್ಛಿಕ</string>

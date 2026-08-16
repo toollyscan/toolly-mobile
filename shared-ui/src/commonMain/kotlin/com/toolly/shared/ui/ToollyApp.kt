@@ -144,6 +144,9 @@ fun ToollyApp(
     actions: ToollyUiActions,
     documentsContent: (@Composable () -> Unit)? = null,
     searchContent: (@Composable () -> Unit)? = null,
+    appLanguageDisplayName: String = "English",
+    hasProfilePhoto: Boolean = false,
+    onPickProfilePhoto: () -> Unit = {},
 ) {
     ToollyTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -158,7 +161,13 @@ fun ToollyApp(
                 ToollyDestination.EMAIL_SIGN_IN -> EmailSignInScreen(state, actions)
                 ToollyDestination.CREATE_ACCOUNT -> CreateAccountScreen(state, actions)
                 ToollyDestination.RESET_PASSWORD -> ResetPasswordScreen(actions)
-                ToollyDestination.PROFILE_COMPLETION -> ProfileCompletionScreen(state, actions)
+                ToollyDestination.PROFILE_COMPLETION -> ProfileCompletionScreen(
+                    state = state,
+                    actions = actions,
+                    appLanguageDisplayName = appLanguageDisplayName,
+                    hasProfilePhoto = hasProfilePhoto,
+                    onPickProfilePhoto = onPickProfilePhoto,
+                )
                 ToollyDestination.SESSION_ROUTING -> SessionRoutingScreen(actions)
                 ToollyDestination.HOME,
                 ToollyDestination.LIBRARY,

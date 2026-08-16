@@ -2,6 +2,9 @@ package com.toolly.spike.capture.ui
 
 import android.app.Activity
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -26,6 +29,7 @@ import com.toolly.shared.ui.ToollyApp
 import com.toolly.spike.capture.BuildConfig
 import com.toolly.spike.capture.firebase.FirebaseAccountAuthenticator
 import com.toolly.spike.capture.google.GoogleIdTokenProvider
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,6 +62,17 @@ internal fun AndroidToollyApp(
     // sendPhoneVerificationCode, needed by verifyOtp. Not UI state -- an adapter coordination
     // detail, matching how captureRequested/LocalCaptureLaunchRequest already work below.
     var pendingPhoneVerificationId by remember { mutableStateOf<PhoneVerificationId?>(null) }
+
+    // 4.2 Complete profile's photo picker: Android's Photo Picker needs no runtime permission and
+    // returns at most one image URI. Only whether a photo was picked is kept -- the app never
+    // crosses a platform bitmap/URI across the shared-ui boundary (see ProfilePhotoPicker's doc).
+    var hasProfilePhoto by remember { mutableStateOf(false) }
+    val profilePhotoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> if (uri != null) hasProfilePhoto = true }
+    val appLanguageDisplayName = remember {
+        Locale.getDefault().displayLanguage.replaceFirstChar { it.uppercase() }
+    }
 
     fun dispatch(event: ToollyUiEvent) {
         state = reduceToollyUiState(state, event)
@@ -218,6 +233,13 @@ internal fun AndroidToollyApp(
             },
             documentsContent = documentsContent,
             searchContent = searchContent,
+            appLanguageDisplayName = appLanguageDisplayName,
+            hasProfilePhoto = hasProfilePhoto,
+            onPickProfilePhoto = {
+                profilePhotoLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            },
         )
     }
 }

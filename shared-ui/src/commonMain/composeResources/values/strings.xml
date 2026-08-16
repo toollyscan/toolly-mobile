@@ -124,7 +124,11 @@
     <string name="reset_check_inbox_body">For privacy, the confirmation is the same whether or not an account exists.</string>
     <string name="back_to_sign_in">Back to sign in</string>
     <string name="profile_completion_title">Set up your profile</string>
-    <string name="profile_completion_description">Name and verified phone are required. Email is optional.</string>
+    <string name="profile_completion_description">Name and verified phone are required. Photo and email are optional.</string>
+    <string name="profile_photo_optional">Profile photo · optional</string>
+    <string name="profile_photo_selected">Photo selected</string>
+    <string name="edit_profile_photo_description">Choose a profile photo</string>
+    <string name="app_language_label">App language</string>
     <string name="full_name_label">Full name · required</string>
     <string name="phone_verified_label">Phone · verified</string>
     <string name="email_optional_label">Email · optional</string>

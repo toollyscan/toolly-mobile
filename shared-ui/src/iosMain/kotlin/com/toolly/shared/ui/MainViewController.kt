@@ -22,7 +22,11 @@ import com.toolly.shared.model.ToollyUiEvent
 import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.model.reduceToollyUiState
 import kotlinx.coroutines.launch
+import platform.Foundation.NSLocale
 import platform.Foundation.NSUserDefaults
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
+import platform.Foundation.localizedStringForLanguageCode
 
 @Suppress("FunctionName")
 fun MainViewController() = MainViewController(
@@ -251,7 +255,21 @@ fun MainViewController(
                 dispatch(ToollyUiEvent.MainDestinationSelected(destination))
             }
         },
+        appLanguageDisplayName = currentAppLanguageDisplayName(),
+        // 4.2 Complete profile's photo picker needs a real PHPickerViewController consent-UI flow,
+        // which (like Apple sign-in, see AuthScreens.kt's file doc) can't be built/verified without
+        // Xcode on this machine -- documented pending, not faked. hasProfilePhoto stays false and
+        // the edit badge is a real, wired no-op rather than silently doing nothing unexpectedly.
+        hasProfilePhoto = false,
+        onPickProfilePhoto = {},
     )
+}
+
+private fun currentAppLanguageDisplayName(): String {
+    val locale = NSLocale.currentLocale
+    return locale.localizedStringForLanguageCode(locale.languageCode)
+        ?.replaceFirstChar { it.uppercase() }
+        ?: "English"
 }
 
 private const val TUTORIAL_COMPLETED_KEY = "toolly.tutorial.completed"
