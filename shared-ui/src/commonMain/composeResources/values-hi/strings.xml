@@ -124,7 +124,11 @@
     <string name="reset_check_inbox_body">गोपनीयता के लिए, पुष्टि वही रहती है चाहे अकाउंट मौजूद हो या नहीं।</string>
     <string name="back_to_sign_in">साइन इन पर वापस जाएँ</string>
     <string name="profile_completion_title">अपनी प्रोफ़ाइल सेट करें</string>
-    <string name="profile_completion_description">नाम और सत्यापित फ़ोन आवश्यक हैं। ईमेल वैकल्पिक है।</string>
+    <string name="profile_completion_description">नाम और सत्यापित फ़ोन आवश्यक हैं। फ़ोटो और ईमेल वैकल्पिक हैं।</string>
+    <string name="profile_photo_optional">प्रोफ़ाइल फ़ोटो · वैकल्पिक</string>
+    <string name="profile_photo_selected">फ़ोटो चुनी गई</string>
+    <string name="edit_profile_photo_description">प्रोफ़ाइल फ़ोटो चुनें</string>
+    <string name="app_language_label">ऐप की भाषा</string>
     <string name="full_name_label">पूरा नाम · आवश्यक</string>
     <string name="phone_verified_label">फ़ोन · सत्यापित</string>
     <string name="email_optional_label">ईमेल · वैकल्पिक</string>

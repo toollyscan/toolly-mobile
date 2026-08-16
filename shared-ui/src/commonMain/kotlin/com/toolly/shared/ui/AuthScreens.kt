@@ -1,6 +1,7 @@
 package com.toolly.shared.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -27,7 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,6 +41,7 @@ import com.toolly.shared.model.ToollyAuthenticationMethod
 import com.toolly.shared.model.ToollyUiActions
 import com.toolly.shared.model.ToollyUiState
 import com.toolly.shared.resources.Res
+import com.toolly.shared.resources.app_language_label
 import com.toolly.shared.resources.apple_sign_in
 import com.toolly.shared.resources.auth_error_account_exists
 import com.toolly.shared.resources.auth_error_account_not_found
@@ -62,6 +68,7 @@ import com.toolly.shared.resources.create_account_verification_notice
 import com.toolly.shared.resources.create_an_account
 import com.toolly.shared.resources.email_hint
 import com.toolly.shared.resources.email_label
+import com.toolly.shared.resources.edit_profile_photo_description
 import com.toolly.shared.resources.email_optional_label
 import com.toolly.shared.resources.email_sign_in_description
 import com.toolly.shared.resources.email_sign_in_title
@@ -87,6 +94,8 @@ import com.toolly.shared.resources.profile_complete
 import com.toolly.shared.resources.profile_complete_description
 import com.toolly.shared.resources.profile_completion_description
 import com.toolly.shared.resources.profile_completion_title
+import com.toolly.shared.resources.profile_photo_optional
+import com.toolly.shared.resources.profile_photo_selected
 import com.toolly.shared.resources.reset_check_inbox_body
 import com.toolly.shared.resources.reset_check_inbox_title
 import com.toolly.shared.resources.reset_password_description
@@ -389,7 +398,13 @@ internal fun ResetPasswordScreen(actions: ToollyUiActions) {
 }
 
 @Composable
-internal fun ProfileCompletionScreen(state: ToollyUiState, actions: ToollyUiActions) {
+internal fun ProfileCompletionScreen(
+    state: ToollyUiState,
+    actions: ToollyUiActions,
+    appLanguageDisplayName: String,
+    hasProfilePhoto: Boolean,
+    onPickProfilePhoto: () -> Unit,
+) {
     var fullName by remember { mutableStateOf("") }
     val email = state.pendingEmail.orEmpty()
     ScreenColumn {
@@ -399,6 +414,11 @@ internal fun ProfileCompletionScreen(state: ToollyUiState, actions: ToollyUiActi
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         ToollyStepProgress(stepCount = 3, currentStep = 1)
+        ProfilePhotoPicker(
+            initials = initialsFor(fullName),
+            hasPhoto = hasProfilePhoto,
+            onClick = onPickProfilePhoto,
+        )
         ToollyTextField(
             value = fullName,
             onValueChange = { fullName = it },
@@ -416,11 +436,82 @@ internal fun ProfileCompletionScreen(state: ToollyUiState, actions: ToollyUiActi
             label = stringResource(Res.string.email_optional_label),
             readOnly = true,
         )
+        ToollyTextField(
+            value = appLanguageDisplayName,
+            onValueChange = {},
+            label = stringResource(Res.string.app_language_label),
+            readOnly = true,
+        )
         Spacer(modifier = Modifier.weight(1f))
         PrimaryButtonText(
             label = stringResource(Res.string.save_profile),
             enabled = fullName.isNotBlank(),
             onClick = actions::completeProfile,
+        )
+        TermsNotice()
+    }
+}
+
+private const val AVATAR_DIAMETER_DP = 88
+private const val BADGE_DIAMETER_DP = 28
+
+/** `SH`-style initials from a full name (`4.2 Complete profile`); a generic glyph when blank. */
+private fun initialsFor(fullName: String): String {
+    val words = fullName.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    return when {
+        words.isEmpty() -> "?"
+        words.size == 1 -> words[0].take(1).uppercase()
+        else -> (words.first().take(1) + words.last().take(1)).uppercase()
+    }
+}
+
+/**
+ * Profile-photo avatar (`4.2 Complete profile`): an initials circle with an edit badge. Only
+ * whether a photo has been picked is real, presentation state -- rendering the actual picked
+ * image would require passing a platform bitmap across the shared/platform boundary, which this
+ * app's ports never do (see [com.toolly.shared.capture.CaptureContracts]). [onClick] is wired to a
+ * real platform photo picker (Android's Photo Picker; iOS pending, see `MainViewController.kt`),
+ * so tapping it is never a no-op affordance.
+ */
+@Composable
+private fun ProfilePhotoPicker(initials: String, hasPhoto: Boolean, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.size(AVATAR_DIAMETER_DP.dp)) {
+            val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+            Canvas(modifier = Modifier.size(AVATAR_DIAMETER_DP.dp)) {
+                drawCircle(color = surfaceVariant)
+            }
+            Text(
+                initials,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Center),
+            )
+            val editPhotoDescription = stringResource(Res.string.edit_profile_photo_description)
+            Box(
+                // The visual badge is 28dp (matches the wireframe), but the tappable area meets
+                // the 48dp minimum touch target (ACCESSIBILITY_REQUIREMENTS.md).
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(ToollySpacing.MinimumTarget)
+                    .clip(CircleShape)
+                    .clickable(onClick = onClick)
+                    .semantics { contentDescription = editPhotoDescription },
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(BADGE_DIAMETER_DP.dp)) {
+                    drawCircle(color = ToollyColors.Primary)
+                }
+                Text(
+                    if (hasPhoto) stringResource(Res.string.checkmark_glyph) else "+",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+        }
+        Text(
+            stringResource(if (hasPhoto) Res.string.profile_photo_selected else Res.string.profile_photo_optional),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
