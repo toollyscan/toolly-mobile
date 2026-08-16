@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -105,6 +106,7 @@ import java.util.Date
 fun ToollyDocumentApp(
     onLaunchCapture: (ScanConfig, onResult: (ScanResult) -> Unit) -> Unit,
     onImportPdf: (onResult: (ScanResult) -> Unit) -> Unit,
+    onMergeDocuments: (documentIds: List<DocumentId>, onResult: (ScanResult) -> Unit) -> Unit,
     onLoadDocuments: (onResult: (ToollyResult<List<DocumentSummary>>) -> Unit) -> Unit,
     onSavePages: (List<ScannedPage>, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
     onOpenDocument: (DocumentId, onResult: (ToollyResult<DocumentDetails>) -> Unit) -> Unit,
@@ -189,6 +191,21 @@ fun ToollyDocumentApp(
         }
     }
 
+    fun launchMerge(documentIds: List<DocumentId>) {
+        if (!isWorking && screen == AppScreen.Library && documentIds.size >= 2) {
+            isWorking = true
+            message = null
+            onMergeDocuments(documentIds) { result ->
+                isWorking = false
+                when (result) {
+                    is ScanResult.Success -> screen = AppScreen.CapturePreview(result.pages)
+                    ScanResult.Cancelled -> { /* not reachable -- merge has no picker to cancel */ }
+                    is ScanResult.Failure -> message = UiMessage(mergeErrorMessage(result.error))
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         refreshLibrary()
     }
@@ -223,6 +240,7 @@ fun ToollyDocumentApp(
                         }
                     }
                 },
+                onMerge = ::launchMerge,
             )
 
             is AppScreen.CapturePreview -> CapturePreviewScreen(
@@ -811,10 +829,15 @@ private fun LibraryScreen(
     onScan: () -> Unit,
     onImportPdf: () -> Unit,
     onOpen: (DocumentId) -> Unit,
+    onMerge: (List<DocumentId>) -> Unit,
 ) {
     val expanded = LocalConfiguration.current.screenWidthDp >= 600
     var query by remember { mutableStateOf("") }
     var filter by remember { mutableStateOf(LibraryFilter.ALL) }
+    // null = not selecting; a set (possibly empty) = merge-selection mode is active. Selection
+    // order is preserved (a LinkedHashSet-backed mutable set) so merged pages come out in the
+    // order documents were tapped, not an arbitrary one.
+    var mergeSelection by remember { mutableStateOf<LinkedHashSet<DocumentId>?>(null) }
     val filteredDocuments = remember(documents, query, filter) {
         documents.filter { document ->
             document.matchesFilter(filter) &&
@@ -860,6 +883,43 @@ private fun LibraryScreen(
                 Text(stringResource(R.string.import_pdf))
             }
             StatusMessage(message)
+            if (documents.size >= 2) {
+                val selection = mergeSelection
+                if (selection == null) {
+                    TextButton(onClick = { mergeSelection = LinkedHashSet() }) {
+                        Text(stringResource(R.string.merge_documents))
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        OutlinedButton(
+                            onClick = { mergeSelection = null },
+                            enabled = !isWorking,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(R.string.dialog_cancel))
+                        }
+                        Button(
+                            onClick = {
+                                onMerge(selection.toList())
+                                mergeSelection = null
+                            },
+                            enabled = !isWorking && selection.size >= 2,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(
+                                pluralStringResource(
+                                    R.plurals.merge_selected_count,
+                                    selection.size,
+                                    selection.size,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
             if (documents.isNotEmpty()) {
                 OutlinedTextField(
                     value = query,
@@ -901,16 +961,28 @@ private fun LibraryScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(filteredDocuments, key = { it.id.value }) { document ->
+                        val selection = mergeSelection
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onOpen(document.id) },
+                                .clickable {
+                                    if (selection == null) {
+                                        onOpen(document.id)
+                                    } else {
+                                        mergeSelection = LinkedHashSet(selection).apply {
+                                            if (!remove(document.id)) add(document.id)
+                                        }
+                                    }
+                                },
                         ) {
                             Row(
                                 modifier = Modifier.padding(16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                if (selection != null) {
+                                    Checkbox(checked = document.id in selection, onCheckedChange = null)
+                                }
                                 ToollyDocumentIcon(
                                     iconSize = 28.dp,
                                     modifier = Modifier.padding(top = 2.dp),
@@ -1358,6 +1430,13 @@ private fun captureErrorMessage(error: ScanError): Int = when (error) {
     is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
     is ScanError.LifecycleEnded -> R.string.capture_screen_closed
     else -> R.string.capture_failed
+}
+
+/** Collapses every merge failure cause into one message -- there's no wireframe to match here. */
+@StringRes
+private fun mergeErrorMessage(error: ScanError): Int = when (error) {
+    is ScanError.StorageFailure -> R.string.captured_pages_storage_failed
+    else -> R.string.merge_failed
 }
 
 @StringRes

@@ -6,6 +6,12 @@
     <string name="scan_document">दस्तावेज़ स्कैन करें</string>
     <string name="import_pdf">PDF आयात करें</string>
     <string name="pdf_import_failed">वह PDF आयात नहीं हो सका। फ़ाइल जाँचें और फिर से प्रयास करें।</string>
+    <string name="merge_documents">दस्तावेज़ मर्ज करें</string>
+    <string name="merge_failed">उन दस्तावेज़ों को मर्ज नहीं किया जा सका। फिर से प्रयास करें।</string>
+    <plurals name="merge_selected_count">
+        <item quantity="one">मर्ज करें (%1$d)</item>
+        <item quantity="other">मर्ज करें (%1$d)</item>
+    </plurals>
     <string name="no_documents">अभी कोई दस्तावेज़ नहीं है</string>
     <string name="scanned_document">स्कैन किया गया दस्तावेज़</string>
     <plurals name="page_count">

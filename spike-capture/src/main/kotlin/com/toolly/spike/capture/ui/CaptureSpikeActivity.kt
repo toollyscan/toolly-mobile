@@ -25,6 +25,7 @@ import com.toolly.domain.model.DocumentDetails
 import com.toolly.domain.model.DocumentExportDelivery
 import com.toolly.domain.model.DocumentExportFormat
 import com.toolly.domain.model.DocumentExportOutcome
+import com.toolly.domain.model.DocumentId
 import com.toolly.domain.model.TemporaryAssetId as DomainTemporaryAssetId
 import com.toolly.domain.usecases.ListDocumentsUseCase
 import com.toolly.domain.usecases.OpenDocumentUseCase
@@ -158,6 +159,11 @@ class CaptureSpikeActivity : ComponentActivity() {
                                 }
                             },
                             onImportPdf = ::launchPdfImport,
+                            onMergeDocuments = { documentIds, onResult ->
+                                lifecycleScope.launch {
+                                    onResult(mergeDocuments(documentIds, openDocument))
+                                }
+                            },
                             onLoadDocuments = { onResult ->
                                 lifecycleScope.launch {
                                     onResult(listDocuments())
@@ -389,6 +395,35 @@ class CaptureSpikeActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Combines the current pages of [documentIds] (in that order) into one new document, by
+     * decrypting each source page and re-staging it through the exact same
+     * [TemporaryScanStore]/[ScanResult] pipeline a live capture or PDF import already uses --
+     * landing on the same review screen (reorder/discard before saving), not a blind merge.
+     * Documents that fail to open are skipped rather than aborting the whole merge; a document
+     * whose pages fail to decrypt contributes nothing, which shows up as fewer pages in review.
+     */
+    private suspend fun mergeDocuments(
+        documentIds: List<DocumentId>,
+        openDocument: OpenDocumentUseCase,
+    ): ScanResult {
+        val bitmaps = mutableListOf<android.graphics.Bitmap>()
+        for (documentId in documentIds) {
+            val opened = openDocument(documentId)
+            if (opened is ToollyResult.Success) {
+                for (page in opened.value.pages.sortedBy { it.ordinal }) {
+                    documentRepository.loadAssetBitmap(page.sourceAssetId)?.let { bitmaps += it }
+                }
+            }
+        }
+        if (bitmaps.isEmpty()) {
+            return ScanResult.Failure(ScanError.InvalidResult)
+        }
+        val outcome = temporaryStore.importBitmaps(bitmaps)
+        bitmaps.forEach { it.recycle() }
+        return outcome.toScanResult()
     }
 
     private fun TemporaryScanStore.ImportOutcome.toScanResult(): ScanResult = when (this) {

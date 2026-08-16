@@ -6,6 +6,12 @@
     <string name="scan_document">Scan document</string>
     <string name="import_pdf">Import PDF</string>
     <string name="pdf_import_failed">Couldn\'t import that PDF. Check the file and try again.</string>
+    <string name="merge_documents">Merge documents</string>
+    <string name="merge_failed">Couldn\'t merge those documents. Try again.</string>
+    <plurals name="merge_selected_count">
+        <item quantity="one">Merge (%1$d)</item>
+        <item quantity="other">Merge (%1$d)</item>
+    </plurals>
     <string name="no_documents">No documents yet</string>
     <string name="scanned_document">Scanned document</string>
     <plurals name="page_count">
