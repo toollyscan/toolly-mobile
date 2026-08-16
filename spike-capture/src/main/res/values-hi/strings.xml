@@ -66,6 +66,8 @@
     <string name="dialog_cancel">रद्द करें</string>
     <string name="search_subtitle">नाम और श्रेणी से खोजें</string>
     <string name="search_prompt">अपने दस्तावेज़ खोजने के लिए टाइप करें</string>
+    <string name="recent_searches_label">हाल की खोजें</string>
+    <string name="clear">साफ़ करें</string>
     <string name="search_result_matched_title">नाम मेल खाया</string>
     <string name="document_card_subtitle">%1$s · %2$s</string>
     <string name="saved_today">आज सहेजा गया</string>
