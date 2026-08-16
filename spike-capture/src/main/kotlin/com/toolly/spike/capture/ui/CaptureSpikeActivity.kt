@@ -46,8 +46,8 @@ import com.toolly.shared.capture.ScanResult
 import com.toolly.shared.capture.ScannedPage
 import com.toolly.shared.capture.TemporaryAssetId as CaptureTemporaryAssetId
 import com.toolly.spike.capture.export.AndroidDocumentExporter
-import com.toolly.spike.capture.export.ExportQuality
 import com.toolly.spike.capture.export.AndroidShareIntentFactory
+import com.toolly.spike.capture.export.ExportQuality
 import com.toolly.spike.capture.mlkit.MlKitDocumentScannerAdapter
 import com.toolly.spike.capture.mlkit.TemporaryScanStore
 import com.toolly.spike.capture.pdfimport.PdfPageRasterizer

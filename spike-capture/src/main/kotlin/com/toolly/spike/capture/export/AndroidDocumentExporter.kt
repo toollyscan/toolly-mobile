@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
  * uncompressed otherwise, so this is the only way "quality" actually changes the output file size.
  * [downscale] additionally shrinks pixel dimensions for the smaller tiers.
  */
-internal enum class ExportQuality(val downscale: Float, val jpegQuality: Int) {
+enum class ExportQuality(val downscale: Float, val jpegQuality: Int) {
     SMALL(downscale = 0.5f, jpegQuality = 50),
     BALANCED(downscale = 0.75f, jpegQuality = 75),
     BEST(downscale = 1f, jpegQuality = 92),
