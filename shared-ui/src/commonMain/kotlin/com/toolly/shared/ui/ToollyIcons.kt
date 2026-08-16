@@ -180,4 +180,41 @@ fun ToollyDocumentIcon(modifier: Modifier = Modifier, iconSize: Dp = DEFAULT_ICO
     }
 }
 
+/**
+ * Camera glyph for the bottom nav's raised Scan action (wireframes `4.1`/`4.2` etc. -- every
+ * screen with the bottom nav shows a camera icon there, not the "+" this used to draw).
+ */
+@Composable
+fun ToollyCameraIcon(modifier: Modifier = Modifier, iconSize: Dp = DEFAULT_ICON_SIZE_DP.dp) {
+    val color = LocalContentColor.current
+    Canvas(modifier = modifier.size(iconSize)) {
+        val stroke = strokeWidth()
+        val w = size.width
+        val h = size.height
+        val bodyTop = h * 0.32f
+        val path = Path().apply {
+            moveTo(w * 0.1f, bodyTop)
+            lineTo(w * 0.36f, bodyTop)
+            lineTo(w * 0.44f, h * 0.16f)
+            lineTo(w * 0.56f, h * 0.16f)
+            lineTo(w * 0.64f, bodyTop)
+            lineTo(w * 0.9f, bodyTop)
+            lineTo(w * 0.9f, h * 0.86f)
+            lineTo(w * 0.1f, h * 0.86f)
+            close()
+        }
+        drawPath(
+            path,
+            color = color,
+            style = Stroke(width = stroke, join = StrokeJoin.Round, cap = StrokeCap.Round),
+        )
+        drawCircle(
+            color,
+            radius = w * 0.16f,
+            center = Offset(w * 0.5f, bodyTop + (h * 0.86f - bodyTop) / 2f),
+            style = Stroke(width = stroke),
+        )
+    }
+}
+
 private fun DrawScope.strokeWidth(): Float = size.minDimension * 0.085f
