@@ -11,6 +11,12 @@
 		100000000000000000000002 /* ToollySharedUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* ToollySharedUI.framework */; };
 		100000000000000000000003 /* AppleCaptureSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* AppleCaptureSessionImpl.swift */; };
 		100000000000000000000004 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* GoogleService-Info.plist */; };
+		100000000000000000000101 /* AppleAccountAuthenticatorSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */; };
+		100000000000000000000102 /* AppleDocumentVaultSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */; };
+		100000000000000000000103 /* ToollyVaultCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000113 /* ToollyVaultCrypto.swift */; };
+		100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000114 /* ToollyFirebaseBootstrap.swift */; };
+		100000000000000000000092 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000091 /* FirebaseAuth */; };
+		100000000000000000000094 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000093 /* FirebaseCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +25,10 @@
 		100000000000000000000012 /* ToollySharedUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ToollySharedUI.framework; path = ../shared-ui/build/bin/iosSimulatorArm64/debugFramework/ToollySharedUI.framework; sourceTree = SOURCE_ROOT; };
 		100000000000000000000013 /* AppleCaptureSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCaptureSessionImpl.swift; sourceTree = "<group>"; };
 		100000000000000000000014 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/AppleAccountAuthenticatorSessionImpl.swift"; sourceTree = "<group>"; };
+		100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/AppleDocumentVaultSessionImpl.swift"; sourceTree = "<group>"; };
+		100000000000000000000113 /* ToollyVaultCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/crypto/ToollyVaultCrypto.swift"; sourceTree = "<group>"; };
+		100000000000000000000114 /* ToollyFirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/ToollyFirebaseBootstrap.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +37,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000002 /* ToollySharedUI.framework in Frameworks */,
+				100000000000000000000092 /* FirebaseAuth in Frameworks */,
+				100000000000000000000094 /* FirebaseCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,6 +60,10 @@
 				100000000000000000000011 /* ToollyApp.swift */,
 				100000000000000000000013 /* AppleCaptureSessionImpl.swift */,
 				100000000000000000000014 /* GoogleService-Info.plist */,
+				100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */,
+				100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */,
+				100000000000000000000113 /* ToollyVaultCrypto.swift */,
+				100000000000000000000114 /* ToollyFirebaseBootstrap.swift */,
 			);
 			path = ToollyApp;
 			sourceTree = "<group>";
@@ -84,6 +100,10 @@
 			dependencies = (
 			);
 			name = ToollyApp;
+			packageProductDependencies = (
+				100000000000000000000091 /* FirebaseAuth */,
+				100000000000000000000093 /* FirebaseCore */,
+			);
 			productName = ToollyApp;
 			productReference = 100000000000000000000010 /* ToollyApp.app */;
 			productType = "com.apple.product-type.application";
@@ -112,6 +132,9 @@
 				Base,
 			);
 			mainGroup = 100000000000000000000030;
+			packageReferences = (
+				100000000000000000000090 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 100000000000000000000033 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -139,6 +162,10 @@
 			files = (
 				100000000000000000000001 /* ToollyApp.swift in Sources */,
 				100000000000000000000003 /* AppleCaptureSessionImpl.swift in Sources */,
+				100000000000000000000101 /* AppleAccountAuthenticatorSessionImpl.swift in Sources */,
+				100000000000000000000102 /* AppleDocumentVaultSessionImpl.swift in Sources */,
+				100000000000000000000103 /* ToollyVaultCrypto.swift in Sources */,
+				100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,6 +314,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		100000000000000000000090 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		100000000000000000000091 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000090 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		100000000000000000000093 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000090 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 100000000000000000000060 /* Project object */;
 }
