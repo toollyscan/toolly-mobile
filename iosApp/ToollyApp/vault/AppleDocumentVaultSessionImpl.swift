@@ -53,27 +53,34 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
             in: .userDomainMask
         )[0]
         let root = appSupport.appendingPathComponent("toolly-vault-v1", isDirectory: true)
-        self.documentsDirectory = root.appendingPathComponent("documents", isDirectory: true)
-        self.cipher = ToollyVaultCipher(wrappingKey: ToollyVaultWrappingKey(account: "primary"))
-        super.init()
+        let resolvedDocumentsDirectory = root.appendingPathComponent("documents", isDirectory: true)
+
+        // Must exist before `ToollyVaultScope.loadOrCreate` below can persist a fresh scope file
+        // into `root` -- and must happen here, before `self`/`super.init()` are available to do
+        // it any other way (every stored property, `vaultScopeId` included, has to be set before
+        // `super.init()` runs, so there's no later point to create this first).
         try? FileManager.default.createDirectory(
-            at: documentsDirectory,
+            at: resolvedDocumentsDirectory,
             withIntermediateDirectories: true
         )
-        // Excluded from iCloud/iTunes backup -- local vault data should never leave the device via
-        // backup (matches ADR-0012's storage boundary), independent of the fact it's now encrypted.
-        var excludable = documentsDirectory
-        var resourceValues = URLResourceValues()
-        resourceValues.isExcludedFromBackup = true
-        try? excludable.setResourceValues(resourceValues)
+
+        self.documentsDirectory = resolvedDocumentsDirectory
+        self.cipher = ToollyVaultCipher(wrappingKey: ToollyVaultWrappingKey(account: "primary"))
         // Non-secret, per-install domain-separation value mixed into every AAD below -- see
-        // `ToollyVaultScope`'s doc comment. Falls back to a fresh scope if the file is unreadable
-        // (fresh install, or corrupted scope file); an existing encrypted document under a
-        // different scope simply fails to authenticate afterwards rather than silently misreading,
-        // matching how a lost/rotated wrapping key already fails closed.
+        // `ToollyVaultScope`'s doc comment. Falls back to a fresh, non-persisted scope only if the
+        // directory just created above is somehow still unwritable; an existing encrypted document
+        // under a different scope simply fails to authenticate afterwards rather than silently
+        // misreading, matching how a lost/rotated wrapping key already fails closed.
         self.vaultScopeId = (try? ToollyVaultScope.loadOrCreate(
             at: root.appendingPathComponent("vault.scope")
         )) ?? UUID().uuidString.lowercased()
+        super.init()
+        // Excluded from iCloud/iTunes backup -- local vault data should never leave the device via
+        // backup (matches ADR-0012's storage boundary), independent of the fact it's now encrypted.
+        var excludable = resolvedDocumentsDirectory
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try? excludable.setResourceValues(resourceValues)
     }
 
     func listDocuments(callback: AppleDocumentListCallback) {
