@@ -1,18 +1,18 @@
-import FirebaseCore
 import SwiftUI
 import ToollySharedUI
 import UIKit
 
 @main
 struct ToollyIOSApplication: App {
-    // Must run before anything touches `Auth.auth()` (AppleAccountAuthenticatorSessionImpl does,
-    // as soon as ToollyRootView constructs it below) -- an unconfigured FirebaseApp makes Firebase
-    // fail with a fatal error, not a catchable one. GoogleService-Info.plist is provisioned by CI
-    // from the toollyscan-dev environment secret before this target ever builds (see
+    // ToollyFirebaseBootstrap.configure() (not a direct FirebaseCore import/call here -- this
+    // file is the composition root, and Firebase symbols are confined to `/firebase/`-scoped
+    // adapter code per config/dependencies/policy.json's `firebase-adapter-only` source boundary)
+    // must run before anything touches `Auth.auth()`. GoogleService-Info.plist is provisioned by
+    // CI from the toollyscan-dev environment secret before this target ever builds (see
     // docs/architecture/FIREBASE_ENVIRONMENTS.md); a real device/local run needs that file present
     // the same way.
     init() {
-        FirebaseApp.configure()
+        ToollyFirebaseBootstrap.configure()
     }
 
     var body: some Scene {

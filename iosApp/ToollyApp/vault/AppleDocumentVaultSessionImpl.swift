@@ -142,8 +142,13 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
                         pageId: page.pageId,
                         assetId: page.assetId,
                         ordinal: Int(page.ordinal),
-                        widthPixels: page.widthPixels?.int32Value.map(Int.init),
-                        heightPixels: page.heightPixels?.int32Value.map(Int.init)
+                        // NOT `page.widthPixels?.int32Value.map(Int.init)`: `.map` there falls
+                        // inside the `?.` chain's scope, so Swift resolves it as a (nonexistent)
+                        // member of the unwrapped `Int32` itself rather than of the optional --
+                        // a real compile error only surfaced once this file was first actually
+                        // registered in the Xcode project's build phase (see #102).
+                        widthPixels: page.widthPixels.map { Int($0.int32Value) },
+                        heightPixels: page.heightPixels.map { Int($0.int32Value) }
                     )
                 )
             }

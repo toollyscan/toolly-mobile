@@ -14,6 +14,7 @@
 		100000000000000000000101 /* AppleAccountAuthenticatorSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */; };
 		100000000000000000000102 /* AppleDocumentVaultSessionImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */; };
 		100000000000000000000103 /* ToollyVaultCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000113 /* ToollyVaultCrypto.swift */; };
+		100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000114 /* ToollyFirebaseBootstrap.swift */; };
 		100000000000000000000092 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000091 /* FirebaseAuth */; };
 		100000000000000000000094 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000093 /* FirebaseCore */; };
 /* End PBXBuildFile section */
@@ -27,6 +28,7 @@
 		100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/AppleAccountAuthenticatorSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/AppleDocumentVaultSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000113 /* ToollyVaultCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/crypto/ToollyVaultCrypto.swift"; sourceTree = "<group>"; };
+		100000000000000000000114 /* ToollyFirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/ToollyFirebaseBootstrap.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 				100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */,
 				100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */,
 				100000000000000000000113 /* ToollyVaultCrypto.swift */,
+				100000000000000000000114 /* ToollyFirebaseBootstrap.swift */,
 			);
 			path = ToollyApp;
 			sourceTree = "<group>";
@@ -162,6 +165,7 @@
 				100000000000000000000101 /* AppleAccountAuthenticatorSessionImpl.swift in Sources */,
 				100000000000000000000102 /* AppleDocumentVaultSessionImpl.swift in Sources */,
 				100000000000000000000103 /* ToollyVaultCrypto.swift in Sources */,
+				100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
