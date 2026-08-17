@@ -173,6 +173,12 @@
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">Export securely</string>
+    <string name="sign_document">Sign document</string>
+    <string name="signed_indicator">Signature added</string>
+    <string name="esign_title">Add your signature</string>
+    <string name="esign_description">Draw with your finger. This stamps a visual signature onto the last page -- it does not verify identity or create a legal audit trail.</string>
+    <string name="esign_done">Done</string>
+    <string name="clear">Clear</string>
     <string name="searchable_pdf_label">Searchable PDF</string>
     <string name="searchable_pdf_premium_notice">Recognize text so this document is searchable. Available with Toolly Premium.</string>
     <string name="premium_lock_label">Premium</string>

@@ -173,6 +173,12 @@
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">ಸುರಕ್ಷಿತವಾಗಿ ರಫ್ತು ಮಾಡಿ</string>
+    <string name="sign_document">ದಾಖಲೆಗೆ ಸಹಿ ಮಾಡಿ</string>
+    <string name="signed_indicator">ಸಹಿ ಸೇರಿಸಲಾಗಿದೆ</string>
+    <string name="esign_title">ನಿಮ್ಮ ಸಹಿಯನ್ನು ಸೇರಿಸಿ</string>
+    <string name="esign_description">ನಿಮ್ಮ ಬೆರಳಿನಿಂದ ಬರೆಯಿರಿ. ಇದು ಕೊನೆಯ ಪುಟದಲ್ಲಿ ದೃಶ್ಯ ಸಹಿಯನ್ನು ಮುದ್ರಿಸುತ್ತದೆ -- ಇದು ಗುರುತನ್ನು ಪರಿಶೀಲಿಸುವುದಿಲ್ಲ ಅಥವಾ ಕಾನೂನು ಆಡಿಟ್ ಟ್ರೇಲ್ ರಚಿಸುವುದಿಲ್ಲ.</string>
+    <string name="esign_done">ಮುಗಿದಿದೆ</string>
+    <string name="clear">ತೆರವುಗೊಳಿಸಿ</string>
     <string name="searchable_pdf_label">ಹುಡುಕಬಹುದಾದ PDF</string>
     <string name="searchable_pdf_premium_notice">ಈ ದಾಖಲೆ ಹುಡುಕಬಹುದಾಗಿರಲು ಪಠ್ಯವನ್ನು ಗುರುತಿಸಿ. Toolly Premium ನೊಂದಿಗೆ ಲಭ್ಯ.</string>
     <string name="premium_lock_label">ಪ್ರೀಮಿಯಂ</string>

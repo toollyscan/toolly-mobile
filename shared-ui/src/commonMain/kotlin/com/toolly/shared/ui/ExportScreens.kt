@@ -38,6 +38,8 @@ import com.toolly.shared.resources.save_to_device
 import com.toolly.shared.resources.searchable_pdf_label
 import com.toolly.shared.resources.searchable_pdf_premium_notice
 import com.toolly.shared.resources.share
+import com.toolly.shared.resources.sign_document
+import com.toolly.shared.resources.signed_indicator
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -84,6 +86,8 @@ fun ExportBuilderScreen(
     previewContent: (@Composable () -> Unit)? = null,
     documentTitle: String? = null,
     totalPageCount: Int? = null,
+    hasSignature: Boolean = false,
+    onSignDocument: (() -> Unit)? = null,
 ) {
     val formatOptions = listOf(
         ToollyChipOption(ToollyExportFormat.PDF, Res.string.export_format_pdf),
@@ -137,6 +141,12 @@ fun ExportBuilderScreen(
             label = stringResource(Res.string.export_watermark_label),
             placeholder = stringResource(Res.string.export_watermark_hint),
         )
+        if (onSignDocument != null) {
+            SecondaryButton(
+                label = if (hasSignature) Res.string.signed_indicator else Res.string.sign_document,
+                onClick = onSignDocument,
+            )
+        }
         ToollyCard {
             Row(
                 modifier = Modifier.fillMaxWidth(),

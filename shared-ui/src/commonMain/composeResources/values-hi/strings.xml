@@ -173,6 +173,12 @@
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">सुरक्षित रूप से निर्यात करें</string>
+    <string name="sign_document">दस्तावेज़ पर हस्ताक्षर करें</string>
+    <string name="signed_indicator">हस्ताक्षर जोड़ा गया</string>
+    <string name="esign_title">अपना हस्ताक्षर जोड़ें</string>
+    <string name="esign_description">अपनी उंगली से बनाएँ। यह अंतिम पृष्ठ पर एक दृश्य हस्ताक्षर लगाता है -- यह पहचान सत्यापित नहीं करता या कानूनी ऑडिट ट्रेल नहीं बनाता।</string>
+    <string name="esign_done">पूर्ण</string>
+    <string name="clear">साफ़ करें</string>
     <string name="searchable_pdf_label">खोजने योग्य PDF</string>
     <string name="searchable_pdf_premium_notice">टेक्स्ट पहचानें ताकि यह दस्तावेज़ खोजने योग्य हो। Toolly Premium के साथ उपलब्ध।</string>
     <string name="premium_lock_label">प्रीमियम</string>

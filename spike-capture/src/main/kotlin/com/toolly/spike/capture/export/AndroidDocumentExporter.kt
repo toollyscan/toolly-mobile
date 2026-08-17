@@ -13,6 +13,7 @@ import com.toolly.domain.model.DocumentPage
 import com.toolly.foundation.ToollyError
 import com.toolly.foundation.ToollyErrorCode
 import com.toolly.foundation.ToollyResult
+import com.toolly.shared.edit.SignatureStrokes
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.util.concurrent.CancellationException
@@ -46,8 +47,10 @@ internal class AndroidDocumentExporter(
         destination: OutputStream,
         quality: ExportQuality = ExportQuality.BEST,
         watermarkText: String? = null,
+        signature: SignatureStrokes = emptyList(),
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
         val pdf = PdfDocument()
+        val lastOrdinal = document.pages.maxOfOrNull { it.ordinal }
         try {
             for (page in document.pages.sortedBy { it.ordinal }) {
                 coroutineContext.ensureActive()
@@ -77,6 +80,14 @@ internal class AndroidDocumentExporter(
                             drawWatermark(
                                 pdfPage.canvas,
                                 watermarkText,
+                                pageSize.width.toFloat(),
+                                pageSize.height.toFloat(),
+                            )
+                        }
+                        if (signature.isNotEmpty() && page.ordinal == lastOrdinal) {
+                            drawSignature(
+                                pdfPage.canvas,
+                                signature,
                                 pageSize.width.toFloat(),
                                 pageSize.height.toFloat(),
                             )
@@ -135,6 +146,7 @@ internal class AndroidDocumentExporter(
         destination: OutputStream,
         quality: ExportQuality = ExportQuality.BEST,
         watermarkText: String? = null,
+        signature: SignatureStrokes = emptyList(),
     ): ToollyResult<Unit> = withContext(Dispatchers.IO) {
         val loadedBitmap = when (val loaded = loadBitmap(page.sourceAssetId)) {
             is ToollyResult.Success -> loaded.value
@@ -149,12 +161,17 @@ internal class AndroidDocumentExporter(
         } else {
             loadedBitmap
         }
-        val bitmap = if (watermarkText.isNullOrBlank()) {
+        val bitmap = if (watermarkText.isNullOrBlank() && signature.isEmpty()) {
             scaled
         } else {
             val mutable = scaled.copy(Bitmap.Config.ARGB_8888, true)
             scaled.recycle()
-            drawWatermark(Canvas(mutable), watermarkText, mutable.width.toFloat(), mutable.height.toFloat())
+            if (!watermarkText.isNullOrBlank()) {
+                drawWatermark(Canvas(mutable), watermarkText, mutable.width.toFloat(), mutable.height.toFloat())
+            }
+            if (signature.isNotEmpty()) {
+                drawSignature(Canvas(mutable), signature, mutable.width.toFloat(), mutable.height.toFloat())
+            }
             mutable
         }
         try {
@@ -188,6 +205,37 @@ internal class AndroidDocumentExporter(
         canvas.rotate(WATERMARK_ROTATION_DEGREES, width / 2f, height / 2f)
         canvas.drawText(text, width / 2f, height / 2f, paint)
         canvas.restore()
+    }
+
+    /**
+     * Draws [strokes] (each stroke a list of 0..1-normalized points from [SignaturePadScreen][
+     * com.toolly.shared.ui.SignaturePadScreen]) into a fixed anchor box in the bottom-right corner
+     * of the page -- simple visual stamp, no identity verification or audit trail. The pad's own
+     * 0..1 space is mapped directly onto the anchor box (stretched, not letterboxed); adequate for
+     * a small signature where slight aspect distortion isn't noticeable.
+     */
+    private fun drawSignature(canvas: Canvas, strokes: SignatureStrokes, pageWidth: Float, pageHeight: Float) {
+        val boxWidth = pageWidth * SIGNATURE_BOX_WIDTH_FRACTION
+        val boxHeight = pageHeight * SIGNATURE_BOX_HEIGHT_FRACTION
+        val left = pageWidth - boxWidth - PAGE_MARGIN_POINTS
+        val top = pageHeight - boxHeight - PAGE_MARGIN_POINTS
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK
+            style = Paint.Style.STROKE
+            strokeWidth = SIGNATURE_STROKE_WIDTH
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+        }
+        for (stroke in strokes) {
+            if (stroke.size < 2) continue
+            val path = android.graphics.Path()
+            path.moveTo(left + stroke[0].x * boxWidth, top + stroke[0].y * boxHeight)
+            for (index in 1 until stroke.size) {
+                val point = stroke[index]
+                path.lineTo(left + point.x * boxWidth, top + point.y * boxHeight)
+            }
+            canvas.drawPath(path, paint)
+        }
     }
 
     private fun pageSize(bitmap: Bitmap): PdfPageSize =
@@ -227,5 +275,8 @@ internal class AndroidDocumentExporter(
         const val WATERMARK_ALPHA = 70
         const val WATERMARK_TEXT_SIZE_FRACTION = 0.09f
         const val WATERMARK_ROTATION_DEGREES = -45f
+        const val SIGNATURE_BOX_WIDTH_FRACTION = 0.32f
+        const val SIGNATURE_BOX_HEIGHT_FRACTION = 0.12f
+        const val SIGNATURE_STROKE_WIDTH = 3f
     }
 }
