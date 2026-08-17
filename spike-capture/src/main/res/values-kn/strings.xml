@@ -69,6 +69,13 @@
     <string name="document_category_label">ವರ್ಗ</string>
     <string name="tap_page_to_edit">ಕ್ರಾಪ್ ಅಥವಾ ಸುಧಾರಿಸಲು ಪುಟವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ</string>
     <string name="rename_document">ಹೆಸರು ಬದಲಿಸಿ</string>
+    <string name="split_document">ವಿಭಜಿಸಿ</string>
+    <string name="tap_pages_to_split">ಹೊಸ ದಾಖಲೆಗೆ ವಿಭಜಿಸಲು ಪುಟಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ</string>
+    <string name="split_failed">ಆ ದಾಖಲೆಯನ್ನು ವಿಭಜಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <plurals name="split_selected_count">
+        <item quantity="one">ವಿಭಜಿಸಿ (%1$d)</item>
+        <item quantity="other">ವಿಭಜಿಸಿ (%1$d)</item>
+    </plurals>
     <string name="rename_document_title">ದಾಖಲೆಯ ಹೆಸರು</string>
     <string name="rename_document_hint">ಉದಾ. ವಿದ್ಯುತ್ ಬಿಲ್</string>
     <string name="dialog_cancel">ರದ್ದುಮಾಡಿ</string>
