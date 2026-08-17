@@ -168,6 +168,8 @@
     <string name="export_quality_small">छोटा</string>
     <string name="export_quality_balanced">संतुलित</string>
     <string name="export_quality_best">सर्वश्रेष्ठ</string>
+    <string name="export_watermark_label">वॉटरमार्क (वैकल्पिक)</string>
+    <string name="export_watermark_hint">जैसे गोपनीय</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">सुरक्षित रूप से निर्यात करें</string>

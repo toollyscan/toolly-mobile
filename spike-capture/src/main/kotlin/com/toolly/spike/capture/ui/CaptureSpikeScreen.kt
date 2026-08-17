@@ -116,6 +116,7 @@ fun ToollyDocumentApp(
         DocumentDetails,
         DocumentExportFormat,
         ExportQuality,
+        String?,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -339,6 +340,7 @@ fun ToollyDocumentApp(
             is AppScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
                 var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
+                var watermarkText by remember(current.details) { mutableStateOf("") }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
@@ -347,11 +349,14 @@ fun ToollyDocumentApp(
                     onFormatChange = { format = it },
                     quality = quality,
                     onQualityChange = { quality = it },
+                    watermarkText = watermarkText,
+                    onWatermarkTextChange = { watermarkText = it },
                     onContinue = {
                         screen = AppScreen.ExportPrivacyCheck(
                             current.details.filteredToPages(selectedOrdinals),
                             format,
                             quality,
+                            watermarkText.trim().ifBlank { null },
                         )
                     },
                     continueEnabled = selectedOrdinals.isNotEmpty(),
@@ -392,6 +397,7 @@ fun ToollyDocumentApp(
                                 current.details,
                                 domainFormat,
                                 exportQuality,
+                                current.watermarkText,
                                 DocumentExportDelivery.SAVE,
                             ) { outcome ->
                                 isWorking = false
@@ -410,6 +416,7 @@ fun ToollyDocumentApp(
                                 current.details,
                                 domainFormat,
                                 exportQuality,
+                                current.watermarkText,
                                 DocumentExportDelivery.SHARE,
                             ) { outcome ->
                                 isWorking = false
@@ -444,6 +451,7 @@ fun SearchDocumentsScreen(
         DocumentDetails,
         DocumentExportFormat,
         ExportQuality,
+        String?,
         DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) -> Unit,
@@ -577,6 +585,7 @@ fun SearchDocumentsScreen(
             is SearchResultScreen.ExportBuilder -> {
                 var format by remember(current.details) { mutableStateOf(ToollyExportFormat.PDF) }
                 var quality by remember(current.details) { mutableStateOf(ToollyExportQuality.BEST) }
+                var watermarkText by remember(current.details) { mutableStateOf("") }
                 var selectedOrdinals by remember(current.details) {
                     mutableStateOf(current.details.pages.map { it.ordinal }.toSet())
                 }
@@ -585,11 +594,14 @@ fun SearchDocumentsScreen(
                     onFormatChange = { format = it },
                     quality = quality,
                     onQualityChange = { quality = it },
+                    watermarkText = watermarkText,
+                    onWatermarkTextChange = { watermarkText = it },
                     onContinue = {
                         screen = SearchResultScreen.ExportPrivacyCheck(
                             current.details.filteredToPages(selectedOrdinals),
                             format,
                             quality,
+                            watermarkText.trim().ifBlank { null },
                         )
                     },
                     continueEnabled = selectedOrdinals.isNotEmpty(),
@@ -628,6 +640,7 @@ fun SearchDocumentsScreen(
                                 current.details,
                                 domainFormat,
                                 exportQuality,
+                                current.watermarkText,
                                 DocumentExportDelivery.SAVE,
                             ) { outcome ->
                                 isWorking = false
@@ -646,6 +659,7 @@ fun SearchDocumentsScreen(
                                 current.details,
                                 domainFormat,
                                 exportQuality,
+                                current.watermarkText,
                                 DocumentExportDelivery.SHARE,
                             ) { outcome ->
                                 isWorking = false
@@ -787,6 +801,7 @@ private sealed interface SearchResultScreen {
         val details: DocumentDetails,
         val format: ToollyExportFormat,
         val quality: ToollyExportQuality,
+        val watermarkText: String?,
     ) : SearchResultScreen
 }
 
@@ -1509,5 +1524,6 @@ private sealed interface AppScreen {
         val details: DocumentDetails,
         val format: ToollyExportFormat,
         val quality: ToollyExportQuality,
+        val watermarkText: String?,
     ) : AppScreen
 }

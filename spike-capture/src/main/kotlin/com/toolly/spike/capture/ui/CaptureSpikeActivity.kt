@@ -286,6 +286,7 @@ class CaptureSpikeActivity : ComponentActivity() {
         document: DocumentDetails,
         format: DocumentExportFormat,
         quality: ExportQuality,
+        watermarkText: String?,
         delivery: DocumentExportDelivery,
         onResult: (DocumentExportOutcome) -> Unit,
     ) {
@@ -293,7 +294,7 @@ class CaptureSpikeActivity : ComponentActivity() {
             onResult(DocumentExportOutcome.Failure(ToollyErrorCode.CONFLICT))
             return
         }
-        pendingExport = PendingExport(document, quality, delivery, onResult)
+        pendingExport = PendingExport(document, quality, watermarkText, delivery, onResult)
         when (format) {
             DocumentExportFormat.PDF -> {
                 pdfExportLauncher.launch(getString(R.string.export_pdf_file_name))
@@ -316,7 +317,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                     retryableToollyFailure()
                 } else {
                     ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
-                        documentExporter.writePdf(request.document, output, request.quality)
+                        documentExporter.writePdf(request.document, output, request.quality, request.watermarkText)
                     }
                 }
             } catch (cancelled: CancellationException) {
@@ -348,7 +349,7 @@ class CaptureSpikeActivity : ComponentActivity() {
             return
         }
         lifecycleScope.launch {
-            val exported = exportJpegPages(request.document, destinationTree, request.quality)
+            val exported = exportJpegPages(request.document, destinationTree, request.quality, request.watermarkText)
             request.onResult(
                 if (
                     exported.outcome == DocumentExportOutcome.Success &&
@@ -440,6 +441,7 @@ class CaptureSpikeActivity : ComponentActivity() {
         document: DocumentDetails,
         destinationTree: Uri,
         quality: ExportQuality,
+        watermarkText: String?,
     ): JpegExportResult {
         val createdDocuments = mutableListOf<Uri>()
         return try {
@@ -467,7 +469,7 @@ class CaptureSpikeActivity : ComponentActivity() {
                         ToollyErrorCode.RETRYABLE,
                     )
                 val result = ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
-                    documentExporter.writeJpeg(page, output, quality)
+                    documentExporter.writeJpeg(page, output, quality, watermarkText)
                 }
                 if (result is ToollyResult.Failure) {
                     return cleanupFailedJpegExport(createdDocuments, result.error.code)
@@ -517,6 +519,7 @@ class CaptureSpikeActivity : ComponentActivity() {
     private data class PendingExport(
         val document: DocumentDetails,
         val quality: ExportQuality,
+        val watermarkText: String?,
         val delivery: DocumentExportDelivery,
         val onResult: (DocumentExportOutcome) -> Unit,
     )

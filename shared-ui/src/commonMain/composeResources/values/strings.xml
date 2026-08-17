@@ -168,6 +168,8 @@
     <string name="export_quality_small">Small</string>
     <string name="export_quality_balanced">Balanced</string>
     <string name="export_quality_best">Best</string>
+    <string name="export_watermark_label">Watermark (optional)</string>
+    <string name="export_watermark_hint">e.g. CONFIDENTIAL</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">Export securely</string>
