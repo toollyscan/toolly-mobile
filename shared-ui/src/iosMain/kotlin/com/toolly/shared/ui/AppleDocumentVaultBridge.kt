@@ -26,9 +26,12 @@ import kotlin.coroutines.suspendCoroutine
  * per-callback parameters (the auth bridge's style) would be unreadable; they carry primitives
  * only, so they cross the same way a `List<String>` already does elsewhere in this file.
  *
- * Phase 2 has no cryptography behind it yet (see #82) -- the Swift implementation of this
- * interface is expected to be a plain, unencrypted local store for now, matching the "prove the
- * port boundary and plumbing compile end to end first" scope. It is not production-approved.
+ * Phase 2 (see #82) proved this port boundary and plumbing compile end to end first, with a
+ * plain unencrypted local store behind it. Phase 3 (ADR-0012, Tier-2 "iOS vault encryption")
+ * replaces those storage internals with real AES-256-GCM envelope encryption
+ * (`AppleDocumentVaultSessionImpl.swift` + `vault/crypto/ToollyVaultCrypto.swift`) behind this
+ * exact same interface -- nothing on the Kotlin side of this boundary changes. Still not
+ * production-approved: no physical-device/Xcode-build evidence exists yet for either phase.
  */
 interface AppleDocumentVaultSession {
     fun listDocuments(callback: AppleDocumentListCallback)
