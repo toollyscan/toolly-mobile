@@ -164,6 +164,10 @@
     <string name="export_builder_description">एक फ़ॉर्मैट चुनें। पुष्टि करने तक आपका दस्तावेज़ एन्क्रिप्टेड रहता है।</string>
     <string name="export_preview_caption">पूर्वावलोकन निर्यात से पहले सटीक लेआउट और गुणवत्ता दिखाता है।</string>
     <string name="export_format_label">फ़ॉर्मैट</string>
+    <string name="export_quality_label">गुणवत्ता</string>
+    <string name="export_quality_small">छोटा</string>
+    <string name="export_quality_balanced">संतुलित</string>
+    <string name="export_quality_best">सर्वश्रेष्ठ</string>
     <string name="export_format_pdf">PDF</string>
     <string name="export_format_jpeg">JPEG</string>
     <string name="export_securely">सुरक्षित रूप से निर्यात करें</string>

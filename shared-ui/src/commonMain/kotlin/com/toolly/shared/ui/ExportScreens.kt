@@ -24,6 +24,10 @@ import com.toolly.shared.resources.export_format_jpeg
 import com.toolly.shared.resources.export_format_label
 import com.toolly.shared.resources.export_format_pdf
 import com.toolly.shared.resources.export_preview_caption
+import com.toolly.shared.resources.export_quality_balanced
+import com.toolly.shared.resources.export_quality_best
+import com.toolly.shared.resources.export_quality_label
+import com.toolly.shared.resources.export_quality_small
 import com.toolly.shared.resources.export_securely
 import com.toolly.shared.resources.premium_lock_label
 import com.toolly.shared.resources.privacy_check_description
@@ -41,13 +45,20 @@ import org.jetbrains.compose.resources.stringResource
  * shared-ui cannot reference that domain type directly (it lives in the Android-only spike-capture
  * module), so the platform host maps between this and the real domain enum at the call site.
  *
- * The wireframe's "Long image" format and Small/Balanced/Best quality tiers are not offered here:
- * neither has exporter support yet, and this project's policy is not to show controls that don't
- * do anything real (see docs/product/ENTITLEMENTS.md's own precedent -- premium *lock* affordances
- * are fine to show ahead of billing; a control with literally no backing implementation is not the
- * same thing).
+ * The wireframe's "Long image" format is still not offered: no exporter support exists for it, and
+ * this project's policy is not to show controls that don't do anything real (see
+ * docs/product/ENTITLEMENTS.md's own precedent -- premium *lock* affordances are fine to show ahead
+ * of billing; a control with literally no backing implementation is not the same thing).
  */
 enum class ToollyExportFormat { PDF, JPEG }
+
+/**
+ * Export quality tiers (wireframe `5.1`'s Small/Balanced/Best chips), mirroring
+ * `AndroidDocumentExporter.ExportQuality` for the same shared-ui/spike-capture boundary reason as
+ * [ToollyExportFormat]. Real, not cosmetic: each tier re-encodes every page at a different JPEG
+ * quality (and downscales the smaller tiers), genuinely changing output file size.
+ */
+enum class ToollyExportQuality { SMALL, BALANCED, BEST }
 
 /**
  * Export format selection (wireframe `5.1 Export builder`). [previewContent] is an optional slot
@@ -58,6 +69,8 @@ enum class ToollyExportFormat { PDF, JPEG }
 fun ExportBuilderScreen(
     format: ToollyExportFormat,
     onFormatChange: (ToollyExportFormat) -> Unit,
+    quality: ToollyExportQuality,
+    onQualityChange: (ToollyExportQuality) -> Unit,
     onContinue: () -> Unit,
     busy: Boolean = false,
     continueEnabled: Boolean = true,
@@ -69,6 +82,11 @@ fun ExportBuilderScreen(
     val formatOptions = listOf(
         ToollyChipOption(ToollyExportFormat.PDF, Res.string.export_format_pdf),
         ToollyChipOption(ToollyExportFormat.JPEG, Res.string.export_format_jpeg),
+    )
+    val qualityOptions = listOf(
+        ToollyChipOption(ToollyExportQuality.SMALL, Res.string.export_quality_small),
+        ToollyChipOption(ToollyExportQuality.BALANCED, Res.string.export_quality_balanced),
+        ToollyChipOption(ToollyExportQuality.BEST, Res.string.export_quality_best),
     )
     ScreenColumn {
         Text(stringResource(Res.string.export_builder_title), style = MaterialTheme.typography.headlineMedium)
@@ -105,6 +123,8 @@ fun ExportBuilderScreen(
         }
         Text(stringResource(Res.string.export_format_label), style = MaterialTheme.typography.titleSmall)
         ToollyChipRow(options = formatOptions, selected = format, onSelected = onFormatChange)
+        Text(stringResource(Res.string.export_quality_label), style = MaterialTheme.typography.titleSmall)
+        ToollyChipRow(options = qualityOptions, selected = quality, onSelected = onQualityChange)
         ToollyCard {
             Row(
                 modifier = Modifier.fillMaxWidth(),
