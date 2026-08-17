@@ -1,27 +1,46 @@
 import Foundation
 import ToollySharedUI
 
-/// First-party, unencrypted local implementation of the `AppleDocumentVaultSession` boundary
-/// declared in `AppleDocumentVaultBridge.kt` (TLY-014 Phase 2, #82). Stores each document as a
-/// plain JSON manifest plus copied JPEG page files under Application Support -- deliberately NO
-/// cryptography yet, matching Phase 2's "prove the port boundary and plumbing compile end to end
-/// first" scope (see #82's phased plan). This is not production-approved; Phase 3 replaces the
-/// storage internals here with the real CryptoKit/Keychain implementation ADR-0012 requires,
-/// behind this exact same Kotlin-facing interface, so nothing above this class needs to change
-/// when that lands.
+/// First-party, AES-256-GCM-encrypted implementation of the `AppleDocumentVaultSession` boundary
+/// declared in `AppleDocumentVaultBridge.kt` (TLY-014 Phase 3, ADR-0012, Tier-2 "iOS vault
+/// encryption"). Every manifest and page asset is encrypted before it ever touches disk, via
+/// `ToollyVaultCipher` (`vault/crypto/ToollyVaultCrypto.swift`) -- envelope AES-256-GCM with a
+/// Keychain-held wrapping key, mirroring `EncryptedDocumentRepository`'s Android Keystore design.
+/// Plaintext exists only in the bounded capture staging area owned by `resolveTemporaryAsset` and
+/// in bounded decode/encode memory here; nothing plaintext is ever written under
+/// `documentsDirectory`.
+///
+/// ## Deliberately still open (not silently missing)
+/// - **No staged/commit-marker transaction discipline yet.** `EncryptedDocumentRepository` writes
+///   into a `.staging` transaction directory and only promotes it via an atomic rename once every
+///   asset and the manifest are written and verified, so an interrupted multi-page save can never
+///   leave a half-written document readable. This class still writes pages directly into the
+///   final document directory one at a time (same structural shape as Phase 2); an interrupted
+///   save can leave a partial directory with no manifest, which simply fails to list/open on
+///   reopen (fails closed, not silently corrupt) but isn't cleaned up automatically. Bringing over
+///   Android's full staging-transaction protocol is a scoped follow-up, not this change.
+/// - **No streaming/chunked asset encryption.** `ToollyVaultCipher` seals each page as a single
+///   AES-GCM operation (see its own doc comment for why that's safe at these bounded sizes), not
+///   Android's per-chunk streaming design -- fine for JPEG pages, would need revisiting only if
+///   much larger assets are ever supported.
+/// - **No decrypt-to-bitmap consumer wired up yet.** Nothing on iOS currently reads page pixel
+///   data back out of the vault (no document viewer exists there yet), so this class doesn't
+///   expose a `loadAssetData` equivalent to Android's `loadAssetBitmap` -- `decryptAsset` is ready
+///   on `ToollyVaultCipher` for whichever screen needs it first.
 ///
 /// ## Not yet verified against a real Xcode build
-/// Written without access to Xcode or a macOS toolchain, same caveat as
-/// `AppleAccountAuthenticatorSessionImpl.swift`. The Kotlin side of this boundary
-/// (`AppleDocumentVaultBridge.kt`) is compiler-verified via `:shared-ui:compileTestKotlinIosSimulatorArm64`;
-/// this file needs a real Xcode build to confirm the generated Objective-C selectors below match
-/// what Kotlin/Native actually emits (the boxed-optional-Int unboxing in `saveCapturedDocument`
-/// is the single most likely spot to need a signature fix). Deliberately NOT wired into
-/// `ToollyApp.swift` or added to the Xcode target's Sources build phase yet -- see #82 for the
-/// remaining integration step.
+/// Written without access to Xcode or a macOS toolchain, same caveat as every other first-party
+/// Swift file in this app. The Kotlin side of this boundary (`AppleDocumentVaultBridge.kt`) is
+/// compiler-verified via `:shared-ui:compileTestKotlinIosSimulatorArm64`; this file and
+/// `ToollyVaultCrypto.swift` need a real Xcode build and a physical-device/simulator pass to
+/// confirm CryptoKit/Keychain usage here actually behaves as written -- no Swift unit test exists
+/// yet for either (same gap noted for the rest of this vault slice; would need a Tests target
+/// added to the Xcode project, not attempted here without Xcode to verify it against).
 final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
     private let documentsDirectory: URL
     private let resolveTemporaryAsset: (String) -> URL?
+    private let cipher: ToollyVaultCipher
+    private let vaultScopeId: String
 
     /// `resolveTemporaryAsset` resolves a temporary asset id staged by capture back to its file --
     /// pass `captureSession.fileURL(forTemporaryAssetId:)` when wiring this up in `ToollyApp.swift`,
@@ -33,20 +52,28 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
             for: .applicationSupportDirectory,
             in: .userDomainMask
         )[0]
-        self.documentsDirectory = appSupport
-            .appendingPathComponent("toolly-vault-unencrypted", isDirectory: true)
-            .appendingPathComponent("documents", isDirectory: true)
+        let root = appSupport.appendingPathComponent("toolly-vault-v1", isDirectory: true)
+        self.documentsDirectory = root.appendingPathComponent("documents", isDirectory: true)
+        self.cipher = ToollyVaultCipher(wrappingKey: ToollyVaultWrappingKey(account: "primary"))
         super.init()
         try? FileManager.default.createDirectory(
             at: documentsDirectory,
             withIntermediateDirectories: true
         )
-        // Excluded from iCloud/iTunes backup -- local vault data, even this pre-crypto slice,
-        // should never leave the device via backup (matches ADR-0012's storage boundary).
+        // Excluded from iCloud/iTunes backup -- local vault data should never leave the device via
+        // backup (matches ADR-0012's storage boundary), independent of the fact it's now encrypted.
         var excludable = documentsDirectory
         var resourceValues = URLResourceValues()
         resourceValues.isExcludedFromBackup = true
         try? excludable.setResourceValues(resourceValues)
+        // Non-secret, per-install domain-separation value mixed into every AAD below -- see
+        // `ToollyVaultScope`'s doc comment. Falls back to a fresh scope if the file is unreadable
+        // (fresh install, or corrupted scope file); an existing encrypted document under a
+        // different scope simply fails to authenticate afterwards rather than silently misreading,
+        // matching how a lost/rotated wrapping key already fails closed.
+        self.vaultScopeId = (try? ToollyVaultScope.loadOrCreate(
+            at: root.appendingPathComponent("vault.scope")
+        )) ?? UUID().uuidString.lowercased()
     }
 
     func listDocuments(callback: AppleDocumentListCallback) {
@@ -57,18 +84,28 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
             callback.onSuccess(documents: [])
             return
         }
-        let summaries = entries.compactMap { directory in
-            readManifest(documentId: directory.lastPathComponent)?.toSummaryDto()
+        do {
+            let summaries = try entries.compactMap { directory -> AppleDocumentSummaryDto? in
+                guard manifestExists(documentId: directory.lastPathComponent) else { return nil }
+                return try readManifest(documentId: directory.lastPathComponent).toSummaryDto()
+            }
+            callback.onSuccess(documents: summaries)
+        } catch {
+            callback.onFailure(errorCode: error.toollyWireErrorCode)
         }
-        callback.onSuccess(documents: summaries)
     }
 
     func getDocument(documentId: String, callback: AppleDocumentCallback) {
-        guard let manifest = readManifest(documentId: documentId) else {
+        guard manifestExists(documentId: documentId) else {
             callback.onFailure(errorCode: "unavailable")
             return
         }
-        deliver(manifest, callback: callback)
+        do {
+            let manifest = try readManifest(documentId: documentId)
+            deliver(manifest, callback: callback)
+        } catch {
+            callback.onFailure(errorCode: error.toollyWireErrorCode)
+        }
     }
 
     func saveCapturedDocument(
@@ -91,8 +128,15 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
                     callback.onFailure(errorCode: "unavailable")
                     return
                 }
-                let destinationURL = directory.appendingPathComponent("\(page.pageId).jpg")
-                try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+                let plaintext = try requireBoundedJpeg(at: sourceURL)
+                let ciphertext = try cipher.encryptAsset(
+                    plaintext: plaintext,
+                    vaultScopeId: vaultScopeId,
+                    assetId: page.assetId,
+                    assetKind: .sourceImage
+                )
+                let destinationURL = directory.appendingPathComponent(assetFileName(page.assetId))
+                try ciphertext.write(to: destinationURL, options: .atomic)
                 pageEntries.append(
                     PageEntry(
                         pageId: page.pageId,
@@ -116,7 +160,7 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
             deliver(manifest, callback: callback)
         } catch {
             try? FileManager.default.removeItem(at: directory)
-            callback.onFailure(errorCode: "retryable")
+            callback.onFailure(errorCode: error.toollyWireErrorCode)
         }
     }
 
@@ -146,30 +190,54 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
         ) { $0.category = category }
     }
 
-    // MARK: - Manifest read/write
+    // MARK: - Manifest read/write (encrypted)
 
     private func documentDirectory(for documentId: String) -> URL {
         documentsDirectory.appendingPathComponent(documentId, isDirectory: true)
     }
 
     private func manifestURL(for documentId: String) -> URL {
-        documentDirectory(for: documentId).appendingPathComponent("manifest.json")
+        documentDirectory(for: documentId).appendingPathComponent("manifest.tlym")
     }
 
-    private func readManifest(documentId: String) -> Manifest? {
-        guard let data = try? Data(contentsOf: manifestURL(for: documentId)) else { return nil }
-        return try? JSONDecoder().decode(Manifest.self, from: data)
+    private func manifestExists(documentId: String) -> Bool {
+        FileManager.default.fileExists(atPath: manifestURL(for: documentId).path)
+    }
+
+    /// Reads and decrypts a document's manifest. Throws (never returns a partial/best-effort
+    /// result) on any tamper, corruption, or missing-key condition -- callers map the thrown
+    /// error to a wire error code via `Error.toollyWireErrorCode` rather than silently treating a
+    /// document as absent, matching `EncryptedDocumentRepository.readDocument`'s fail-closed
+    /// behavior on the Android side.
+    private func readManifest(documentId: String) throws -> Manifest {
+        let envelope = try Data(contentsOf: manifestURL(for: documentId))
+        guard !envelope.isEmpty, envelope.count <= Self.maxManifestEnvelopeBytes else {
+            throw ToollyVaultCryptoError.invalidEnvelope
+        }
+        let plaintext = try cipher.decryptMetadata(
+            envelope: envelope,
+            vaultScopeId: vaultScopeId,
+            recordId: documentId,
+            recordKind: .document
+        )
+        let manifest = try JSONDecoder().decode(Manifest.self, from: plaintext)
+        guard manifest.documentId == documentId else { throw ToollyVaultCryptoError.invalidEnvelope }
+        return manifest
     }
 
     /// Write-then-replace rather than an in-place overwrite, so an interrupted write can only
-    /// leave a stray `.tmp` file behind, never a half-written manifest. Not the full staged/
-    /// authenticated commit protocol ADR-0012 requires for the real vault -- this is Phase 2's
-    /// "no cryptography yet" slice, and this is best-effort hygiene, not that guarantee.
+    /// leave a stray `.tmp` file behind, never a half-written manifest.
     private func writeManifest(_ manifest: Manifest) throws {
-        let data = try JSONEncoder().encode(manifest)
+        let plaintext = try JSONEncoder().encode(manifest)
+        let ciphertext = try cipher.encryptMetadata(
+            plaintext: plaintext,
+            vaultScopeId: vaultScopeId,
+            recordId: manifest.documentId,
+            recordKind: .document
+        )
         let destination = manifestURL(for: manifest.documentId)
         let pending = destination.appendingPathExtension("tmp")
-        try data.write(to: pending, options: .atomic)
+        try ciphertext.write(to: pending, options: .atomic)
         _ = try FileManager.default.replaceItemAt(destination, withItemAt: pending)
     }
 
@@ -179,17 +247,18 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
         callback: AppleDocumentCallback,
         transform: (inout Manifest) -> Void
     ) {
-        guard var manifest = readManifest(documentId: documentId) else {
+        guard manifestExists(documentId: documentId) else {
             callback.onFailure(errorCode: "unavailable")
             return
         }
-        transform(&manifest)
-        manifest.updatedAtEpochMillis = updatedAtEpochMillis
         do {
+            var manifest = try readManifest(documentId: documentId)
+            transform(&manifest)
+            manifest.updatedAtEpochMillis = updatedAtEpochMillis
             try writeManifest(manifest)
             deliver(manifest, callback: callback)
         } catch {
-            callback.onFailure(errorCode: "retryable")
+            callback.onFailure(errorCode: error.toollyWireErrorCode)
         }
     }
 
@@ -205,6 +274,31 @@ final class AppleDocumentVaultSessionImpl: NSObject, AppleDocumentVaultSession {
             pages: manifest.pages.map { $0.toDto() }
         )
     }
+
+    // MARK: - Asset helpers
+
+    private func assetFileName(_ assetId: String) -> String { "\(assetId).tlya" }
+
+    /// Reads a captured page's staged JPEG and validates it is complete and within the vault's
+    /// bound before it is ever handed to the cipher -- mirrors
+    /// `EncryptedDocumentRepository.requireCompleteJpeg`'s SOI/EOI marker check, so a
+    /// truncated/corrupt capture output fails here with a clear, retryable outcome rather than
+    /// being encrypted and only discovered broken on next read.
+    private func requireBoundedJpeg(at url: URL) throws -> Data {
+        let data = try Data(contentsOf: url)
+        guard data.count >= 4, data.count <= Self.maxPageBytes else {
+            throw ToollyVaultCryptoError.platformFailure
+        }
+        let soi: [UInt8] = [0xFF, 0xD8]
+        let eoi: [UInt8] = [0xFF, 0xD9]
+        guard data.prefix(2).elementsEqual(soi), data.suffix(2).elementsEqual(eoi) else {
+            throw ToollyVaultCryptoError.platformFailure
+        }
+        return data
+    }
+
+    private static let maxManifestEnvelopeBytes = 300 * 1024
+    private static let maxPageBytes = 25 * 1024 * 1024
 }
 
 private struct Manifest: Codable {
@@ -244,5 +338,15 @@ private struct PageEntry: Codable {
             widthPixels: widthPixels.map { KotlinInt(int: Int32($0)) },
             heightPixels: heightPixels.map { KotlinInt(int: Int32($0)) }
         )
+    }
+}
+
+/// Maps any thrown error to `AppleDocumentVaultSession`'s lowercase-snake-case wire codes -- keep
+/// in sync with `AppleDocumentVaultBridge.kt`'s `toToollyError()`. Anything not recognized as a
+/// `ToollyVaultCryptoError` (a plain Foundation I/O error, for instance) degrades to `"retryable"`
+/// rather than crashing or leaking an unmapped code across the Kotlin boundary.
+private extension Error {
+    var toollyWireErrorCode: String {
+        (self as? ToollyVaultCryptoError)?.wireErrorCode ?? "retryable"
     }
 }
