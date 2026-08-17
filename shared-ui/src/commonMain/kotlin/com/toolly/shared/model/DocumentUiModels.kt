@@ -139,6 +139,12 @@ sealed interface ToollyUiEvent {
     /** A real capture just finished with [pageCount] pages; enters the review screen. */
     data class CaptureReviewStarted(val pageCount: Int) : ToollyUiEvent
     data object CaptureDiscarded : ToollyUiEvent
+
+    /** A real save of the reviewed capture completed; returns to the library. */
+    data object CaptureSaved : ToollyUiEvent
+
+    /** A host-owned document list finished loading (or refreshing) from a real vault. */
+    data class DocumentsLoaded(val documents: List<DocumentListItem>) : ToollyUiEvent
 }
 
 data class ToollyUiState(
@@ -590,6 +596,18 @@ fun reduceToollyUiState(
             state.copy(destination = ToollyDestination.LIBRARY, reviewPageCount = 0)
         }
     }
+
+    ToollyUiEvent.CaptureSaved -> {
+        if (state.destination != ToollyDestination.CAPTURE_REVIEW) {
+            state
+        } else {
+            state.copy(destination = ToollyDestination.LIBRARY, reviewPageCount = 0)
+        }
+    }
+
+    // A background list refresh; reachable from any destination and never itself a navigation
+    // event, so it carries no guard beyond "a real host is reporting real data".
+    is ToollyUiEvent.DocumentsLoaded -> state.copy(documents = event.documents)
 }
 
 interface ToollyUiActions {
