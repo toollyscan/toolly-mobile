@@ -26,6 +26,7 @@
 		100000000000000000000012 /* ToollySharedUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ToollySharedUI.framework; path = ../shared-ui/build/bin/iosSimulatorArm64/debugFramework/ToollySharedUI.framework; sourceTree = SOURCE_ROOT; };
 		100000000000000000000013 /* AppleCaptureSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCaptureSessionImpl.swift; sourceTree = "<group>"; };
 		100000000000000000000014 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		100000000000000000000115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/AppleAccountAuthenticatorSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/AppleDocumentVaultSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000113 /* ToollyVaultCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/crypto/ToollyVaultCrypto.swift"; sourceTree = "<group>"; };
@@ -71,6 +72,7 @@
 				100000000000000000000011 /* ToollyApp.swift */,
 				100000000000000000000013 /* AppleCaptureSessionImpl.swift */,
 				100000000000000000000014 /* GoogleService-Info.plist */,
+				100000000000000000000115 /* Info.plist */,
 				100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */,
 				100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */,
 				100000000000000000000113 /* ToollyVaultCrypto.swift */,
@@ -300,13 +302,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_FILE = ToollyApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -336,13 +332,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_FILE = ToollyApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
