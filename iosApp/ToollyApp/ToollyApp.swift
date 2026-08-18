@@ -25,6 +25,17 @@ struct ToollyIOSApplication: App {
 
 private struct ToollyRootView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
+        // ToollyAppTests (TLY-014 Phase 3, #103) only needs this process alive long enough for
+        // the test bundle to attach -- it never touches the rendered UI. Skip composing the real
+        // Compose tree under XCTest: separately discovered while wiring that test target (real
+        // CI failure, filed for its own fix, not swept under this check) -- rendering it here
+        // crashes with a Compose Multiplatform MissingResourceException, because this project has
+        // no Xcode build phase that copies shared-ui's compose-resources bundle into the app
+        // bundle at all. That's a genuine, pre-existing app-launch bug unrelated to testing; this
+        // check only keeps it from blocking unit tests that don't need the UI in the first place.
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            return UIViewController()
+        }
         // The capture session needs to present on top of the view controller
         // MainViewController(...) is about to create, which doesn't exist until that call
         // returns. This box lets the session resolve it lazily, after assignment below.
