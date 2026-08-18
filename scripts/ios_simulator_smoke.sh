@@ -41,6 +41,8 @@ trap cleanup EXIT
 xcrun simctl boot "${phone_udid}" >/dev/null 2>&1 || true
 xcrun simctl bootstatus "${phone_udid}" -b
 
+# `test` alongside `build` runs ToollyAppTests (ToollyVaultCryptoTests) against the same booted
+# simulator -- real correctness evidence for the vault crypto engine, not just "it compiles".
 xcodebuild \
     -project "${repository_root}/iosApp/ToollyApp.xcodeproj" \
     -scheme ToollyApp \
@@ -48,7 +50,7 @@ xcodebuild \
     -destination "id=${phone_udid}" \
     -derivedDataPath "${derived_data}" \
     CODE_SIGNING_ALLOWED=NO \
-    build
+    build test
 
 test -d "${app_path}"
 

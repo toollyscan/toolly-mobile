@@ -5,7 +5,7 @@ import Security
 /// Errors surfaced by Toolly's iOS vault cryptography. Mapped to `AppleDocumentVaultSession`'s
 /// lowercase-snake-case error codes at the call site in `AppleDocumentVaultSessionImpl` -- keep
 /// that mapping in sync with `AppleDocumentVaultBridge.kt`'s `toToollyError()`.
-enum ToollyVaultCryptoError: Error {
+enum ToollyVaultCryptoError: Error, Equatable {
     case keyUnavailable
     case invalidEnvelope
     case authenticationFailed
