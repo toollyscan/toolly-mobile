@@ -17,6 +17,7 @@
 		100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000114 /* ToollyFirebaseBootstrap.swift */; };
 		100000000000000000000092 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000091 /* FirebaseAuth */; };
 		100000000000000000000094 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000093 /* FirebaseCore */; };
+		100000000000000000000202 /* ToollyVaultCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000200 /* ToollyVaultCryptoTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,10 +26,13 @@
 		100000000000000000000012 /* ToollySharedUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ToollySharedUI.framework; path = ../shared-ui/build/bin/iosSimulatorArm64/debugFramework/ToollySharedUI.framework; sourceTree = SOURCE_ROOT; };
 		100000000000000000000013 /* AppleCaptureSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCaptureSessionImpl.swift; sourceTree = "<group>"; };
 		100000000000000000000014 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		100000000000000000000115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/AppleAccountAuthenticatorSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/AppleDocumentVaultSessionImpl.swift"; sourceTree = "<group>"; };
 		100000000000000000000113 /* ToollyVaultCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "vault/crypto/ToollyVaultCrypto.swift"; sourceTree = "<group>"; };
 		100000000000000000000114 /* ToollyFirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "firebase/ToollyFirebaseBootstrap.swift"; sourceTree = "<group>"; };
+		100000000000000000000200 /* ToollyVaultCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToollyVaultCryptoTests.swift; sourceTree = "<group>"; };
+		100000000000000000000201 /* ToollyAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToollyAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +46,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		100000000000000000000205 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -49,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000031 /* ToollyApp */,
+				100000000000000000000203 /* ToollyAppTests */,
 				100000000000000000000032 /* Frameworks */,
 				100000000000000000000033 /* Products */,
 			);
@@ -60,12 +72,21 @@
 				100000000000000000000011 /* ToollyApp.swift */,
 				100000000000000000000013 /* AppleCaptureSessionImpl.swift */,
 				100000000000000000000014 /* GoogleService-Info.plist */,
+				100000000000000000000115 /* Info.plist */,
 				100000000000000000000111 /* AppleAccountAuthenticatorSessionImpl.swift */,
 				100000000000000000000112 /* AppleDocumentVaultSessionImpl.swift */,
 				100000000000000000000113 /* ToollyVaultCrypto.swift */,
 				100000000000000000000114 /* ToollyFirebaseBootstrap.swift */,
 			);
 			path = ToollyApp;
+			sourceTree = "<group>";
+		};
+		100000000000000000000203 /* ToollyAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000200 /* ToollyVaultCryptoTests.swift */,
+			);
+			path = ToollyAppTests;
 			sourceTree = "<group>";
 		};
 		100000000000000000000032 /* Frameworks */ = {
@@ -80,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000010 /* ToollyApp.app */,
+				100000000000000000000201 /* ToollyAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,7 +130,42 @@
 			productReference = 100000000000000000000010 /* ToollyApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		100000000000000000000206 /* ToollyAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000207 /* Build configuration list for PBXNativeTarget "ToollyAppTests" */;
+			buildPhases = (
+				100000000000000000000204 /* Sources */,
+				100000000000000000000205 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				100000000000000000000208 /* PBXTargetDependency */,
+			);
+			name = ToollyAppTests;
+			productName = ToollyAppTests;
+			productReference = 100000000000000000000201 /* ToollyAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		100000000000000000000209 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000060 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000040;
+			remoteInfo = ToollyApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		100000000000000000000208 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000040 /* ToollyApp */;
+			targetProxy = 100000000000000000000209 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		100000000000000000000060 /* Project object */ = {
@@ -120,6 +177,10 @@
 				TargetAttributes = {
 					100000000000000000000040 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					100000000000000000000206 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 100000000000000000000040;
 					};
 				};
 			};
@@ -140,6 +201,7 @@
 			projectRoot = "";
 			targets = (
 				100000000000000000000040 /* ToollyApp */,
+				100000000000000000000206 /* ToollyAppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -166,6 +228,14 @@
 				100000000000000000000102 /* AppleDocumentVaultSessionImpl.swift in Sources */,
 				100000000000000000000103 /* ToollyVaultCrypto.swift in Sources */,
 				100000000000000000000104 /* ToollyFirebaseBootstrap.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000204 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000202 /* ToollyVaultCryptoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,12 +302,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = ToollyApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -267,12 +332,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Toolly uses the camera only when you choose to scan a document.";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_FILE = ToollyApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -289,6 +349,56 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		100000000000000000000210 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				// Mirrors the app target's own setting -- @testable import ToollyApp needs to
+				// re-resolve ToollyApp's own dependencies, ToollySharedUI included, which this
+				// target has no other way to locate (a real, CI-caught failure: "Unable to find
+				// module dependency: 'ToollySharedUI'").
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.toollyscan.mobile.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ToollyApp.app/ToollyApp";
+			};
+			name = Debug;
+		};
+		100000000000000000000211 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../shared-ui/build/bin/iosSimulatorArm64/debugFramework",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.toollyscan.mobile.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ToollyApp.app/ToollyApp";
 			};
 			name = Release;
 		};
@@ -309,6 +419,15 @@
 			buildConfigurations = (
 				100000000000000000000082 /* Debug */,
 				100000000000000000000083 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		100000000000000000000207 /* Build configuration list for PBXNativeTarget "ToollyAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000210 /* Debug */,
+				100000000000000000000211 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

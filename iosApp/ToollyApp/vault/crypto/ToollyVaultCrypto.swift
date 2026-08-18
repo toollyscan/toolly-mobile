@@ -5,7 +5,7 @@ import Security
 /// Errors surfaced by Toolly's iOS vault cryptography. Mapped to `AppleDocumentVaultSession`'s
 /// lowercase-snake-case error codes at the call site in `AppleDocumentVaultSessionImpl` -- keep
 /// that mapping in sync with `AppleDocumentVaultBridge.kt`'s `toToollyError()`.
-enum ToollyVaultCryptoError: Error {
+enum ToollyVaultCryptoError: Error, Equatable {
     case keyUnavailable
     case invalidEnvelope
     case authenticationFailed
@@ -64,12 +64,18 @@ final class ToollyVaultWrappingKey {
     }
 
     private func read() throws -> SymmetricKey? {
+        // No kSecUseDataProtectionKeychain here: that flag opts into the newer, stricter
+        // per-app "data protection keychain" namespace, which requires a keychain-access-groups
+        // entitlement this app doesn't declare -- confirmed by CI (every test failed with
+        // keyUnavailable, including a plain read of a never-used account, meaning even the
+        // existence check itself couldn't reach the keychain). The traditional keychain works
+        // fine for a simulator-only app with no such entitlement, and matches deleteForTesting's
+        // query below, which never had this flag either -- store/read now agree with it.
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecReturnData as String: true,
-            kSecUseDataProtectionKeychain as String: true,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -94,7 +100,6 @@ final class ToollyVaultWrappingKey {
             kSecAttrAccount as String: account,
             kSecValueData as String: keyData,
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-            kSecUseDataProtectionKeychain as String: true,
         ]
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else { throw ToollyVaultCryptoError.platformFailure }
