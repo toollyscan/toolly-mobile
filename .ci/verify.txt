@@ -1,1 +1,2 @@
 Temporary CI verification trigger for PackMate Navigation 3.
+Run: 2 (AGP 9 Kotlin compatibility patch)
